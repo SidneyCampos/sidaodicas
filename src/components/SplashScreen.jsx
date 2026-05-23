@@ -8,14 +8,23 @@ export default function SplashScreen() {
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
+    // Esconde a barra de rolagem do body enquanto o splash estiver ativo
+    document.body.style.overflow = 'hidden';
+
     // A tela de splash fica visível por 2 segundos e depois começa a sumir
     const timer = setTimeout(() => {
       setFadeOut(true);
       // Remove do DOM após a animação de fade out (500ms)
-      setTimeout(() => setShow(false), 500);
+      setTimeout(() => {
+        setShow(false);
+        document.body.style.overflow = ''; // Restaura o scroll nativo
+      }, 500);
     }, 2000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      document.body.style.overflow = ''; // Garante limpeza caso o componente desmonte
+    };
   }, []);
 
   if (!show) return null;
