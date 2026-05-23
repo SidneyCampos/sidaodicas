@@ -42,7 +42,7 @@
   "screenshots": [
     {
       "src": "/screenshot1.png",
-      "sizes": "1080x1920",
+      "sizes": "1896x907",
       "type": "image/png",
       "form_factor": "narrow"
     },
@@ -51,12 +51,6 @@
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow"
-    },
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide"
     }
   ],
   "shortcuts": [
