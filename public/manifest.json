@@ -7,6 +7,8 @@
   "scope": "/",
   "display": "standalone",
   "display_override": [
+    "window-controls-overlay",
+    "tabbed",
     "standalone",
     "minimal-ui"
   ],
@@ -32,6 +34,49 @@
       "id": "com.sidaodicas.app"
     }
   ],
+  "scope_extensions": [
+    {
+      "origin": "*.sidaodicas.com.br"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/open",
+      "accept": {
+        "image/*": [".png", ".jpg", ".jpeg"]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+sidao",
+      "url": "/?link=%s"
+    }
+  ],
+  "widgets": [
+    {
+      "name": "Sidão Dicas Widget",
+      "short_name": "Ofertas",
+      "description": "Widget de ofertas do dia",
+      "tag": "sidao-widget",
+      "template_url": "widget.json",
+      "type": "application/json",
+      "icons": [
+        {
+          "src": "/icon-512.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "note_taking": {
+    "new_note_url": "/?note=new"
+  },
+  "handle_links": "preferred",
   "icons": [
     {
       "src": "/icon-512.png?v=2",
