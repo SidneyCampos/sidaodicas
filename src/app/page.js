@@ -1,64 +1,73 @@
-import Image from "next/image";
+import React from 'react';
+import ProductCard from '../components/ProductCard';
+import { mockProducts } from '../data/mockProducts';
+import { MessageCircleWarning, Zap } from 'lucide-react';
+
+export const metadata = {
+  title: 'Sidão Dicas | Melhores Ofertas e Bugs da Internet',
+  description: 'As melhores ofertas, bugs e achados da internet você encontra aqui. Economize de verdade!',
+};
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-[#0f172a] text-white font-sans pb-20">
+      {/* Header Fixo */}
+      <header className="fixed top-0 w-full bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-800 z-50">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Zap className="text-yellow-400" fill="currentColor" size={28} />
+            <h1 className="text-2xl font-black text-yellow-400 tracking-tight">
+              Sidão Dicas
+            </h1>
+          </div>
+          
+          <a 
+            href="#" 
+            className="bg-[#25D366] hover:bg-[#1fae54] text-white text-sm font-bold py-2.5 px-5 rounded-full flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-green-900/30"
+          >
+            <MessageCircleWarning size={20} />
+            <span className="hidden sm:inline">Entrar no Grupo VIP</span>
+            <span className="sm:hidden">VIP</span>
+          </a>
+        </div>
+      </header>
+
+      {/* Espaçamento para o header fixo */}
+      <main className="pt-24 px-4 max-w-5xl mx-auto">
+        
+        {/* Hero Section */}
+        <section className="text-center mb-12 mt-4 sm:mt-8">
+          <div className="inline-block bg-red-600 text-white text-xs sm:text-sm font-black px-4 py-1.5 rounded-full mb-6 animate-pulse shadow-lg shadow-red-900/50 uppercase tracking-wide">
+            URGENTE: Ofertas por tempo limitado!
+          </div>
+          <h2 className="text-4xl sm:text-6xl font-black mb-6 leading-tight text-slate-100">
+            Encontramos os <br className="hidden sm:block" />
+            <span className="text-yellow-400 drop-shadow-md">Maiores Descontos</span> do Dia.
+          </h2>
+          <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto font-medium">
+            Esses preços podem mudar a qualquer momento. Se gostar de algo, seja rápido e garanta antes que o estoque acabe!
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        </section>
+
+        {/* Grid de Produtos */}
+        <section>
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
+            <h3 className="text-2xl font-black flex items-center gap-3">
+              <span className="text-3xl">🔥</span> 
+              <span>Em Alta Agora</span>
+            </h3>
+            <span className="text-xs text-slate-400 font-bold bg-slate-800 px-3 py-1.5 rounded-md uppercase tracking-wider">
+              Atualizado hoje
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {mockProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+
       </main>
     </div>
   );
