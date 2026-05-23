@@ -4,6 +4,7 @@
   "short_name": "Sidão Dicas",
   "description": "Portal de ofertas e produtos selecionados.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "display_override": [
     "standalone",
@@ -22,6 +23,15 @@
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
+  "iarc_rating_id": "e",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.sidaodicas.app",
+      "id": "com.sidaodicas.app"
+    }
+  ],
   "icons": [
     {
       "src": "/icon-512.png?v=2",
@@ -41,6 +51,12 @@
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
     }
   ],
   "shortcuts": [
@@ -49,8 +65,8 @@
       "url": "/?sort=daily",
       "icons": [
         {
-          "src": "/icon-192.png",
-          "sizes": "192x192",
+          "src": "/icon-512.png",
+          "sizes": "512x512",
           "type": "image/png"
         }
       ]
@@ -60,8 +76,8 @@
       "url": "/grupo",
       "icons": [
         {
-          "src": "/icon-192.png",
-          "sizes": "192x192",
+          "src": "/icon-512.png",
+          "sizes": "512x512",
           "type": "image/png"
         }
       ]
