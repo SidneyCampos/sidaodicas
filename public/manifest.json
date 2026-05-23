@@ -1,0 +1,16 @@
+{
+  "name": "Sidão Dicas",
+  "short_name": "Sidão Dicas",
+  "description": "Portal de ofertas e produtos selecionados.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#FFEA00",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
