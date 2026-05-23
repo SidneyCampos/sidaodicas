@@ -41,3 +41,29 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// === CAPABILIDADES AVANÇADAS PARA O PWABUILDER ===
+
+// 1. Background Sync API
+self.addEventListener('sync', (event) => {
+  console.log('[Service Worker] Background sync event fired:', event.tag);
+  // Aqui entraria a lógica de reenviar dados quando a internet voltar
+});
+
+// 2. Periodic Sync API
+self.addEventListener('periodicsync', (event) => {
+  console.log('[Service Worker] Periodic sync event fired:', event.tag);
+  // Aqui entraria a lógica de atualizar dados (como novas ofertas) em segundo plano
+});
+
+// 3. Web Push Notifications API
+self.addEventListener('push', (event) => {
+  console.log('[Service Worker] Push notification received');
+  const title = 'Nova Oferta do Sidão Dicas!';
+  const options = {
+    body: event.data ? event.data.text() : 'Temos um novo bug imperdível rolando agora!',
+    icon: '/icon-512.png',
+    badge: '/icon-512.png'
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
