@@ -21,10 +21,7 @@ export default function Home() {
             </h1>
           </div>
           
-          <a 
-            href="https://chat.whatsapp.com/C1Ryp7KvesNEgmowEZu2TS" 
-            className="bg-[#25D366] hover:bg-[#1fae54] text-white text-sm font-bold py-2.5 px-5 rounded-full flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-green-900/30"
-          >
+          <a href="https://chat.whatsapp.com/C1Ryp7KvesNEgmowEZu2TS" target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#1fae54] text-white text-sm font-bold py-2.5 px-5 rounded-full flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-green-900/30">
             <MessageCircleWarning size={20} />
             <span className="hidden sm:inline">Entrar no Grupo VIP</span>
             <span className="sm:hidden">VIP</span>
