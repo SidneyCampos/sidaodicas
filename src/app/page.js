@@ -22,7 +22,7 @@ export default function Home() {
           </div>
           
           <a 
-            href="#" 
+            href="https://chat.whatsapp.com/C1Ryp7KvesNEgmowEZu2TS" 
             className="bg-[#25D366] hover:bg-[#1fae54] text-white text-sm font-bold py-2.5 px-5 rounded-full flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-green-900/30"
           >
             <MessageCircleWarning size={20} />
