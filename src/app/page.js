@@ -20,7 +20,7 @@ export default function Home() {
               Sidão Dicas
             </h1>
           </div>
-          
+
           <a href="https://chat.whatsapp.com/C1Ryp7KvesNEgmowEZu2TS" target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#1fae54] text-white text-sm font-bold py-2.5 px-5 rounded-full flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-green-900/30">
             <MessageCircleWarning size={20} />
             <span className="hidden sm:inline">Entrar no Grupo VIP</span>
@@ -31,7 +31,7 @@ export default function Home() {
 
       {/* Espaçamento para o header fixo */}
       <main className="pt-24 px-4 max-w-5xl mx-auto">
-        
+
         {/* Hero Section */}
         <section className="text-center mb-12 mt-4 sm:mt-8">
           <div className="inline-block bg-red-600 text-white text-xs sm:text-sm font-black px-4 py-1.5 rounded-full mb-6 animate-pulse shadow-lg shadow-red-900/50 uppercase tracking-wide">
@@ -50,7 +50,7 @@ export default function Home() {
         <section>
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
             <h3 className="text-2xl font-black flex items-center gap-3">
-              <span className="text-3xl">🔥</span> 
+              <span className="text-3xl">🔥</span>
               <span>Em Alta Agora</span>
             </h3>
             <span className="text-xs text-slate-400 font-bold bg-slate-800 px-3 py-1.5 rounded-md uppercase tracking-wider">
