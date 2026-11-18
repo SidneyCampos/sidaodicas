@@ -50,3 +50,12 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #475569; /* slate-600 ao passar o mouse */
 }
+
+/* Utilitário para ocultar scrollbar em barras horizontais mobile (estilo Shopee/Meli) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

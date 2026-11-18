@@ -11,15 +11,15 @@ export default function SplashScreen() {
     // Esconde a barra de rolagem do body enquanto o splash estiver ativo
     document.body.style.overflow = 'hidden';
 
-    // A tela de splash fica visível por 2 segundos e depois começa a sumir
+    // A tela de splash fica visível brevemente (600ms) para não atrasar a visualização dos produtos
     const timer = setTimeout(() => {
       setFadeOut(true);
-      // Remove do DOM após a animação de fade out (500ms)
+      // Remove do DOM após a animação de fade out (300ms)
       setTimeout(() => {
         setShow(false);
         document.body.style.overflow = ''; // Restaura o scroll nativo
-      }, 500);
-    }, 2000);
+      }, 300);
+    }, 600);
 
     return () => {
       clearTimeout(timer);
