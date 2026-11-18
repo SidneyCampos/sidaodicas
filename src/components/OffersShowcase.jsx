@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  Flame,
+  ChevronDown,
   LayoutGrid,
   Rows3,
-  SlidersHorizontal,
-  Store,
   X,
   Zap,
 } from "lucide-react";
 import Header from "./Header";
 import ProductCard from "./ProductCard";
 import CouponsSection from "./CouponsSection";
+
+const PAGE_SIZE = 12;
 
 const STORES = [
   { id: "Todas", label: "🔥 Todas", activeClass: "bg-[#FFE600] text-slate-950 border-[#FFE600]" },
@@ -29,9 +29,16 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCouponsOpen, setIsCouponsOpen] = useState(false);
   const [mobileTwoCols, setMobileTwoCols] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const filteredOffers = useMemo(() => {
-    return ofertas.filter((item) => {
+  // Reseta a paginação para 12 itens sempre que o usuário mudar filtro ou busca
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [selectedStore, selectedCategory, searchQuery]);
+
+  // Filtra e ordena da oferta mais recente para a mais antiga
+  const sortedAndFilteredOffers = useMemo(() => {
+    const filtered = ofertas.filter((item) => {
       const matchesStore =
         selectedStore === "Todas" ||
         (item.loja && item.loja.toLowerCase() === selectedStore.toLowerCase());
@@ -51,12 +58,33 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
 
       return matchesStore && matchesCategory && matchesSearch;
     });
+
+    return [...filtered].sort((a, b) => {
+      const timeA = a.criadoEm ? new Date(a.criadoEm).getTime() : 0;
+      const timeB = b.criadoEm ? new Date(b.criadoEm).getTime() : 0;
+      if (timeB !== timeA) {
+        return timeB - timeA;
+      }
+      return (Number(b.id) || 0) - (Number(a.id) || 0);
+    });
   }, [ofertas, selectedStore, selectedCategory, searchQuery]);
+
+  const visibleOffers = useMemo(() => {
+    return sortedAndFilteredOffers.slice(0, visibleCount);
+  }, [sortedAndFilteredOffers, visibleCount]);
+
+  const hasMoreOffers = visibleCount < sortedAndFilteredOffers.length;
+  const remainingCount = sortedAndFilteredOffers.length - visibleCount;
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + PAGE_SIZE);
+  };
 
   const clearFilters = () => {
     setSelectedStore("Todas");
     setSelectedCategory("Todas");
     setSearchQuery("");
+    setVisibleCount(PAGE_SIZE);
   };
 
   return (
@@ -122,7 +150,7 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300">
               <Zap size={14} className="text-[#FFE600] fill-[#FFE600]" />
               <span>Radar de Ofertas em Tempo Real</span>
-              <span className="text-slate-500">({filteredOffers.length})</span>
+              <span className="text-slate-500">({sortedAndFilteredOffers.length})</span>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -161,16 +189,38 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
 
         {/* VITRINE DE PRODUTOS IMEDIATA (Estilo Marketplace: 2 cols no mobile, 3 no tablet, 4 no desktop) */}
         <section aria-label="Ofertas em Destaque">
-          {filteredOffers.length > 0 ? (
-            <div
-              className={`grid ${
-                mobileTwoCols ? "grid-cols-2" : "grid-cols-1"
-              } sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4`}
-            >
-              {filteredOffers.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+          {visibleOffers.length > 0 ? (
+            <>
+              <div
+                className={`grid ${
+                  mobileTwoCols ? "grid-cols-2" : "grid-cols-1"
+                } sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4`}
+              >
+                {visibleOffers.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+
+              {/* Botão de Paginação: Carregar mais ofertas (+12 a cada clique) */}
+              {hasMoreOffers && (
+                <div className="mt-8 flex flex-col items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLoadMore}
+                    className="bg-slate-900 hover:bg-slate-800 text-white border border-yellow-400/50 hover:border-[#FFE600] font-black text-xs sm:text-sm px-6 py-3.5 rounded-2xl inline-flex items-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
+                  >
+                    <span>Carregar mais ofertas</span>
+                    <span className="bg-[#FFE600] text-slate-950 text-xs font-black px-2 py-0.5 rounded-full">
+                      +{Math.min(PAGE_SIZE, remainingCount)}
+                    </span>
+                    <ChevronDown size={16} className="text-[#FFE600]" />
+                  </button>
+                  <span className="text-[11px] text-slate-400">
+                    Exibindo {visibleOffers.length} de {sortedAndFilteredOffers.length} ofertas verificadas
+                  </span>
+                </div>
+              )}
+            </>
           ) : (
             <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-8 text-center max-w-md mx-auto my-6">
               <p className="text-base font-bold text-white mb-1.5">

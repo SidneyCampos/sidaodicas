@@ -8,10 +8,11 @@
     "loja": "Amazon",
     "categoria": "Eletrônicos",
     "cupomOpcional": "",
-    "destaqueTag": "Menor Preço em 30 dias",
+    "destaqueTag": "MENOR PREÇO EM 30 DIAS",
     "imagemUrl": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://www.amazon.com.br/s?k=iphone+15+128gb",
-    "verificadoEm": "Verificado hoje"
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T19:05:00.000Z"
   },
   {
     "id": 2,
@@ -22,10 +23,11 @@
     "loja": "Mercado Livre",
     "categoria": "Games",
     "cupomOpcional": "GAME100",
-    "destaqueTag": "Oferta Verificada",
+    "destaqueTag": "OFERTA VERIFICADA",
     "imagemUrl": "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://lista.mercadolivre.com.br/playstation-5-slim",
-    "verificadoEm": "Verificado há 15 min"
+    "verificadoEm": "Verificado há 15 min",
+    "criadoEm": "2026-11-18T18:52:00.000Z"
   },
   {
     "id": 3,
@@ -36,10 +38,11 @@
     "loja": "Mercado Livre",
     "categoria": "Casa",
     "cupomOpcional": "CASA20",
-    "destaqueTag": "Mais Vendido",
+    "destaqueTag": "MAIS VENDIDO",
     "imagemUrl": "https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://lista.mercadolivre.com.br/air-fryer-mondial-4l",
-    "verificadoEm": "Verificado hoje"
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T18:35:00.000Z"
   },
   {
     "id": 4,
@@ -50,10 +53,11 @@
     "loja": "Amazon",
     "categoria": "Eletrônicos",
     "cupomOpcional": "",
-    "destaqueTag": "Esquenta Black Friday",
+    "destaqueTag": "ESQUENTA BLACK FRIDAY",
     "imagemUrl": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://www.amazon.com.br/s?k=smart+tv+55+4k+samsung",
-    "verificadoEm": "Verificado há 30 min"
+    "verificadoEm": "Verificado há 30 min",
+    "criadoEm": "2026-11-18T18:10:00.000Z"
   },
   {
     "id": 5,
@@ -64,10 +68,11 @@
     "loja": "Amazon",
     "categoria": "Games",
     "cupomOpcional": "TECH150",
-    "destaqueTag": "Menor Preço em 30 dias",
+    "destaqueTag": "MENOR PREÇO EM 30 DIAS",
     "imagemUrl": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://www.amazon.com.br/s?k=notebook+gamer+acer+nitro",
-    "verificadoEm": "Verificado hoje"
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T17:40:00.000Z"
   },
   {
     "id": 6,
@@ -78,10 +83,11 @@
     "loja": "Shopee",
     "categoria": "Mais Vendidos",
     "cupomOpcional": "SHOPEE15",
-    "destaqueTag": "Oferta Verificada",
+    "destaqueTag": "OFERTA VERIFICADA",
     "imagemUrl": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://shopee.com.br/search?keyword=jbl%20tune%20520bt",
-    "verificadoEm": "Verificado hoje"
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T17:15:00.000Z"
   },
   {
     "id": 7,
@@ -92,10 +98,11 @@
     "loja": "Shopee",
     "categoria": "Games",
     "cupomOpcional": "FRETEGRATIS",
-    "destaqueTag": "Esquenta Black Friday",
+    "destaqueTag": "ESQUENTA BLACK FRIDAY",
     "imagemUrl": "https://images.unsplash.com/photo-1598550476439-6847785fcea6?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://shopee.com.br/search?keyword=cadeira%20gamer%20ergonomica",
-    "verificadoEm": "Verificado há 1 hora"
+    "verificadoEm": "Verificado há 1 hora",
+    "criadoEm": "2026-11-18T16:45:00.000Z"
   },
   {
     "id": 8,
@@ -106,10 +113,11 @@
     "loja": "Mercado Livre",
     "categoria": "Casa",
     "cupomOpcional": "MELI30",
-    "destaqueTag": "Mais Vendido",
+    "destaqueTag": "MAIS VENDIDO",
     "imagemUrl": "https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://lista.mercadolivre.com.br/robo-aspirador",
-    "verificadoEm": "Verificado hoje"
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T16:10:00.000Z"
   },
   {
     "id": 9,
@@ -120,9 +128,100 @@
     "loja": "Amazon",
     "categoria": "Mais Vendidos",
     "cupomOpcional": "",
-    "destaqueTag": "Oferta Verificada",
+    "destaqueTag": "OFERTA VERIFICADA",
     "imagemUrl": "https://images.unsplash.com/photo-1543512214-318c7553f230?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://www.amazon.com.br/s?k=echo+dot+5+geracao",
-    "verificadoEm": "Verificado hoje"
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T15:30:00.000Z"
+  },
+  {
+    "id": 10,
+    "titulo": "Mouse Gamer Sem Fio Logitech G305 LIGHTSPEED 12000 DPI",
+    "precoAntigo": 349.90,
+    "precoAtual": 199.90,
+    "descontoPercentual": 43,
+    "loja": "Amazon",
+    "categoria": "Games",
+    "cupomOpcional": "",
+    "destaqueTag": "MAIS VENDIDO",
+    "imagemUrl": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=600&auto=format&fit=crop",
+    "linkAfiliado": "https://www.amazon.com.br/s?k=logitech+g305",
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T14:50:00.000Z"
+  },
+  {
+    "id": 11,
+    "titulo": "Cafeteira Espresso Nespresso Vertuo Pop Preta 127V",
+    "precoAntigo": 699.00,
+    "precoAtual": 379.00,
+    "descontoPercentual": 46,
+    "loja": "Mercado Livre",
+    "categoria": "Casa",
+    "cupomOpcional": "CASA20",
+    "destaqueTag": "MENOR PREÇO EM 30 DIAS",
+    "imagemUrl": "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?q=80&w=600&auto=format&fit=crop",
+    "linkAfiliado": "https://lista.mercadolivre.com.br/nespresso-vertuo-pop",
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T14:15:00.000Z"
+  },
+  {
+    "id": 12,
+    "titulo": "Smartwatch Xiaomi Redmi Watch 4 GPS Tela AMOLED 1.97\" Bateria 20 Dias",
+    "precoAntigo": 799.00,
+    "precoAtual": 469.00,
+    "descontoPercentual": 41,
+    "loja": "Shopee",
+    "categoria": "Eletrônicos",
+    "cupomOpcional": "SHOPEE15",
+    "destaqueTag": "OFERTA VERIFICADA",
+    "imagemUrl": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop",
+    "linkAfiliado": "https://shopee.com.br/search?keyword=redmi%20watch%204",
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T13:30:00.000Z"
+  },
+  {
+    "id": 13,
+    "titulo": "Controle Sem Fio DualSense PlayStation 5 - Branco Original",
+    "precoAntigo": 499.90,
+    "precoAtual": 349.00,
+    "descontoPercentual": 30,
+    "loja": "Amazon",
+    "categoria": "Games",
+    "cupomOpcional": "",
+    "destaqueTag": "ESQUENTA BLACK FRIDAY",
+    "imagemUrl": "https://images.unsplash.com/photo-1592840496694-26d035b52b48?q=80&w=600&auto=format&fit=crop",
+    "linkAfiliado": "https://www.amazon.com.br/s?k=controle+dualsense+ps5",
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T12:45:00.000Z"
+  },
+  {
+    "id": 14,
+    "titulo": "Caixa de Som Bluetooth JBL Flip 6 À Prova D'água IP67",
+    "precoAntigo": 799.00,
+    "precoAtual": 549.00,
+    "descontoPercentual": 31,
+    "loja": "Mercado Livre",
+    "categoria": "Mais Vendidos",
+    "cupomOpcional": "MELI30",
+    "destaqueTag": "MAIS VENDIDO",
+    "imagemUrl": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=600&auto=format&fit=crop",
+    "linkAfiliado": "https://lista.mercadolivre.com.br/jbl-flip-6",
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T11:20:00.000Z"
+  },
+  {
+    "id": 15,
+    "titulo": "Aspirador de Pó Vertical Sem Fio 2 em 1 Portátil Ciclone 1200W",
+    "precoAntigo": 389.90,
+    "precoAtual": 219.90,
+    "descontoPercentual": 44,
+    "loja": "Shopee",
+    "categoria": "Casa",
+    "cupomOpcional": "SHOPEE15",
+    "destaqueTag": "OFERTA VERIFICADA",
+    "imagemUrl": "https://images.unsplash.com/photo-1558317374-067fb5f30001?q=80&w=600&auto=format&fit=crop",
+    "linkAfiliado": "https://shopee.com.br/search?keyword=aspirador%20vertical",
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-18T10:00:00.000Z"
   }
 ]

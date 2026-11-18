@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Check, Clock, Copy, ExternalLink, ShieldCheck } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Clock, Copy, ShieldCheck } from "lucide-react";
 
 const STORE_CONFIG = {
   Amazon: {
@@ -30,23 +30,82 @@ const STORE_CONFIG = {
   },
 };
 
+export function formatRelativeVerifiedTime(criadoEm, fallbackText) {
+  if (!criadoEm) {
+    return fallbackText || "Verificado hoje";
+  }
+
+  const parsed = new Date(criadoEm).getTime();
+  if (Number.isNaN(parsed)) {
+    return fallbackText || "Verificado hoje";
+  }
+
+  const diffMs = Date.now() - parsed;
+  if (diffMs < 0) {
+    return "Verificado agora";
+  }
+
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 2) {
+    return "Verificado agora";
+  }
+  if (diffMin < 60) {
+    return `Verificado há ${diffMin} min`;
+  }
+
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) {
+    return `Verificado há ${diffHours}h`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) {
+    return "Verificado ontem";
+  }
+
+  return fallbackText || "Verificado hoje";
+}
+
+export function calculateDiscountPercentage(precoAntigo, precoAtual, manualPercent) {
+  const manual = Number(manualPercent);
+  if (!Number.isNaN(manual) && manual > 0) {
+    return Math.round(manual);
+  }
+  const oldVal = Number(precoAntigo);
+  const newVal = Number(precoAtual);
+  if (!Number.isNaN(oldVal) && !Number.isNaN(newVal) && oldVal > newVal && oldVal > 0) {
+    return Math.round(((oldVal - newVal) / oldVal) * 100);
+  }
+  return 0;
+}
+
 export default function ProductCard({ product }) {
   const [couponCopied, setCouponCopied] = useState(false);
 
-  const precoAntigo = product.precoAntigo ?? product.precoOriginal ?? 0;
-  const precoAtual = product.precoAtual ?? product.precoDesconto ?? 0;
+  const precoAntigo = Number(product.precoAntigo ?? product.precoOriginal ?? 0);
+  const precoAtual = Number(product.precoAtual ?? product.precoDesconto ?? 0);
   const imagemUrl = product.imagemUrl ?? product.urlImagem ?? "";
   const loja = product.loja || "Amazon";
   const destaqueTag = product.destaqueTag ?? product.tag ?? "Oferta do Dia";
-  const verificadoEm = product.verificadoEm || "Verificado hoje";
+  const fallbackVerificado = product.verificadoEm || "Verificado hoje";
   const cupomOpcional = product.cupomOpcional || "";
   const linkAfiliado = product.linkAfiliado || "#";
 
-  const descontoPercentual =
-    product.descontoPercentual ??
-    (precoAntigo > precoAtual
-      ? Math.round(((precoAntigo - precoAtual) / precoAntigo) * 100)
-      : 0);
+  const [relativeTime, setRelativeTime] = useState(() =>
+    product.criadoEm ? formatRelativeVerifiedTime(product.criadoEm, fallbackVerificado) : fallbackVerificado
+  );
+
+  useEffect(() => {
+    setRelativeTime(
+      formatRelativeVerifiedTime(product.criadoEm, fallbackVerificado)
+    );
+  }, [product.criadoEm, fallbackVerificado]);
+
+  const descontoPercentual = calculateDiscountPercentage(
+    precoAntigo,
+    precoAtual,
+    product.descontoPercentual
+  );
 
   const storeInfo = STORE_CONFIG[loja] || {
     badgeLabel: `Oficial ${loja}`,
@@ -117,14 +176,14 @@ export default function ProductCard({ product }) {
       {/* Corpo do Card Enxuto e Focado em Conversão */}
       <div className="p-3 sm:p-4 flex flex-col flex-grow justify-between gap-2">
         <div>
-          {/* Linha de Destaque Tag + Tempo */}
+          {/* Linha de Destaque Tag + Tempo Relativo Dinâmico */}
           <div className="flex items-center justify-between gap-1 mb-1.5">
             <span className="text-[10px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-yellow-400/15 text-yellow-300 truncate">
               {destaqueTag}
             </span>
             <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-slate-400 shrink-0">
               <Clock size={10} />
-              {verificadoEm}
+              {relativeTime}
             </span>
           </div>
 
