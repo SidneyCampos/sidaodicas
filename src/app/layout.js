@@ -15,15 +15,16 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport = {
-  themeColor: "#FFEA00",
+  themeColor: "#facc15",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
 };
 
 export const metadata = {
-  title: "Sidão Dicas | As Melhores Ofertas",
-  description: "As melhores ofertas, bugs e achados da internet você encontra aqui.",
+  title: "Sidão Dicas & Ofertas | Curadoria Oficial Verificada",
+  description:
+    "Radar de ofertas verificadas em tempo real e cupons de desconto ativos para Amazon, Mercado Livre e Shopee.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -32,6 +33,13 @@ export const metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    title: "Sidão Dicas & Ofertas | Curadoria Oficial Verificada",
+    description:
+      "Radar de ofertas verificadas em tempo real e cupons de desconto ativos para Amazon, Mercado Livre e Shopee.",
+    type: "website",
+    locale: "pt_BR",
   },
 };
 

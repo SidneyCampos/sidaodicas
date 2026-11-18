@@ -1,71 +1,85 @@
-import React from 'react';
-import ProductCard from '../components/ProductCard';
-import { mockProducts } from '../data/mockProducts';
-import { MessageCircleWarning, Zap } from 'lucide-react';
+import React from "react";
+import Header from "../components/Header";
+import OffersShowcase from "../components/OffersShowcase";
+import Footer from "../components/Footer";
+import ofertas from "../data/ofertas.json";
+import cupons from "../data/cupons.json";
+import { BadgeCheck, Lock, ShieldCheck, Store } from "lucide-react";
 
 export const metadata = {
-  title: 'Sidão Dicas | Melhores Ofertas e Bugs da Internet',
-  description: 'As melhores ofertas, bugs e achados da internet você encontra aqui. Economize de verdade!',
+  title: "Sidão Dicas & Ofertas | Radar de Ofertas Verificadas em Tempo Real",
+  description:
+    "Curadoria oficial de ofertas verificadas e cupons de desconto ativos para Amazon, Mercado Livre e Shopee. Redirecionamento 100% seguro para as lojas oficiais.",
+  openGraph: {
+    title: "Sidão Dicas & Ofertas | Curadoria Oficial Verificada",
+    description:
+      "Economize com segurança! Monitoramos preços e cupons em tempo real nas páginas oficiais da Amazon, Mercado Livre e Shopee.",
+    type: "website",
+    locale: "pt_BR",
+  },
 };
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white font-sans pb-20">
-      {/* Header Fixo */}
-      <header className="fixed top-0 w-full bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-800 z-50">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Zap className="text-yellow-400" fill="currentColor" size={28} />
-            <h1 className="text-2xl font-black text-yellow-400 tracking-tight">
-              Sidão Dicas
-            </h1>
+    <div className="min-h-screen flex flex-col bg-[#0f172a] text-white font-sans">
+      {/* Header Oficial com Avatar, Selo Verificado, Alertas e Grupo VIP */}
+      <Header />
+
+      {/* Barra de Transparência e Segurança (Abaixo do Header) */}
+      <div className="bg-slate-900/95 border-b border-emerald-500/30">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-start sm:items-center justify-center gap-3 text-xs sm:text-sm text-slate-200">
+          <div className="flex items-center gap-1.5 text-emerald-400 shrink-0 mt-0.5 sm:mt-0">
+            <ShieldCheck size={18} className="text-emerald-400" />
+            <Lock size={15} className="text-emerald-400 hidden sm:inline" />
           </div>
-
-          <a href="https://chat.whatsapp.com/C1Ryp7KvesNEgmowEZu2TS" target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#1fae54] text-white text-sm font-bold py-2.5 px-5 rounded-full flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-green-900/30">
-            <MessageCircleWarning size={20} />
-            <span className="hidden sm:inline">Entrar no Grupo VIP</span>
-            <span className="sm:hidden">VIP</span>
-          </a>
-        </div>
-      </header>
-
-      {/* Espaçamento para o header fixo */}
-      <main className="pt-24 px-4 max-w-5xl mx-auto">
-
-        {/* Hero Section */}
-        <section className="text-center mb-12 mt-4 sm:mt-8">
-          <div className="inline-block bg-red-600 text-white text-xs sm:text-sm font-black px-4 py-1.5 rounded-full mb-6 animate-pulse shadow-lg shadow-red-900/50 uppercase tracking-wide">
-            URGENTE: Ofertas por tempo limitado!
-          </div>
-          <h2 className="text-4xl sm:text-6xl font-black mb-6 leading-tight text-slate-100">
-            Encontramos os <br className="hidden sm:block" />
-            <span className="text-yellow-400 drop-shadow-md">Maiores Descontos</span> do Dia.
-          </h2>
-          <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto font-medium">
-            Esses preços podem mudar a qualquer momento. Se gostar de algo, seja rápido e garanta antes que o estoque acabe!
+          <p className="leading-relaxed text-center sm:text-left">
+            <strong className="text-emerald-400 font-bold">
+              🔒 Redirecionamento 100% Seguro:
+            </strong>{" "}
+            O Sidão Dicas não é uma loja e nunca pede seus dados bancários. Nós monitoramos preços e redirecionamos você diretamente para as páginas oficiais da{" "}
+            <strong className="text-white">Amazon</strong>,{" "}
+            <strong className="text-white">Mercado Livre</strong> e{" "}
+            <strong className="text-white">Shopee</strong>.
           </p>
-        </section>
+        </div>
+      </div>
 
-        {/* Grid de Produtos */}
-        <section>
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
-            <h3 className="text-2xl font-black flex items-center gap-3">
-              <span className="text-3xl">🔥</span>
-              <span>Em Alta Agora</span>
-            </h3>
-            <span className="text-xs text-slate-400 font-bold bg-slate-800 px-3 py-1.5 rounded-md uppercase tracking-wider">
-              Atualizado hoje
+      {/* Conteúdo Principal */}
+      <main className="flex-grow px-4 pt-8 sm:pt-10 max-w-6xl w-full mx-auto">
+        {/* Hero Section focado em Credibilidade e Curadoria */}
+        <section className="text-center mb-10 sm:mb-12">
+          <div className="inline-flex items-center gap-2 bg-yellow-400/15 border border-yellow-400/40 text-[#facc15] text-xs sm:text-sm font-black px-4 py-1.5 rounded-full mb-5 shadow-sm">
+            <span>⚡ Radar de Ofertas Verificadas em Tempo Real</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-5xl font-black mb-4 leading-tight text-white tracking-tight">
+            Curadoria Oficial de{" "}
+            <span className="text-[#facc15]">Descontos &amp; Cupons</span>
+          </h2>
+
+          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Nossa equipe monitora variações de preço e testa cupons diariamente para você comprar sempre pelo menor valor direto nas maiores lojas oficiais do Brasil.
+          </p>
+
+          {/* Selos Rápidos de Confiança */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-bold text-slate-300">
+            <span className="inline-flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl">
+              <BadgeCheck size={15} className="text-emerald-400" />
+              Histórico de Preços Analisado
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl">
+              <Store size={15} className="text-yellow-400" />
+              Links Diretos: Amazon, Mercado Livre e Shopee
             </span>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {mockProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
         </section>
 
+        {/* Seção de Cupons Ativos + Vitrine com Filtros e Cards de Produtos */}
+        <OffersShowcase ofertas={ofertas} cupons={cupons} />
       </main>
+
+      {/* Rodapé Profissional com Avisos Legais e Redes Sociais */}
+      <Footer />
     </div>
   );
 }

@@ -59,9 +59,9 @@ self.addEventListener('periodicsync', (event) => {
 // 3. Web Push Notifications API
 self.addEventListener('push', (event) => {
   console.log('[Service Worker] Push notification received');
-  const title = 'Nova Oferta do Sidão Dicas!';
+  const title = '⚡ Nova Oferta Verificada - Sidão Dicas!';
   const options = {
-    body: event.data ? event.data.text() : 'Temos um novo bug imperdível rolando agora!',
+    body: event.data ? event.data.text() : 'Uma nova promoção verificada acabou de entrar no radar!',
     icon: '/icon-512.png',
     badge: '/icon-512.png'
   };

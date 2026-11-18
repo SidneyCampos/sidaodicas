@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "loja": "Mercado Livre",
+    "codigo": "MELI30",
+    "descricao": "R$ 30 OFF em compras acima de R$ 299 em produtos selecionados",
+    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/ofertas",
+    "validade": "Válido hoje • Estoque limitado"
+  },
+  {
+    "id": 2,
+    "loja": "Amazon",
+    "codigo": "AMAZON20",
+    "descricao": "R$ 20 OFF em Eletrônicos e Casa Inteligente vendidos pela Amazon",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals",
+    "validade": "Válido no App Oficial"
+  },
+  {
+    "id": 3,
+    "loja": "Shopee",
+    "codigo": "SHOPEE15",
+    "descricao": "R$ 15 OFF + Cupom de Frete Grátis em lojas oficiais Shopee",
+    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
+    "validade": "Ativo agora • Uso imediato"
+  }
+]
