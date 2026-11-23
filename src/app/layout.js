@@ -15,29 +15,29 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport = {
-  themeColor: "#facc15",
+  themeColor: "#0b0f14",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
 };
 
 export const metadata = {
-  title: "Sidão Dicas & Ofertas | Curadoria Oficial Verificada",
+  title: "Sidão Dicas Ofertas | Produtos Selecionados & Cupons",
   description:
-    "Radar de ofertas verificadas em tempo real e cupons de desconto ativos para Amazon, Mercado Livre e Shopee.",
+    "Dicas e ofertas dos melhores produtos selecionados pra você na Amazon, Mercado Livre e Shopee.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "Sidão Dicas",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
-    title: "Sidão Dicas & Ofertas | Curadoria Oficial Verificada",
+    title: "Sidão Dicas Ofertas | Curadoria Oficial",
     description:
-      "Radar de ofertas verificadas em tempo real e cupons de desconto ativos para Amazon, Mercado Livre e Shopee.",
+      "Dicas e ofertas dos melhores produtos selecionados pra você na Amazon, Mercado Livre e Shopee.",
     type: "website",
     locale: "pt_BR",
   },
@@ -49,7 +49,7 @@ export default function RootLayout({ children }) {
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#0f172a] text-white">
+      <body className="min-h-full flex flex-col bg-[#0b0f14] text-[#f2ede4]">
         <SplashScreen />
         {children}
         <InstallPrompt />

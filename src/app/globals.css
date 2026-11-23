@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0f14;
+  --foreground: #f2ede4;
+  --studio-surface: #121820;
+  --studio-amber: #d89643;
+  --studio-amber-light: #e5ad5e;
 }
 
 @theme inline {
@@ -12,46 +15,42 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #0b0f14;
+  background-image: radial-gradient(
+    ellipse 70% 40% at 82% -5%,
+    rgba(216, 150, 67, 0.08),
+    transparent 65%
+  );
+  color: #f2ede4;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Customização de Scrollbar Premium (Sleek Dark Mode) */
+/* Scrollbar Discreta Estilo Estúdio */
 html {
-  /* Para Firefox */
   scrollbar-width: thin;
-  scrollbar-color: #334155 #0f172a; 
+  scrollbar-color: #27313d #0b0f14;
 }
 
-/* Para Chrome, Edge e Safari */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a; /* Fundo do app */
+  background: #0b0f14;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155; /* slate-700 */
-  border-radius: 10px;
+  background: #27313d;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569; /* slate-600 ao passar o mouse */
+  background: #3b4757;
 }
 
-/* Utilitário para ocultar scrollbar em barras horizontais mobile (estilo Shopee/Meli) */
+/* Utilitário para ocultar scrollbar em barras horizontais mobile */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

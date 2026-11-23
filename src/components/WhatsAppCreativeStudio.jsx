@@ -15,6 +15,21 @@ import { calculateDiscountPercentage } from "./ProductCard";
 
 const CARD_THEMES = [
   {
+    id: "estudio",
+    label: "🪵 Estúdio Sidão",
+    bgTop: "#0e151d",
+    bgBottom: "#17202b",
+    titleColor: "#F2EDE4",
+    oldPriceColor: "#8B95A3",
+    strikeColor: "#D89643",
+    priceLabelColor: "#E5AD5E",
+    priceColor: "#E5AD5E",
+    badgeBg: "#D89643",
+    badgeText: "#0B0F14",
+    footerBg: "#080B0F",
+    footerText: "#E5AD5E",
+  },
+  {
     id: "rosa",
     label: "🌸 Rosa Viral",
     bgTop: "#FDE2EE",
@@ -31,7 +46,7 @@ const CARD_THEMES = [
   },
   {
     id: "sidao",
-    label: "💛 Amarelo Sidão",
+    label: "💛 Amarelo Clássico",
     bgTop: "#FEF9C3",
     bgBottom: "#FDE047",
     titleColor: "#0F172A",
@@ -57,21 +72,6 @@ const CARD_THEMES = [
     badgeBg: "#EE4D2D",
     badgeText: "#FFFFFF",
     footerBg: "#18181B",
-    footerText: "#FACC15",
-  },
-  {
-    id: "dark",
-    label: "🌙 Dark Premium",
-    bgTop: "#0F172A",
-    bgBottom: "#1E293B",
-    titleColor: "#F8FAFC",
-    oldPriceColor: "#94A3B8",
-    strikeColor: "#EF4444",
-    priceLabelColor: "#FACC15",
-    priceColor: "#FACC15",
-    badgeBg: "#16A34A",
-    badgeText: "#FFFFFF",
-    footerBg: "#020617",
     footerText: "#FACC15",
   },
 ];

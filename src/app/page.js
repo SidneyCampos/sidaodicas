@@ -7,13 +7,13 @@ import { getFreshCouponsForHome } from "../lib/couponAutoSync";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Sidão Dicas & Ofertas | Radar de Ofertas Verificadas em Tempo Real",
+  title: "Sidão Dicas Ofertas | Produtos Selecionados & Cupons",
   description:
-    "Curadoria oficial de ofertas verificadas e cupons de desconto ativos para Amazon, Mercado Livre e Shopee. Redirecionamento 100% seguro para as lojas oficiais.",
+    "Dicas e ofertas dos melhores produtos selecionados pra você na Amazon, Mercado Livre e Shopee. Redirecionamento 100% oficial.",
   openGraph: {
-    title: "Sidão Dicas & Ofertas | Curadoria Oficial Verificada",
+    title: "Sidão Dicas Ofertas | Curadoria Oficial",
     description:
-      "Economize com segurança! Monitoramos preços e cupons em tempo real nas páginas oficiais da Amazon, Mercado Livre e Shopee.",
+      "Dicas e ofertas dos melhores produtos selecionados pra você na Amazon, Mercado Livre e Shopee.",
     type: "website",
     locale: "pt_BR",
   },
@@ -26,14 +26,12 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d16] text-white font-sans">
-      {/* Vitrine Clean com Header Unificado, Filtros Minimalistas e Modal de Cupons */}
+    <div className="min-h-screen flex flex-col bg-[#0b0f14] text-[#f2ede4] font-sans">
       <OffersShowcase
         ofertas={Array.isArray(ofertas) ? ofertas : []}
         cupons={Array.isArray(cupons) ? cupons : []}
       />
 
-      {/* Rodapé Resumido com Segurança, Afiliados e Redes Sociais */}
       <Footer />
     </div>
   );

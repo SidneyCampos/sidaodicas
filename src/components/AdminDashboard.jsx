@@ -583,18 +583,22 @@ const isFieldMissing = (keyword) => {
 // =========================================================================
 if (!isLoggedIn) {
   return (
-    <div className="min-h-screen bg-[#080d1a] text-white font-sans flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#FFE600]/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#0b0f14] text-[#f2ede4] font-sans flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-[#121820]/95 border border-[#e7d7bf]/12 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#d89643]/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-[#FFE600] text-slate-950 flex items-center justify-center font-black shadow-lg shadow-yellow-500/20 mb-3">
-            <Zap size={30} fill="currentColor" />
+          <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-[#8c5a22] via-[#e5ad5e] to-[#d89643] shadow-lg mb-3">
+            <img
+              src="/avatar-sidao.png"
+              alt="Sidão Dicas Ofertas"
+              className="w-full h-full rounded-full object-cover bg-[#121820]"
+            />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">
-            Sidão Dicas <span className="text-[#FFE600]">Admin</span>
+          <h1 className="text-2xl font-bold text-[#f2ede4] tracking-tight">
+            Sidão Dicas <span className="text-[#e5ad5e]">Admin</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#8b95a3] mt-1">
             Entre com seu usuário e senha para gerenciar ofertas de qualquer computador.
           </p>
         </div>
@@ -692,26 +696,30 @@ if (!isLoggedIn) {
 // PAINEL ADMIN AUTENTICADO
 // =========================================================================
 return (
-  <div className="min-h-screen bg-[#080d1a] text-white font-sans pb-16">
+  <div className="min-h-screen bg-[#0b0f14] text-[#f2ede4] font-sans pb-16">
     {/* Top Bar do Painel Admin */}
-    <header className="sticky top-0 z-50 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
+    <header className="sticky top-0 z-50 bg-[#0b0f14]/95 backdrop-blur-md border-b border-[#e7d7bf]/[0.08] shadow-lg">
       <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FFE600] text-slate-950 flex items-center justify-center font-black shadow">
-              <Zap size={20} fill="currentColor" />
+            <div className="w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-[#8c5a22] via-[#e5ad5e] to-[#d89643] shrink-0">
+              <img
+                src="/avatar-sidao.png"
+                alt="Sidão Dicas Ofertas"
+                className="w-full h-full rounded-full object-cover bg-[#121820]"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-black text-white leading-none">
-                  Sidão Dicas <span className="text-[#FFE600]">Admin</span>
+                <h1 className="text-base sm:text-lg font-bold text-[#f2ede4] leading-none">
+                  Sidão Dicas <span className="text-[#e5ad5e]">Admin</span>
                 </h1>
-                <span className="text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold uppercase bg-[#182e24] text-[#7ae0ae] border border-[#2f9e75]/35 px-2 py-0.5 rounded-full">
                   🌐 Acesso Web Seguro
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Cole o link de associado → Carrega tudo + Arte e Texto WhatsApp
+              <p className="text-[11px] text-[#8b95a3] mt-0.5">
+                Cole o link de associado → Carrega tudo + Arte e Texto WhatsApp/Instagram
               </p>
             </div>
           </div>

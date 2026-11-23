@@ -100,17 +100,17 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-0 left-0 w-full p-4 z-50">
-      <div className="bg-slate-900/95 border border-slate-700 shadow-2xl rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-4xl mx-auto backdrop-blur-md">
+      <div className="bg-[#121820]/95 border border-[#e7d7bf]/15 shadow-2xl rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-4xl mx-auto backdrop-blur-xl">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-yellow-400/15 border border-yellow-400/30 flex items-center justify-center text-yellow-400 shrink-0">
-            <Smartphone size={22} />
+          <div className="w-11 h-11 rounded-xl bg-[#d89643]/15 border border-[#d89643]/30 flex items-center justify-center text-[#e5ad5e] shrink-0">
+            <Smartphone size={20} />
           </div>
           <div className="flex flex-col">
-            <span className="text-white font-black text-sm sm:text-base">
-              Instale o App Sidão Dicas &amp; Ofertas
+            <span className="text-[#f2ede4] font-bold text-sm sm:text-base">
+              Instale o App Sidão Dicas Ofertas
             </span>
-            <span className="text-slate-400 text-xs sm:text-sm">
-              Acesso rápido ao radar de preços e cupons direto na sua tela inicial.
+            <span className="text-[#8b95a3] text-xs sm:text-sm">
+              Acesso direto às ofertas selecionadas na sua tela inicial.
             </span>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function InstallPrompt() {
           <button
             type="button"
             onClick={handleDismiss}
-            className="text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition-colors cursor-pointer"
+            className="text-[#929ca8] hover:text-[#f2ede4] bg-white/[0.04] hover:bg-white/[0.08] font-semibold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition-colors cursor-pointer"
           >
             Agora não
           </button>
@@ -127,9 +127,9 @@ export default function InstallPrompt() {
           <button
             type="button"
             onClick={handleInstallClick}
-            className="bg-[#facc15] hover:bg-yellow-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 active:scale-95 transition-transform cursor-pointer shadow-md shadow-yellow-400/10"
+            className="bg-[#d89643] hover:bg-[#e5ad5e] text-[#0b0f14] font-bold px-4 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
           >
-            <Download size={16} />
+            <Download size={15} />
             <span>Instalar App</span>
           </button>
 
@@ -137,7 +137,7 @@ export default function InstallPrompt() {
             type="button"
             onClick={handleDismiss}
             aria-label="Fechar aviso de instalação"
-            className="text-slate-400 hover:text-white p-1.5 rounded-full hover:bg-slate-800 transition-colors cursor-pointer"
+            className="text-[#8b95a3] hover:text-[#f2ede4] p-1.5 rounded-full hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>

@@ -9,7 +9,6 @@ import {
   Search,
   Ticket,
   X,
-  Zap,
 } from "lucide-react";
 import NotificationModal from "./NotificationModal";
 
@@ -22,60 +21,53 @@ export default function Header({
   showSavedOnly = false,
   onToggleSavedOnly,
 }) {
-  const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [notifPermission, setNotifPermission] = useState("default");
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if ("Notification" in window) {
-        setNotifPermission(Notification.permission);
-      }
-      const img = new window.Image();
-      img.onload = () => setAvatarLoaded(true);
-      img.onerror = () => setAvatarLoaded(false);
-      img.src = "/avatar-sidao.png";
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotifPermission(Notification.permission);
     }
   }, []);
 
   return (
     <>
-      <header className="sticky top-0 w-full bg-[#090d16]/90 backdrop-blur-xl border-b border-white/[0.06] z-40">
+      <header className="sticky top-0 w-full bg-[#0b0f14]/90 backdrop-blur-xl border-b border-[#e7d7bf]/[0.07] z-40">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3 sm:gap-6">
-          {/* Identidade Limpa e Minimalista */}
-          <a href="#" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="w-9 h-9 rounded-xl bg-white/[0.06] border border-white/10 p-0.5 flex items-center justify-center overflow-hidden">
-              {avatarLoaded ? (
-                <img
-                  src="/avatar-sidao.png"
-                  alt="Sidão Dicas"
-                  className="w-full h-full rounded-[9px] object-cover"
-                />
-              ) : (
-                <div className="w-full h-full rounded-[9px] bg-[#facc15] text-slate-950 flex items-center justify-center">
-                  <Zap size={18} fill="currentColor" />
-                </div>
-              )}
+          {/* Identidade Coerente com o Canal do YouTube (@SidãoDicasOfertas) */}
+          <a href="#" className="flex items-center gap-3 shrink-0 group">
+            <div className="w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-[#8c5a22] via-[#e5ad5e] to-[#d89643] shadow-md shadow-black/40 shrink-0">
+              <img
+                src="/avatar-sidao.png"
+                alt="Sidão Dicas Ofertas"
+                className="w-full h-full rounded-full object-cover bg-[#121820]"
+              />
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-lg font-extrabold text-white tracking-tight">
-                Sidão <span className="text-[#facc15]">Dicas</span>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[15px] sm:text-base font-bold text-[#f2ede4] tracking-tight leading-none group-hover:text-white transition-colors">
+                  Sidão Dicas{" "}
+                  <span className="text-[#e5ad5e] font-semibold">Ofertas</span>
+                </span>
+                <BadgeCheck
+                  size={14}
+                  className="text-[#d89643] shrink-0"
+                  title="Curadoria Oficial"
+                />
+              </div>
+              <span className="text-[10px] text-[#8b95a3] font-medium tracking-wide mt-0.5 hidden sm:block">
+                @SidãoDicasOfertas
               </span>
-              <BadgeCheck
-                size={15}
-                className="text-emerald-400 shrink-0"
-                title="Curadoria Oficial Verificada"
-              />
             </div>
           </a>
 
-          {/* Busca Clean (Desktop) */}
+          {/* Busca Minimalista Estilo Estúdio (Desktop) */}
           {onSearchChange && (
-            <div className="hidden md:flex flex-1 max-w-lg relative">
+            <div className="hidden md:flex flex-1 max-w-md relative">
               <Search
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
+                size={15}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6e7885] pointer-events-none"
               />
               <input
                 type="text"
@@ -83,13 +75,13 @@ export default function Header({
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Buscar produto, loja ou cupom..."
                 aria-label="Buscar ofertas"
-                className="w-full bg-white/[0.04] hover:bg-white/[0.06] focus:bg-white/[0.08] border border-white/[0.08] focus:border-white/25 focus:outline-none text-sm text-white placeholder-slate-500 pl-10 pr-8 py-2 rounded-full transition-all"
+                className="w-full bg-[#121820]/90 hover:bg-[#161e28] focus:bg-[#161e28] border border-[#e7d7bf]/[0.08] focus:border-[#d89643]/50 focus:outline-none text-sm text-[#f2ede4] placeholder-[#6e7885] pl-10 pr-8 py-2 rounded-full transition-all"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b95a3] hover:text-[#f2ede4] cursor-pointer"
                   aria-label="Limpar busca"
                 >
                   <X size={14} />
@@ -98,42 +90,42 @@ export default function Header({
             </div>
           )}
 
-          {/* Ações Discretas e Organizadas (Sem competição de cores) */}
+          {/* Ações Discretas em Tons Quentes e Neutros (Zero Neon) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Botão Único de Cupons (Abre Modal Limpo) */}
             {onOpenCoupons && (
               <button
                 type="button"
                 onClick={onOpenCoupons}
-                className="text-xs font-semibold py-2 px-3 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Ver Cupons de Desconto Ativos"
+                className="text-xs font-semibold py-2 px-3 rounded-full bg-[#121820] hover:bg-[#1a222d] text-[#f2ede4] border border-[#e7d7bf]/[0.09] hover:border-[#d89643]/40 flex items-center gap-1.5 transition-all cursor-pointer"
+                title="Cupons Ativos"
               >
-                <Ticket size={14} className="text-[#facc15]" />
+                <Ticket size={14} className="text-[#e5ad5e]" />
                 <span>Cupons</span>
                 {cuponsCount > 0 && (
-                  <span className="text-[10px] font-bold bg-[#facc15] text-slate-950 px-1.5 py-0.2 rounded-full">
+                  <span className="text-[10px] font-bold bg-[#d89643]/20 text-[#e5ad5e] border border-[#d89643]/30 px-1.5 py-0.2 rounded-full">
                     {cuponsCount}
                   </span>
                 )}
               </button>
             )}
 
-            {/* Favoritos / Salvos (Aumenta permanência na página) */}
             {onToggleSavedOnly && (
               <button
                 type="button"
                 onClick={onToggleSavedOnly}
-                className={`relative p-2 sm:px-3 sm:py-2 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                className={`relative p-2 sm:px-3 sm:py-2 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   showSavedOnly
-                    ? "bg-rose-500/15 border-rose-500/40 text-rose-300"
-                    : "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-slate-300"
+                    ? "bg-[#d89643]/15 border-[#d89643]/50 text-[#e5ad5e]"
+                    : "bg-[#121820] hover:bg-[#1a222d] border-[#e7d7bf]/[0.08] text-[#929ca8] hover:text-[#f2ede4]"
                 }`}
                 title="Ofertas Salvas"
                 aria-label="Ofertas Salvas"
               >
                 <Heart
                   size={15}
-                  className={showSavedOnly ? "fill-rose-400 text-rose-400" : ""}
+                  className={
+                    showSavedOnly ? "fill-[#e5ad5e] text-[#e5ad5e]" : ""
+                  }
                 />
                 {savedCount > 0 && (
                   <span className="text-[10px] font-bold">{savedCount}</span>
@@ -141,28 +133,24 @@ export default function Header({
               </button>
             )}
 
-            {/* Alertas (Ícone discreto) */}
             <button
               type="button"
               onClick={() => setIsNotificationModalOpen(true)}
-              className="relative p-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 border border-white/[0.08] transition-colors cursor-pointer"
+              className="relative p-2 rounded-full bg-[#121820] hover:bg-[#1a222d] text-[#929ca8] hover:text-[#f2ede4] border border-[#e7d7bf]/[0.08] transition-all cursor-pointer"
               aria-label="Ativar Alertas de Ofertas"
               title="Alertas de Ofertas"
             >
               <Bell
-                size={16}
-                className={
-                  notifPermission === "granted" ? "text-emerald-400" : ""
-                }
+                size={15}
+                className={notifPermission === "granted" ? "text-[#5ed3a2]" : ""}
               />
             </button>
 
-            {/* Grupo VIP WhatsApp */}
             <a
               href="https://chat.whatsapp.com/C1Ryp7KvesNEgmowEZu2TS"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold py-2 px-3 sm:px-3.5 rounded-full flex items-center gap-1.5 transition-colors"
+              className="bg-[#182e24] hover:bg-[#1f3d2f] text-[#7ae0ae] border border-[#2f9e75]/35 text-xs font-semibold py-2 px-3 sm:px-3.5 rounded-full flex items-center gap-1.5 transition-colors"
             >
               <MessageCircle size={14} className="shrink-0" />
               <span className="hidden sm:inline">Grupo VIP</span>
@@ -171,13 +159,13 @@ export default function Header({
           </div>
         </div>
 
-        {/* Busca Mobile Clean */}
+        {/* Busca Mobile */}
         {onSearchChange && (
           <div className="md:hidden px-4 pb-3">
             <div className="relative">
               <Search
-                size={15}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
+                size={14}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6e7885] pointer-events-none"
               />
               <input
                 type="text"
@@ -185,13 +173,13 @@ export default function Header({
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Buscar produto ou loja..."
                 aria-label="Buscar ofertas"
-                className="w-full bg-white/[0.05] border border-white/[0.08] focus:border-white/25 focus:outline-none text-xs text-white placeholder-slate-500 pl-9 pr-8 py-2 rounded-full"
+                className="w-full bg-[#121820] border border-[#e7d7bf]/[0.08] focus:border-[#d89643]/50 focus:outline-none text-xs text-[#f2ede4] placeholder-[#6e7885] pl-9 pr-8 py-2 rounded-full"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b95a3] hover:text-[#f2ede4]"
                   aria-label="Limpar busca"
                 >
                   <X size={14} />

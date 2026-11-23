@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownUp,
+  ArrowUpRight,
   ChevronDown,
   ShieldCheck,
   X,
@@ -26,7 +27,6 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
   const [showTrustInfo, setShowTrustInfo] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Sistema de Favoritos/Salvos em localStorage (Retenção na página)
   const [savedIds, setSavedIds] = useState([]);
   const [showSavedOnly, setShowSavedOnly] = useState(false);
 
@@ -103,7 +103,6 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
       if (sortBy === "menor-preco") {
         return (Number(a.precoAtual) || 0) - (Number(b.precoAtual) || 0);
       }
-      // Padrão: Mais recentes primeiro
       const timeA = a.criadoEm ? new Date(a.criadoEm).getTime() : 0;
       const timeB = b.criadoEm ? new Date(b.criadoEm).getTime() : 0;
       if (timeB !== timeA) return timeB - timeA;
@@ -142,7 +141,6 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
 
   return (
     <>
-      {/* Header Clean (Sem sub-barra poluída) */}
       <Header
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -153,10 +151,54 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
         onToggleSavedOnly={() => setShowSavedOnly((prev) => !prev)}
       />
 
-      <main className="flex-grow px-4 pt-5 pb-8 max-w-7xl w-full mx-auto">
-        {/* Barra Única e Clean de Filtros + Ordenação + Selo Discreto de Segurança */}
+      <main className="flex-grow px-4 pt-5 pb-10 max-w-7xl w-full mx-auto">
+        {/* Faixa Editorial de Estúdio (Ultra-Compacta, 100% alinhada ao banner do YouTube!) */}
+        <section
+          aria-label="Apresentação Sidão Dicas Ofertas"
+          className="relative overflow-hidden rounded-2xl border border-[#e7d7bf]/[0.09] bg-[#0e141c] mb-6 h-[104px] sm:h-[132px] flex items-center shadow-xl shadow-black/30"
+        >
+          {/* Imagem real do estúdio ancorada à direita */}
+          <div
+            className="absolute inset-0 bg-no-repeat bg-cover bg-right opacity-90 sm:opacity-100"
+            style={{ backgroundImage: "url('/studio-banner.jpg')" }}
+            aria-hidden="true"
+          />
+          {/* Gradiente cinematográfico suave para leitura limpa à esquerda */}
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-[#0d1218] via-[#0d1218]/90 sm:via-[#0d1218]/75 to-transparent"
+            aria-hidden="true"
+          />
+
+          <div className="relative z-10 px-5 sm:px-7 max-w-xl">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#e5ad5e]" />
+              <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-[#e5ad5e]">
+                Curadoria Oficial • Estúdio Sidão Dicas
+              </span>
+            </div>
+
+            <h1 className="text-base sm:text-2xl font-bold text-[#f2ede4] tracking-tight leading-snug">
+              Dicas e ofertas selecionadas pra você.
+            </h1>
+
+            <div className="hidden sm:flex items-center gap-3 mt-1.5 text-xs text-[#929ca8]">
+              <span>Preços auditados na Amazon, Mercado Livre e Shopee</span>
+              <span className="text-[#3e4856]">•</span>
+              <a
+                href="https://youtube.com/@SidãoDicasOfertas"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-0.5 text-[#e5ad5e] hover:text-[#f2c985] font-medium transition-colors"
+              >
+                <span>Canal no YouTube</span>
+                <ArrowUpRight size={12} />
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Barra Única e Clean de Filtros + Ordenação + Segurança Discreta */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
-          {/* Lojas + Categorias em uma única faixa limpa sem emojis exagerados */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
             {STORES.map((store) => {
               const active = selectedStore === store;
@@ -165,10 +207,10 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
                   key={store}
                   type="button"
                   onClick={() => setSelectedStore(store)}
-                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer shrink-0 ${
+                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap cursor-pointer shrink-0 border ${
                     active
-                      ? "bg-[#facc15] text-slate-950 font-bold"
-                      : "bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                      ? "bg-[#d89643] text-[#0b0f14] border-[#d89643] font-bold shadow-sm"
+                      : "bg-[#121820] text-[#b4bdc8] border-[#e7d7bf]/[0.07] hover:border-[#d89643]/35 hover:text-[#f2ede4]"
                   }`}
                 >
                   {store}
@@ -176,7 +218,7 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
               );
             })}
 
-            <span className="h-4 w-px bg-white/10 mx-1.5 shrink-0" />
+            <span className="h-4 w-px bg-[#e7d7bf]/10 mx-1.5 shrink-0" />
 
             {CATEGORIES.filter((c) => c !== "Todas").map((category) => {
               const active = selectedCategory === category;
@@ -189,8 +231,8 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
                   }
                   className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer shrink-0 ${
                     active
-                      ? "bg-white text-slate-950 font-semibold"
-                      : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
+                      ? "bg-[#f2ede4] text-[#0b0f14] font-semibold"
+                      : "text-[#8b95a3] hover:text-[#f2ede4] hover:bg-white/[0.04]"
                   }`}
                 >
                   {category}
@@ -199,14 +241,13 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
             })}
           </div>
 
-          {/* Ordenação + Selo de Segurança Minimalista */}
           <div className="flex items-center justify-between md:justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setShowTrustInfo((prev) => !prev)}
-              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#8b95a3] hover:text-[#e5ad5e] transition-colors cursor-pointer"
             >
-              <ShieldCheck size={14} className="text-emerald-400" />
+              <ShieldCheck size={14} className="text-[#5ed3a2]" />
               <span>Links 100% oficiais</span>
             </button>
 
@@ -215,7 +256,7 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="text-xs font-semibold text-[#facc15] hover:underline flex items-center gap-0.5 cursor-pointer"
+                  className="text-xs font-semibold text-[#e5ad5e] hover:underline flex items-center gap-0.5 cursor-pointer"
                 >
                   <X size={13} />
                   <span>Limpar</span>
@@ -225,21 +266,21 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
               <div className="relative flex items-center">
                 <ArrowDownUp
                   size={12}
-                  className="absolute left-2.5 text-slate-400 pointer-events-none"
+                  className="absolute left-2.5 text-[#8b95a3] pointer-events-none"
                 />
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   aria-label="Ordenar ofertas"
-                  className="bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-slate-200 pl-7 pr-3 py-1.5 rounded-full focus:outline-none focus:border-white/20 cursor-pointer"
+                  className="bg-[#121820] hover:bg-[#161e28] border border-[#e7d7bf]/[0.08] text-xs font-medium text-[#d5dce4] pl-7 pr-3 py-1.5 rounded-full focus:outline-none focus:border-[#d89643]/50 cursor-pointer"
                 >
-                  <option value="recentes" className="bg-slate-900">
+                  <option value="recentes" className="bg-[#121820]">
                     Mais recentes
                   </option>
-                  <option value="desconto" className="bg-slate-900">
+                  <option value="desconto" className="bg-[#121820]">
                     Maior desconto
                   </option>
-                  <option value="menor-preco" className="bg-slate-900">
+                  <option value="menor-preco" className="bg-[#121820]">
                     Menor preço
                   </option>
                 </select>
@@ -248,47 +289,49 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
           </div>
         </div>
 
-        {/* Popover Discreto de Segurança (Só aparece se clicar em "Links 100% oficiais") */}
+        {/* Popover Discreto de Segurança */}
         {showTrustInfo && (
-          <div className="mb-6 bg-[#111827] border border-white/10 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+          <div className="mb-6 bg-[#121820] border border-[#e7d7bf]/10 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#b4bdc8]">
             <div className="flex items-start sm:items-center gap-2.5">
-              <ShieldCheck size={18} className="text-emerald-400 shrink-0" />
+              <ShieldCheck size={18} className="text-[#5ed3a2] shrink-0" />
               <p>
-                <strong className="text-white">Compra Segura:</strong> O Sidão
-                Dicas não é uma loja e nunca pede seus dados. Você escolhe a
-                oferta aqui e finaliza a compra direto no site ou app oficial da{" "}
-                <strong className="text-white">Amazon</strong>,{" "}
-                <strong className="text-white">Mercado Livre</strong> ou{" "}
-                <strong className="text-white">Shopee</strong>.
+                <strong className="text-[#f2ede4]">Compra Segura:</strong> O
+                Sidão Dicas não é uma loja e nunca pede seus dados bancários.
+                Você escolhe a oferta selecionada aqui e finaliza direto no site
+                ou app oficial da{" "}
+                <strong className="text-[#f2ede4]">Amazon</strong>,{" "}
+                <strong className="text-[#f2ede4]">Mercado Livre</strong> ou{" "}
+                <strong className="text-[#f2ede4]">Shopee</strong>.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowTrustInfo(false)}
-              className="text-slate-400 hover:text-white font-semibold shrink-0 self-end sm:self-center cursor-pointer"
+              className="text-[#8b95a3] hover:text-[#f2ede4] font-semibold shrink-0 self-end sm:self-center cursor-pointer"
             >
               Entendi ✕
             </button>
           </div>
         )}
 
-        {/* Aviso quando visualizando apenas favoritos */}
+        {/* Aviso quando visualizando apenas salvos */}
         {showSavedOnly && (
-          <div className="mb-5 flex items-center justify-between bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-2.5 text-xs text-rose-200">
+          <div className="mb-5 flex items-center justify-between bg-[#d89643]/10 border border-[#d89643]/25 rounded-xl px-4 py-2.5 text-xs text-[#f2dec0]">
             <span>
-              Exibindo suas <strong>{sortedAndFilteredOffers.length} ofertas salvas</strong>.
+              Exibindo suas{" "}
+              <strong>{sortedAndFilteredOffers.length} ofertas salvas</strong>.
             </span>
             <button
               type="button"
               onClick={() => setShowSavedOnly(false)}
-              className="font-bold text-white hover:underline cursor-pointer"
+              className="font-bold text-[#f2ede4] hover:underline cursor-pointer"
             >
               Ver todas as ofertas
             </button>
           </div>
         )}
 
-        {/* VITRINE CLEAN DE PRODUTOS (Espaço para respirar!) */}
+        {/* VITRINE EDITORIAL DE PRODUTOS */}
         <section aria-label="Ofertas em Destaque">
           {visibleOffers.length > 0 ? (
             <>
@@ -303,33 +346,34 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
                 ))}
               </div>
 
-              {/* Paginação "Carregar mais ofertas" (+12 a cada clique) */}
               {hasMoreOffers && (
                 <div className="mt-10 flex flex-col items-center justify-center gap-2">
                   <button
                     type="button"
                     onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-                    className="bg-white/[0.05] hover:bg-white/[0.1] text-white border border-white/10 font-semibold text-xs sm:text-sm px-6 py-3 rounded-full inline-flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+                    className="bg-[#121820] hover:bg-[#19212c] text-[#f2ede4] border border-[#e7d7bf]/15 hover:border-[#d89643]/50 font-semibold text-xs sm:text-sm px-6 py-3 rounded-full inline-flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
                     <span>
-                      Carregar mais ofertas (+{Math.min(PAGE_SIZE, remainingCount)})
+                      Carregar mais ofertas (+
+                      {Math.min(PAGE_SIZE, remainingCount)})
                     </span>
-                    <ChevronDown size={15} className="text-[#facc15]" />
+                    <ChevronDown size={15} className="text-[#e5ad5e]" />
                   </button>
-                  <span className="text-[11px] text-slate-500">
-                    {visibleOffers.length} de {sortedAndFilteredOffers.length} ofertas
+                  <span className="text-[11px] text-[#6e7885]">
+                    {visibleOffers.length} de {sortedAndFilteredOffers.length}{" "}
+                    ofertas
                   </span>
                 </div>
               )}
             </>
           ) : (
-            <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-10 text-center max-w-md mx-auto my-8">
-              <p className="text-sm font-semibold text-white mb-1.5">
+            <div className="bg-[#121820] border border-[#e7d7bf]/[0.07] rounded-2xl p-10 text-center max-w-md mx-auto my-8">
+              <p className="text-sm font-semibold text-[#f2ede4] mb-1.5">
                 {showSavedOnly
                   ? "Você ainda não salvou nenhuma oferta"
                   : "Nenhuma oferta encontrada"}
               </p>
-              <p className="text-xs text-slate-400 mb-4">
+              <p className="text-xs text-[#8b95a3] mb-4">
                 {showSavedOnly
                   ? "Toque no coração em qualquer produto para guardar aqui."
                   : "Tente buscar outro termo ou limpar os filtros."}
@@ -337,7 +381,7 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="bg-[#facc15] hover:bg-yellow-300 text-slate-950 font-bold text-xs px-4 py-2 rounded-full transition-colors cursor-pointer"
+                className="bg-[#d89643] hover:bg-[#e5ad5e] text-[#0b0f14] font-bold text-xs px-4 py-2 rounded-full transition-colors cursor-pointer"
               >
                 Ver Todas as Ofertas
               </button>
@@ -346,7 +390,6 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
         </section>
       </main>
 
-      {/* Modal Clean de Cupons (Aberto pelo botão no Header — zero poluição na página!) */}
       <CouponsSection
         cupons={cupons}
         isOpen={isCouponsModalOpen}

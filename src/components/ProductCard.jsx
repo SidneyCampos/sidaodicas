@@ -5,15 +5,15 @@ import { ArrowUpRight, Check, Copy, Heart, Star } from "lucide-react";
 
 const STORE_ACCENT = {
   Amazon: {
-    dot: "bg-amber-400",
+    dot: "bg-[#d89643]",
     shortLabel: "Amazon",
   },
   "Mercado Livre": {
-    dot: "bg-yellow-300",
+    dot: "bg-[#e3c15f]",
     shortLabel: "Mercado Livre",
   },
   Shopee: {
-    dot: "bg-orange-500",
+    dot: "bg-[#d96c4a]",
     shortLabel: "Shopee",
   },
 };
@@ -107,7 +107,7 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
   );
 
   const storeStyle = STORE_ACCENT[loja] || {
-    dot: "bg-slate-400",
+    dot: "bg-[#8b95a3]",
     shortLabel: loja,
   };
 
@@ -136,17 +136,17 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
   };
 
   return (
-    <article className="bg-[#111827]/80 hover:bg-[#141c2f] rounded-2xl border border-white/[0.06] hover:border-white/[0.14] flex flex-col group transition-all duration-200 overflow-hidden">
-      {/* 1. Foto Limpa (Apenas 1 badge de desconto no canto + coração discreto de salvar) */}
+    <article className="bg-[#121820] hover:bg-[#151c26] rounded-2xl border border-[#e7d7bf]/[0.07] hover:border-[#d89643]/35 flex flex-col group transition-all duration-300 overflow-hidden shadow-lg shadow-black/25">
+      {/* 1. Moldura Fotográfica em Off-White Suave (Confortável no Dark Mode) */}
       <div className="relative p-2.5 pb-0">
         <a
           href={linkAfiliado}
           target="_blank"
           rel="noopener noreferrer"
-          className="relative w-full h-40 sm:h-48 bg-white rounded-xl overflow-hidden flex items-center justify-center p-4 block"
+          className="relative w-full h-40 sm:h-48 bg-[#faf9f6] rounded-xl overflow-hidden flex items-center justify-center p-4 block"
         >
           {descontoPercentual > 0 && (
-            <span className="absolute top-2.5 right-2.5 z-10 bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">
+            <span className="absolute top-2.5 right-2.5 z-10 bg-[#121820]/90 text-[#e5ad5e] border border-[#d89643]/35 text-[11px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm">
               -{descontoPercentual}%
             </span>
           )}
@@ -166,7 +166,6 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
           )}
         </a>
 
-        {/* Botão Discreto de Salvar Oferta (Retenção do usuário) */}
         {onToggleSave && (
           <button
             type="button"
@@ -178,29 +177,30 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
             title={isSaved ? "Salvo" : "Salvar para ver depois"}
             className={`absolute top-4 left-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
               isSaved
-                ? "bg-rose-500 text-white shadow-md"
-                : "bg-slate-900/65 text-white/80 hover:bg-slate-900 hover:text-white opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
+                ? "bg-[#d89643] text-[#0b0f14] shadow-md"
+                : "bg-[#121820]/65 text-[#f2ede4]/85 hover:bg-[#121820] hover:text-[#f2ede4] opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
             }`}
           >
-            <Heart size={14} className={isSaved ? "fill-white" : ""} />
+            <Heart size={14} className={isSaved ? "fill-[#0b0f14]" : ""} />
           </button>
         )}
       </div>
 
-      {/* 2. Conteúdo Enxuto e Respirado ("Trust Trio": Loja • Nota/Tempo • Preço) */}
+      {/* 2. Conteúdo Editorial Limpo */}
       <div className="p-3.5 sm:p-4 flex flex-col flex-grow justify-between gap-3">
         <div>
-          {/* Metadados silenciosos (Sem poluição visual!) */}
-          <div className="flex items-center justify-between gap-2 text-[11px] text-slate-400 mb-1.5">
+          <div className="flex items-center justify-between gap-2 text-[11px] text-[#8b95a3] mb-1.5">
             <span className="inline-flex items-center gap-1.5 font-medium truncate">
-              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${storeStyle.dot}`} />
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${storeStyle.dot}`}
+              />
               <span className="truncate">{storeStyle.shortLabel}</span>
             </span>
 
-            <span className="inline-flex items-center gap-1.5 text-slate-500 shrink-0">
+            <span className="inline-flex items-center gap-1.5 text-[#6e7885] shrink-0">
               {nota && (
-                <span className="inline-flex items-center gap-0.5 text-slate-400 font-medium">
-                  <Star size={10} className="fill-amber-400 text-amber-400" />
+                <span className="inline-flex items-center gap-0.5 text-[#b4bdc8] font-medium">
+                  <Star size={10} className="fill-[#d89643] text-[#d89643]" />
                   {nota}
                 </span>
               )}
@@ -208,60 +208,59 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
             </span>
           </div>
 
-          {/* Título Limpo */}
           <a
             href={linkAfiliado}
             target="_blank"
             rel="noopener noreferrer"
             className="block"
           >
-            <h3 className="text-slate-100 font-semibold text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors">
+            <h3 className="text-[#e8e2d7] font-medium text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors">
               {product.titulo}
             </h3>
           </a>
         </div>
 
-        {/* 3. Hierarquia de Preço Única + Cupom Discreto + CTA Coeso */}
+        {/* 3. Preço + Cupom Discreto + CTA em Âmbar Quente no Hover */}
         <div className="space-y-2.5 pt-1">
           <div>
             {precoAntigo > precoAtual && (
-              <span className="block text-slate-500 text-[11px] sm:text-xs line-through">
+              <span className="block text-[#6e7885] text-[11px] sm:text-xs line-through">
                 {formatPrice(precoAntigo)}
               </span>
             )}
-            <span className="text-lg sm:text-2xl font-extrabold text-white tracking-tight leading-none">
+            <span className="text-lg sm:text-2xl font-bold text-[#f7f3ec] tracking-tight leading-none">
               {formatPrice(precoAtual)}
             </span>
           </div>
 
-          {/* Mini chip discreto de cupom (somente se existir) */}
           {cupomOpcional && (
             <button
               type="button"
               onClick={handleCopyCoupon}
-              className={`w-full px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold flex items-center justify-between gap-1.5 transition-colors cursor-pointer ${
+              className={`w-full px-2.5 py-1.5 rounded-lg border text-[11px] font-medium flex items-center justify-between gap-1.5 transition-colors cursor-pointer ${
                 couponCopied
-                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                  : "bg-white/[0.03] hover:bg-white/[0.07] border-dashed border-white/15 text-slate-300"
+                  ? "bg-[#182e24] border-[#2f9e75]/45 text-[#7ae0ae]"
+                  : "bg-[#0d1218]/70 hover:bg-[#1a222d] border-dashed border-[#d89643]/35 text-[#e5ad5e]"
               }`}
             >
               <span className="truncate font-mono">
-                {couponCopied ? `Copiado: ${cupomOpcional}` : `Cupom: ${cupomOpcional}`}
+                {couponCopied
+                  ? `Copiado: ${cupomOpcional}`
+                  : `Cupom: ${cupomOpcional}`}
               </span>
               {couponCopied ? (
-                <Check size={12} className="shrink-0 text-emerald-400" />
+                <Check size={12} className="shrink-0 text-[#7ae0ae]" />
               ) : (
-                <Copy size={11} className="shrink-0 text-slate-400" />
+                <Copy size={11} className="shrink-0 text-[#d89643]" />
               )}
             </button>
           )}
 
-          {/* CTA Unificado e Elegante (Acende em Amarelo Sidão no hover) */}
           <a
             href={linkAfiliado}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-2.5 px-3 rounded-xl bg-white/[0.07] hover:bg-[#facc15] text-white hover:text-slate-950 border border-white/[0.08] hover:border-[#facc15] font-bold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all active:scale-[0.98]"
+            className="w-full py-2.5 px-3 rounded-xl bg-[#1b222c] hover:bg-[#d89643] text-[#f2ede4] hover:text-[#0b0f14] border border-[#e7d7bf]/[0.08] hover:border-[#d89643] font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all active:scale-[0.98]"
           >
             <span>Ir para {storeStyle.shortLabel}</span>
             <ArrowUpRight size={14} className="shrink-0" />

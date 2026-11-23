@@ -1,8 +1,8 @@
 {
   "id": "/?source=pwa",
-  "name": "Sidão Dicas",
+  "name": "Sidão Dicas Ofertas",
   "short_name": "Sidão Dicas",
-  "description": "Portal de ofertas e produtos selecionados.",
+  "description": "Dicas e ofertas dos melhores produtos selecionados pra você.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -12,8 +12,8 @@
     "standalone",
     "minimal-ui"
   ],
-  "background_color": "#0f172a",
-  "theme_color": "#FFEA00",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
   "orientation": "portrait",
   "dir": "ltr",
   "lang": "pt-BR",
