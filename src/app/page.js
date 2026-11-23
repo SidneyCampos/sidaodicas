@@ -2,6 +2,7 @@ import React from "react";
 import OffersShowcase from "../components/OffersShowcase";
 import Footer from "../components/Footer";
 import { readJsonData } from "../lib/adminStorage";
+import { getFreshCouponsForHome } from "../lib/couponAutoSync";
 
 export const dynamic = "force-dynamic";
 
@@ -21,13 +22,16 @@ export const metadata = {
 export default async function Home() {
   const [ofertas, cupons] = await Promise.all([
     readJsonData("ofertas.json"),
-    readJsonData("cupons.json"),
+    getFreshCouponsForHome(),
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#080d1a] text-white font-sans">
-      {/* Header Unificado + Barra de Cupons Retrátil + Vitrine Imediata de Produtos */}
-      <OffersShowcase ofertas={ofertas} cupons={cupons} />
+    <div className="min-h-screen flex flex-col bg-[#090d16] text-white font-sans">
+      {/* Vitrine Clean com Header Unificado, Filtros Minimalistas e Modal de Cupons */}
+      <OffersShowcase
+        ofertas={Array.isArray(ofertas) ? ofertas : []}
+        cupons={Array.isArray(cupons) ? cupons : []}
+      />
 
       {/* Rodapé Resumido com Segurança, Afiliados e Redes Sociais */}
       <Footer />

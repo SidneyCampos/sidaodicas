@@ -97,9 +97,17 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
   const [imagePreviewError, setImagePreviewError] = useState(false);
   const lastExtractedUrlRef = useRef("");
 
-  // Estado do formulário de Cupom
+  // Estado do formulário de Cupom + Automação de Cupons
   const [couponForm, setCouponForm] = useState(INITIAL_COUPON_FORM);
   const [isSavingCoupon, setIsSavingCoupon] = useState(false);
+  const [isSyncingCoupons, setIsSyncingCoupons] = useState(false);
+  const [affiliateConfig, setAffiliateConfig] = useState({
+    Amazon: "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "Mercado Livre": "https://www.mercadolivre.com.br/social/casi3341967",
+    Shopee: "https://shopee.com.br/m/cupons-diarios",
+    autoSyncEnabled: true,
+    lastAutoSyncAt: null,
+  });
 
   // Estado da lista de Ofertas Ativas & Modal de Kit WhatsApp
   const [adminSearch, setAdminSearch] = useState("");
@@ -117,9 +125,10 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      const [resOfertas, resCupons] = await Promise.all([
+      const [resOfertas, resCupons, resConfig] = await Promise.all([
         fetch("/api/admin/ofertas"),
         fetch("/api/admin/cupons"),
+        fetch("/api/admin/cupons/sync"),
       ]);
 
       if (resOfertas.status === 401 || resCupons.status === 401) {
@@ -129,9 +138,11 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
 
       const dataOfertas = await resOfertas.json();
       const dataCupons = await resCupons.json();
+      const dataConfig = resConfig.ok ? await resConfig.json() : {};
 
       if (dataOfertas.ofertas) setOfertas(dataOfertas.ofertas);
       if (dataCupons.cupons) setCupons(dataCupons.cupons);
+      if (dataConfig.config) setAffiliateConfig(dataConfig.config);
     } catch (error) {
       console.error("Erro ao carregar dados no painel admin:", error);
       showMessage("error", "Falha ao carregar as ofertas e cupons.");
@@ -451,6 +462,32 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       }
     } catch {
       showMessage("error", "Falha ao remover cupom.");
+    }
+  };
+
+  const handleSyncCouponsAuto = async (onlySaveConfig = false) => {
+    setIsSyncingCoupons(true);
+    setFeedback(null);
+    try {
+      const response = await fetch("/api/admin/cupons/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          config: affiliateConfig,
+          onlySaveConfig,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Falha ao sincronizar cupons.");
+      }
+      if (data.cupons) setCupons(data.cupons);
+      if (data.config) setAffiliateConfig(data.config);
+      showMessage("success", data.message);
+    } catch (err) {
+      showMessage("error", err.message || "Erro na sincronização automática.");
+    } finally {
+      setIsSyncingCoupons(false);
     }
   };
 
@@ -1239,10 +1276,124 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
         )}
 
         {/* ===================================================================
-            ABA B: 🎟️ GERENCIAR CUPONS
+            ABA B: 🎟️ GERENCIAR CUPONS (COM SINCRONIZAÇÃO AUTOMÁTICA!)
         =================================================================== */}
         {activeTab === "cupons" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="space-y-6">
+            {/* Painel de Automação de Cupons (1 Clique + Links Padrão do Afiliado) */}
+            <section className="bg-gradient-to-r from-slate-900 via-[#0f172a] to-slate-900 border border-[#FFE600]/40 rounded-2xl p-5 shadow-xl">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-800">
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                    <Sparkles size={18} className="text-[#FFE600]" />
+                    <span>🤖 Automação de Cupons (24h automático no site)</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    O site busca automaticamente cupons ativos de Amazon, Mercado Livre e Shopee e coloca <strong>os seus links de afiliado</strong> neles. Configure seus 3 links abaixo uma única vez!
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleSyncCouponsAuto(false)}
+                  disabled={isSyncingCoupons}
+                  className="bg-[#FFE600] hover:bg-yellow-300 disabled:opacity-60 text-slate-950 font-black text-xs sm:text-sm px-5 py-3 rounded-xl flex items-center justify-center gap-2 shrink-0 shadow-lg transition-all active:scale-95 cursor-pointer"
+                >
+                  {isSyncingCoupons ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Buscando cupons ativos...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 size={16} />
+                      <span>🤖 Atualizar Cupons Automaticamente Agora</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-amber-300 mb-1">
+                    Seu Link Padrão Amazon
+                  </label>
+                  <input
+                    type="url"
+                    value={affiliateConfig.Amazon || ""}
+                    onChange={(e) =>
+                      setAffiliateConfig({
+                        ...affiliateConfig,
+                        Amazon: e.target.value,
+                      })
+                    }
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-yellow-300 mb-1">
+                    Seu Link Padrão Mercado Livre
+                  </label>
+                  <input
+                    type="url"
+                    value={affiliateConfig["Mercado Livre"] || ""}
+                    onChange={(e) =>
+                      setAffiliateConfig({
+                        ...affiliateConfig,
+                        "Mercado Livre": e.target.value,
+                      })
+                    }
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-orange-300 mb-1">
+                    Seu Link Padrão Shopee
+                  </label>
+                  <input
+                    type="url"
+                    value={affiliateConfig.Shopee || ""}
+                    onChange={(e) =>
+                      setAffiliateConfig({
+                        ...affiliateConfig,
+                        Shopee: e.target.value,
+                      })
+                    }
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+                <label className="inline-flex items-center gap-2 cursor-pointer text-slate-300 font-semibold">
+                  <input
+                    type="checkbox"
+                    checked={affiliateConfig.autoSyncEnabled !== false}
+                    onChange={(e) =>
+                      setAffiliateConfig({
+                        ...affiliateConfig,
+                        autoSyncEnabled: e.target.checked,
+                      })
+                    }
+                    className="accent-[#FFE600] w-4 h-4"
+                  />
+                  <span>Manter cupons atualizados automaticamente no site (a cada 2h)</span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => handleSyncCouponsAuto(true)}
+                  disabled={isSyncingCoupons}
+                  className="text-xs font-bold text-[#FFE600] hover:underline cursor-pointer"
+                >
+                  Salvar apenas meus links padrão
+                </button>
+              </div>
+            </section>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <section className="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl self-start">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
                 <h2 className="text-base sm:text-lg font-black text-white">
@@ -1427,11 +1578,12 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
 
                 {cupons.length === 0 && (
                   <p className="text-sm text-slate-400 text-center py-8">
-                    Nenhum cupom ativo no momento.
+                    Nenhum cupom ativo no momento. Clique em &quot;Atualizar Cupons Automaticamente Agora&quot; acima!
                   </p>
                 )}
               </div>
             </section>
+            </div>
           </div>
         )}
 

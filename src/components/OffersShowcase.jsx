@@ -2,43 +2,70 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  ArrowDownUp,
   ChevronDown,
-  LayoutGrid,
-  Rows3,
+  ShieldCheck,
   X,
-  Zap,
 } from "lucide-react";
 import Header from "./Header";
-import ProductCard from "./ProductCard";
+import ProductCard, { calculateDiscountPercentage } from "./ProductCard";
 import CouponsSection from "./CouponsSection";
 
 const PAGE_SIZE = 12;
+const SAVED_STORAGE_KEY = "sidao_saved_offers";
 
-const STORES = [
-  { id: "Todas", label: "🔥 Todas", activeClass: "bg-[#FFE600] text-slate-950 border-[#FFE600]" },
-  { id: "Amazon", label: "📦 Amazon", activeClass: "bg-[#FF9900] text-slate-950 border-[#FF9900]" },
-  { id: "Mercado Livre", label: "🤝 Mercado Livre", activeClass: "bg-[#FFE600] text-slate-950 border-[#FFE600]" },
-  { id: "Shopee", label: "🛍️ Shopee", activeClass: "bg-[#EE4D2D] text-white border-[#EE4D2D]" },
-];
-
+const STORES = ["Todas", "Amazon", "Mercado Livre", "Shopee"];
 const CATEGORIES = ["Todas", "Mais Vendidos", "Eletrônicos", "Games", "Casa"];
 
 export default function OffersShowcase({ ofertas = [], cupons = [] }) {
   const [selectedStore, setSelectedStore] = useState("Todas");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
+  const [sortBy, setSortBy] = useState("recentes");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isCouponsOpen, setIsCouponsOpen] = useState(false);
-  const [mobileTwoCols, setMobileTwoCols] = useState(true);
+  const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
+  const [showTrustInfo, setShowTrustInfo] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Reseta a paginação para 12 itens sempre que o usuário mudar filtro ou busca
+  // Sistema de Favoritos/Salvos em localStorage (Retenção na página)
+  const [savedIds, setSavedIds] = useState([]);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SAVED_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setSavedIds(parsed);
+      }
+    } catch {
+      // ignora
+    }
+  }, []);
+
+  const toggleSaveOffer = (id) => {
+    setSavedIds((prev) => {
+      const next = prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id];
+      try {
+        localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // ignora
+      }
+      return next;
+    });
+  };
+
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [selectedStore, selectedCategory, searchQuery]);
+  }, [selectedStore, selectedCategory, searchQuery, sortBy, showSavedOnly]);
 
-  // Filtra e ordena da oferta mais recente para a mais antiga
   const sortedAndFilteredOffers = useMemo(() => {
     const filtered = ofertas.filter((item) => {
+      if (showSavedOnly && !savedIds.includes(item.id)) {
+        return false;
+      }
+
       const matchesStore =
         selectedStore === "Todas" ||
         (item.loja && item.loja.toLowerCase() === selectedStore.toLowerCase());
@@ -60,14 +87,37 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
     });
 
     return [...filtered].sort((a, b) => {
+      if (sortBy === "desconto") {
+        const discA = calculateDiscountPercentage(
+          a.precoAntigo,
+          a.precoAtual,
+          a.descontoPercentual
+        );
+        const discB = calculateDiscountPercentage(
+          b.precoAntigo,
+          b.precoAtual,
+          b.descontoPercentual
+        );
+        return discB - discA;
+      }
+      if (sortBy === "menor-preco") {
+        return (Number(a.precoAtual) || 0) - (Number(b.precoAtual) || 0);
+      }
+      // Padrão: Mais recentes primeiro
       const timeA = a.criadoEm ? new Date(a.criadoEm).getTime() : 0;
       const timeB = b.criadoEm ? new Date(b.criadoEm).getTime() : 0;
-      if (timeB !== timeA) {
-        return timeB - timeA;
-      }
+      if (timeB !== timeA) return timeB - timeA;
       return (Number(b.id) || 0) - (Number(a.id) || 0);
     });
-  }, [ofertas, selectedStore, selectedCategory, searchQuery]);
+  }, [
+    ofertas,
+    selectedStore,
+    selectedCategory,
+    searchQuery,
+    sortBy,
+    showSavedOnly,
+    savedIds,
+  ]);
 
   const visibleOffers = useMemo(() => {
     return sortedAndFilteredOffers.slice(0, visibleCount);
@@ -76,54 +126,58 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
   const hasMoreOffers = visibleCount < sortedAndFilteredOffers.length;
   const remainingCount = sortedAndFilteredOffers.length - visibleCount;
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + PAGE_SIZE);
-  };
+  const hasActiveFilters =
+    selectedStore !== "Todas" ||
+    selectedCategory !== "Todas" ||
+    searchQuery.trim() !== "" ||
+    showSavedOnly;
 
   const clearFilters = () => {
     setSelectedStore("Todas");
     setSelectedCategory("Todas");
     setSearchQuery("");
+    setShowSavedOnly(false);
     setVisibleCount(PAGE_SIZE);
   };
 
   return (
     <>
-      {/* Header Unificado Estilo Marketplace (Busca + Segurança + Botão de Cupons + VIP) */}
+      {/* Header Clean (Sem sub-barra poluída) */}
       <Header
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         cuponsCount={cupons.length}
-        isCouponsOpen={isCouponsOpen}
-        onToggleCoupons={() => setIsCouponsOpen((prev) => !prev)}
+        onOpenCoupons={() => setIsCouponsModalOpen(true)}
+        savedCount={savedIds.length}
+        showSavedOnly={showSavedOnly}
+        onToggleSavedOnly={() => setShowSavedOnly((prev) => !prev)}
       />
 
-      <main className="flex-grow px-3 sm:px-4 pt-3 sm:pt-5 max-w-7xl w-full mx-auto">
-        {/* Barra de Filtros Rápidos Horizontal (1 Linha no Mobile igual App Shopee/Meli) */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 mb-3">
-          {/* Lojas Oficiais */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+      <main className="flex-grow px-4 pt-5 pb-8 max-w-7xl w-full mx-auto">
+        {/* Barra Única e Clean de Filtros + Ordenação + Selo Discreto de Segurança */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+          {/* Lojas + Categorias em uma única faixa limpa sem emojis exagerados */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
             {STORES.map((store) => {
-              const active = selectedStore === store.id;
+              const active = selectedStore === store;
               return (
                 <button
-                  key={store.id}
+                  key={store}
                   type="button"
-                  onClick={() => setSelectedStore(store.id)}
-                  className={`text-xs font-extrabold px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                  onClick={() => setSelectedStore(store)}
+                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer shrink-0 ${
                     active
-                      ? `${store.activeClass} shadow-sm`
-                      : "bg-slate-900/90 border-slate-800 text-slate-300 hover:border-slate-600 hover:text-white"
+                      ? "bg-[#facc15] text-slate-950 font-bold"
+                      : "bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:text-white"
                   }`}
                 >
-                  {store.label}
+                  {store}
                 </button>
               );
             })}
 
-            <span className="text-slate-700 mx-1 hidden sm:inline">|</span>
+            <span className="h-4 w-px bg-white/10 mx-1.5 shrink-0" />
 
-            {/* Categorias na mesma faixa rolável no mobile */}
             {CATEGORIES.filter((c) => c !== "Todas").map((category) => {
               const active = selectedCategory === category;
               return (
@@ -133,10 +187,10 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
                   onClick={() =>
                     setSelectedCategory(active ? "Todas" : category)
                   }
-                  className={`text-xs font-bold px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                  className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer shrink-0 ${
                     active
-                      ? "bg-yellow-400/20 border-yellow-400 text-yellow-300"
-                      : "bg-slate-900/60 border-slate-800/90 text-slate-400 hover:text-slate-200"
+                      ? "bg-white text-slate-950 font-semibold"
+                      : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
                   }`}
                 >
                   {category}
@@ -145,94 +199,145 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
             })}
           </div>
 
-          {/* Controles Direitos: Status do Radar + Alternador de Grade Mobile */}
-          <div className="flex items-center justify-between lg:justify-end gap-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300">
-              <Zap size={14} className="text-[#FFE600] fill-[#FFE600]" />
-              <span>Radar de Ofertas em Tempo Real</span>
-              <span className="text-slate-500">({sortedAndFilteredOffers.length})</span>
-            </div>
+          {/* Ordenação + Selo de Segurança Minimalista */}
+          <div className="flex items-center justify-between md:justify-end gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowTrustInfo((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+            >
+              <ShieldCheck size={14} className="text-emerald-400" />
+              <span>Links 100% oficiais</span>
+            </button>
 
-            <div className="flex items-center gap-1.5">
-              {(selectedStore !== "Todas" ||
-                selectedCategory !== "Todas" ||
-                searchQuery.trim() !== "") && (
+            <div className="flex items-center gap-2">
+              {hasActiveFilters && (
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="text-xs font-bold text-[#FFE600] hover:underline flex items-center gap-1 cursor-pointer mr-1"
+                  className="text-xs font-semibold text-[#facc15] hover:underline flex items-center gap-0.5 cursor-pointer"
                 >
                   <X size={13} />
                   <span>Limpar</span>
                 </button>
               )}
 
-              {/* Botão para alternar 2 colunas vs 1 coluna no celular */}
-              <button
-                type="button"
-                onClick={() => setMobileTwoCols((prev) => !prev)}
-                className="sm:hidden bg-slate-900 border border-slate-800 text-slate-300 p-1.5 rounded-lg flex items-center gap-1 text-[11px] font-bold"
-                title="Alternar visualização"
-              >
-                {mobileTwoCols ? <Rows3 size={14} /> : <LayoutGrid size={14} />}
-              </button>
+              <div className="relative flex items-center">
+                <ArrowDownUp
+                  size={12}
+                  className="absolute left-2.5 text-slate-400 pointer-events-none"
+                />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  aria-label="Ordenar ofertas"
+                  className="bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-slate-200 pl-7 pr-3 py-1.5 rounded-full focus:outline-none focus:border-white/20 cursor-pointer"
+                >
+                  <option value="recentes" className="bg-slate-900">
+                    Mais recentes
+                  </option>
+                  <option value="desconto" className="bg-slate-900">
+                    Maior desconto
+                  </option>
+                  <option value="menor-preco" className="bg-slate-900">
+                    Menor preço
+                  </option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Barra Opcional/Retrátil de Cupons (Fica fechada em 1 linha fina até clicar!) */}
-        <CouponsSection
-          cupons={cupons}
-          isOpenExternal={isCouponsOpen}
-          onToggleExternal={setIsCouponsOpen}
-        />
+        {/* Popover Discreto de Segurança (Só aparece se clicar em "Links 100% oficiais") */}
+        {showTrustInfo && (
+          <div className="mb-6 bg-[#111827] border border-white/10 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+            <div className="flex items-start sm:items-center gap-2.5">
+              <ShieldCheck size={18} className="text-emerald-400 shrink-0" />
+              <p>
+                <strong className="text-white">Compra Segura:</strong> O Sidão
+                Dicas não é uma loja e nunca pede seus dados. Você escolhe a
+                oferta aqui e finaliza a compra direto no site ou app oficial da{" "}
+                <strong className="text-white">Amazon</strong>,{" "}
+                <strong className="text-white">Mercado Livre</strong> ou{" "}
+                <strong className="text-white">Shopee</strong>.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowTrustInfo(false)}
+              className="text-slate-400 hover:text-white font-semibold shrink-0 self-end sm:self-center cursor-pointer"
+            >
+              Entendi ✕
+            </button>
+          </div>
+        )}
 
-        {/* VITRINE DE PRODUTOS IMEDIATA (Estilo Marketplace: 2 cols no mobile, 3 no tablet, 4 no desktop) */}
+        {/* Aviso quando visualizando apenas favoritos */}
+        {showSavedOnly && (
+          <div className="mb-5 flex items-center justify-between bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-2.5 text-xs text-rose-200">
+            <span>
+              Exibindo suas <strong>{sortedAndFilteredOffers.length} ofertas salvas</strong>.
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowSavedOnly(false)}
+              className="font-bold text-white hover:underline cursor-pointer"
+            >
+              Ver todas as ofertas
+            </button>
+          </div>
+        )}
+
+        {/* VITRINE CLEAN DE PRODUTOS (Espaço para respirar!) */}
         <section aria-label="Ofertas em Destaque">
           {visibleOffers.length > 0 ? (
             <>
-              <div
-                className={`grid ${
-                  mobileTwoCols ? "grid-cols-2" : "grid-cols-1"
-                } sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4`}
-              >
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
                 {visibleOffers.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isSaved={savedIds.includes(product.id)}
+                    onToggleSave={toggleSaveOffer}
+                  />
                 ))}
               </div>
 
-              {/* Botão de Paginação: Carregar mais ofertas (+12 a cada clique) */}
+              {/* Paginação "Carregar mais ofertas" (+12 a cada clique) */}
               {hasMoreOffers && (
-                <div className="mt-8 flex flex-col items-center justify-center gap-2">
+                <div className="mt-10 flex flex-col items-center justify-center gap-2">
                   <button
                     type="button"
-                    onClick={handleLoadMore}
-                    className="bg-slate-900 hover:bg-slate-800 text-white border border-yellow-400/50 hover:border-[#FFE600] font-black text-xs sm:text-sm px-6 py-3.5 rounded-2xl inline-flex items-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
+                    onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                    className="bg-white/[0.05] hover:bg-white/[0.1] text-white border border-white/10 font-semibold text-xs sm:text-sm px-6 py-3 rounded-full inline-flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
-                    <span>Carregar mais ofertas</span>
-                    <span className="bg-[#FFE600] text-slate-950 text-xs font-black px-2 py-0.5 rounded-full">
-                      +{Math.min(PAGE_SIZE, remainingCount)}
+                    <span>
+                      Carregar mais ofertas (+{Math.min(PAGE_SIZE, remainingCount)})
                     </span>
-                    <ChevronDown size={16} className="text-[#FFE600]" />
+                    <ChevronDown size={15} className="text-[#facc15]" />
                   </button>
-                  <span className="text-[11px] text-slate-400">
-                    Exibindo {visibleOffers.length} de {sortedAndFilteredOffers.length} ofertas verificadas
+                  <span className="text-[11px] text-slate-500">
+                    {visibleOffers.length} de {sortedAndFilteredOffers.length} ofertas
                   </span>
                 </div>
               )}
             </>
           ) : (
-            <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-8 text-center max-w-md mx-auto my-6">
-              <p className="text-base font-bold text-white mb-1.5">
-                Nenhuma oferta encontrada
+            <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-10 text-center max-w-md mx-auto my-8">
+              <p className="text-sm font-semibold text-white mb-1.5">
+                {showSavedOnly
+                  ? "Você ainda não salvou nenhuma oferta"
+                  : "Nenhuma oferta encontrada"}
               </p>
               <p className="text-xs text-slate-400 mb-4">
-                Tente buscar por outro termo ou limpar os filtros selecionados.
+                {showSavedOnly
+                  ? "Toque no coração em qualquer produto para guardar aqui."
+                  : "Tente buscar outro termo ou limpar os filtros."}
               </p>
               <button
                 type="button"
                 onClick={clearFilters}
-                className="bg-[#FFE600] hover:bg-yellow-300 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer"
+                className="bg-[#facc15] hover:bg-yellow-300 text-slate-950 font-bold text-xs px-4 py-2 rounded-full transition-colors cursor-pointer"
               >
                 Ver Todas as Ofertas
               </button>
@@ -240,6 +345,13 @@ export default function OffersShowcase({ ofertas = [], cupons = [] }) {
           )}
         </section>
       </main>
+
+      {/* Modal Clean de Cupons (Aberto pelo botão no Header — zero poluição na página!) */}
+      <CouponsSection
+        cupons={cupons}
+        isOpen={isCouponsModalOpen}
+        onClose={() => setIsCouponsModalOpen(false)}
+      />
     </>
   );
 }

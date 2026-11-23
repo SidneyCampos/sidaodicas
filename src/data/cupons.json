@@ -1,26 +1,92 @@
 [
   {
-    "id": 1,
+    "id": "auto-mercadolivre-OFFPRATECH",
     "loja": "Mercado Livre",
-    "codigo": "MELI30",
-    "descricao": "R$ 30 OFF em compras acima de R$ 299 em produtos selecionados",
-    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/ofertas",
-    "validade": "Válido hoje • Estoque limitado"
+    "codigo": "OFFPRATECH",
+    "descricao": "Mercado Livre: cupom de R$ 250 OFF em Eletrônicos",
+    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
+    "validade": "Válido até 23/11",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.615Z"
   },
   {
-    "id": 2,
+    "id": "auto-mercadolivre-BLACKDELUXO",
+    "loja": "Mercado Livre",
+    "codigo": "BLACKDELUXO",
+    "descricao": "Mercado Livre: cupom de 10% OFF em perfumes acima de R$500",
+    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.616Z"
+  },
+  {
+    "id": "auto-mercadolivre-DESCONTO",
+    "loja": "Mercado Livre",
+    "codigo": "DESCONTO",
+    "descricao": "Cupom Mercado Livre: 25% OFF acima de R$ 1 (até R$ 500) em Selecionados",
+    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
+    "validade": "Válido até 31/05",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.616Z"
+  },
+  {
+    "id": "auto-mercadolivre-GANHEDESCONTO",
+    "loja": "Mercado Livre",
+    "codigo": "GANHEDESCONTO",
+    "descricao": "Cupom Mercado Livre: 25% OFF acima de R$ 1 (até R$ 500) em Selecionados",
+    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
+    "validade": "Válido até 31/12",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.616Z"
+  },
+  {
+    "id": "auto-amazon-RELAMPAGO20",
     "loja": "Amazon",
-    "codigo": "AMAZON20",
-    "descricao": "R$ 20 OFF em Eletrônicos e Casa Inteligente vendidos pela Amazon",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals",
-    "validade": "Válido no App Oficial"
+    "codigo": "RELAMPAGO20",
+    "descricao": "Cupom de desconto Amazon: 20% OFF em todo o site",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.628Z"
   },
   {
-    "id": 3,
+    "id": "auto-shopee-V0UCH3R002AF",
     "loja": "Shopee",
-    "codigo": "SHOPEE15",
-    "descricao": "R$ 15 OFF + Cupom de Frete Grátis em lojas oficiais Shopee",
+    "codigo": "V0UCH3R002AF",
+    "descricao": "Economize R$ 40 em seus pedidos aplicando cupom Shopee",
     "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
-    "validade": "Ativo agora • Uso imediato"
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.440Z"
+  },
+  {
+    "id": "auto-shopee-C0M3C0U200",
+    "loja": "Shopee",
+    "codigo": "C0M3C0U200",
+    "descricao": "O momento chegou: Aplique cupom Shopee e ganhe R$ 200 OFF",
+    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.461Z"
+  },
+  {
+    "id": "auto-shopee-DESCONTO30AF",
+    "loja": "Shopee",
+    "codigo": "DESCONTO30AF",
+    "descricao": "Aplique cupom Shopee e ganhe R$ 30 OFF",
+    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.461Z"
+  },
+  {
+    "id": "auto-shopee-SHOPEE100AF",
+    "loja": "Shopee",
+    "codigo": "SHOPEE100AF",
+    "descricao": "Cupom Shopee concede desconto de R$100",
+    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "atualizadoEm": "2026-11-23T17:23:02.461Z"
   }
 ]

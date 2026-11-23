@@ -93,7 +93,7 @@ export async function readJsonData(filename) {
   if (process.env.GITHUB_TOKEN) {
     try {
       const gh = await fetchFromGitHub(githubPath);
-      if (gh && Array.isArray(gh.data)) {
+      if (gh && gh.data && typeof gh.data === "object") {
         return gh.data;
       }
     } catch (e) {
@@ -105,7 +105,7 @@ export async function readJsonData(filename) {
   try {
     const tmpRaw = await fs.readFile(tmpPath, "utf-8");
     const parsed = JSON.parse(tmpRaw);
-    if (Array.isArray(parsed)) return parsed;
+    if (parsed && typeof parsed === "object") return parsed;
   } catch {
     // Ignora se /tmp ainda não existir
   }

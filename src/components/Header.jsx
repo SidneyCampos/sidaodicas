@@ -2,18 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  ArrowRight,
   BadgeCheck,
   Bell,
-  CheckCircle2,
-  ExternalLink,
-  HelpCircle,
-  Lock,
+  Heart,
   MessageCircle,
   Search,
-  ShieldCheck,
-  Sparkles,
-  Store,
   Ticket,
   X,
   Zap,
@@ -23,21 +16,21 @@ import NotificationModal from "./NotificationModal";
 export default function Header({
   searchQuery = "",
   onSearchChange,
-  cuponsCount = 3,
-  isCouponsOpen = false,
-  onToggleCoupons,
+  cuponsCount = 0,
+  onOpenCoupons,
+  savedCount = 0,
+  showSavedOnly = false,
+  onToggleSavedOnly,
 }) {
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [notifPermission, setNotifPermission] = useState("default");
-  const [showTrustPopover, setShowTrustPopover] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       if ("Notification" in window) {
         setNotifPermission(Notification.permission);
       }
-      // Verifica silenciosamente se /avatar-sidao.png existe antes de exibir para nunca quebrar ícone
       const img = new window.Image();
       img.onload = () => setAvatarLoaded(true);
       img.onerror = () => setAvatarLoaded(false);
@@ -47,161 +40,158 @@ export default function Header({
 
   return (
     <>
-      <header className="sticky top-0 w-full bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800/90 z-50 shadow-lg shadow-black/40">
-        {/* Linha 1: Marca + Busca (Desktop) + Ações Rápidas */}
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
-          {/* Logo & Selo Oficial (Sem truncamento feio no mobile!) */}
+      <header className="sticky top-0 w-full bg-[#090d16]/90 backdrop-blur-xl border-b border-white/[0.06] z-40">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3 sm:gap-6">
+          {/* Identidade Limpa e Minimalista */}
           <a href="#" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="relative">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl p-0.5 bg-gradient-to-tr from-[#FFE600] via-[#FF9900] to-[#EE4D2D] shadow-md shadow-yellow-500/15">
-                {avatarLoaded ? (
-                  <img
-                    src="/avatar-sidao.png"
-                    alt="Sidão Dicas"
-                    className="w-full h-full rounded-[10px] object-cover bg-slate-950"
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-[10px] bg-slate-950 flex items-center justify-center text-[#FFE600]">
-                    <Zap size={20} fill="currentColor" />
-                  </div>
-                )}
-              </div>
-              <span
-                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[#0b1120] rounded-full"
-                title="Radar Online"
-              />
+            <div className="w-9 h-9 rounded-xl bg-white/[0.06] border border-white/10 p-0.5 flex items-center justify-center overflow-hidden">
+              {avatarLoaded ? (
+                <img
+                  src="/avatar-sidao.png"
+                  alt="Sidão Dicas"
+                  className="w-full h-full rounded-[9px] object-cover"
+                />
+              ) : (
+                <div className="w-full h-full rounded-[9px] bg-[#facc15] text-slate-950 flex items-center justify-center">
+                  <Zap size={18} fill="currentColor" />
+                </div>
+              )}
             </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1">
-                <span className="text-base sm:text-lg font-black text-white tracking-tight leading-none">
-                  Sidão <span className="text-[#FFE600]">Dicas</span>
-                </span>
-                <BadgeCheck
-                  size={15}
-                  className="text-emerald-400 shrink-0"
-                  title="Curadoria Oficial Verificada"
-                />
-              </div>
-              <span className="text-[10px] font-bold text-slate-400 leading-tight mt-0.5">
-                Radar Oficial de Ofertas
+            <div className="flex items-center gap-1.5">
+              <span className="text-base sm:text-lg font-extrabold text-white tracking-tight">
+                Sidão <span className="text-[#facc15]">Dicas</span>
               </span>
+              <BadgeCheck
+                size={15}
+                className="text-emerald-400 shrink-0"
+                title="Curadoria Oficial Verificada"
+              />
             </div>
           </a>
 
-          {/* Barra de Busca Integrada (Estilo Mercado Livre / Amazon / Shopee - Visível no Desktop na mesma linha) */}
+          {/* Busca Clean (Desktop) */}
           {onSearchChange && (
-            <div className="hidden md:flex flex-1 max-w-md lg:max-w-xl relative">
+            <div className="hidden md:flex flex-1 max-w-lg relative">
               <Search
-                size={17}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
               />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Buscar em Amazon, Mercado Livre e Shopee..."
+                placeholder="Buscar produto, loja ou cupom..."
                 aria-label="Buscar ofertas"
-                className="w-full bg-slate-900/95 border border-slate-700/90 focus:border-[#FFE600] focus:outline-none text-sm text-white placeholder-slate-400 pl-10 pr-8 py-2 rounded-xl transition-colors"
+                className="w-full bg-white/[0.04] hover:bg-white/[0.06] focus:bg-white/[0.08] border border-white/[0.08] focus:border-white/25 focus:outline-none text-sm text-white placeholder-slate-500 pl-10 pr-8 py-2 rounded-full transition-all"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
                   aria-label="Limpar busca"
                 >
-                  <X size={15} />
+                  <X size={14} />
                 </button>
               )}
             </div>
           )}
 
-          {/* Botões de Ação Compactos */}
+          {/* Ações Discretas e Organizadas (Sem competição de cores) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Botão Rápido de Cupons */}
-            {onToggleCoupons && (
+            {/* Botão Único de Cupons (Abre Modal Limpo) */}
+            {onOpenCoupons && (
               <button
                 type="button"
-                onClick={onToggleCoupons}
-                className={`text-xs font-extrabold py-2 px-2.5 sm:px-3 rounded-xl border flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
-                  isCouponsOpen
-                    ? "bg-[#FFE600] text-slate-950 border-[#FFE600]"
-                    : "bg-slate-900 hover:bg-slate-800 text-[#FFE600] border-yellow-400/35"
-                }`}
+                onClick={onOpenCoupons}
+                className="text-xs font-semibold py-2 px-3 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 border border-white/[0.08] flex items-center gap-1.5 transition-colors cursor-pointer"
                 title="Ver Cupons de Desconto Ativos"
               >
-                <Ticket size={15} />
-                <span className="hidden sm:inline">Cupons</span>
-                <span
-                  className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
-                    isCouponsOpen
-                      ? "bg-slate-950 text-[#FFE600]"
-                      : "bg-[#FFE600] text-slate-950"
-                  }`}
-                >
-                  {cuponsCount}
-                </span>
+                <Ticket size={14} className="text-[#facc15]" />
+                <span>Cupons</span>
+                {cuponsCount > 0 && (
+                  <span className="text-[10px] font-bold bg-[#facc15] text-slate-950 px-1.5 py-0.2 rounded-full">
+                    {cuponsCount}
+                  </span>
+                )}
               </button>
             )}
 
-            {/* Botão Alertas (Sem ícone duplicado!) */}
+            {/* Favoritos / Salvos (Aumenta permanência na página) */}
+            {onToggleSavedOnly && (
+              <button
+                type="button"
+                onClick={onToggleSavedOnly}
+                className={`relative p-2 sm:px-3 sm:py-2 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  showSavedOnly
+                    ? "bg-rose-500/15 border-rose-500/40 text-rose-300"
+                    : "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-slate-300"
+                }`}
+                title="Ofertas Salvas"
+                aria-label="Ofertas Salvas"
+              >
+                <Heart
+                  size={15}
+                  className={showSavedOnly ? "fill-rose-400 text-rose-400" : ""}
+                />
+                {savedCount > 0 && (
+                  <span className="text-[10px] font-bold">{savedCount}</span>
+                )}
+              </button>
+            )}
+
+            {/* Alertas (Ícone discreto) */}
             <button
               type="button"
               onClick={() => setIsNotificationModalOpen(true)}
-              className="relative bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/90 hover:border-yellow-400/50 text-xs font-bold py-2 px-2.5 sm:px-3 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+              className="relative p-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 border border-white/[0.08] transition-colors cursor-pointer"
               aria-label="Ativar Alertas de Ofertas"
-              title="Ativar Alertas de Ofertas"
+              title="Alertas de Ofertas"
             >
               <Bell
                 size={16}
                 className={
-                  notifPermission === "granted"
-                    ? "text-emerald-400"
-                    : "text-[#FFE600]"
+                  notifPermission === "granted" ? "text-emerald-400" : ""
                 }
               />
-              <span className="hidden sm:inline">Alertas</span>
-              {notifPermission !== "granted" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FFE600] animate-ping" />
-              )}
             </button>
 
-            {/* Botão Grupo VIP WhatsApp */}
+            {/* Grupo VIP WhatsApp */}
             <a
               href="https://chat.whatsapp.com/C1Ryp7KvesNEgmowEZu2TS"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#25D366] hover:bg-[#1fae54] text-slate-950 text-xs font-black py-2 px-3 sm:px-3.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 shadow-md shadow-green-950/40"
+              className="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold py-2 px-3 sm:px-3.5 rounded-full flex items-center gap-1.5 transition-colors"
             >
-              <MessageCircle size={15} className="fill-slate-950 shrink-0" />
-              <span>VIP</span>
-              <span className="hidden lg:inline">WhatsApp</span>
+              <MessageCircle size={14} className="shrink-0" />
+              <span className="hidden sm:inline">Grupo VIP</span>
+              <span className="sm:hidden">VIP</span>
             </a>
           </div>
         </div>
 
-        {/* Linha 2 (Apenas Mobile): Busca Rápida Estilo App Shopee/Mercado Livre */}
+        {/* Busca Mobile Clean */}
         {onSearchChange && (
-          <div className="md:hidden px-3 pb-2">
+          <div className="md:hidden px-4 pb-3">
             <div className="relative">
               <Search
                 size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
               />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Buscar produto, oferta ou cupom..."
+                placeholder="Buscar produto ou loja..."
                 aria-label="Buscar ofertas"
-                className="w-full bg-slate-900 border border-slate-700/80 focus:border-[#FFE600] focus:outline-none text-xs text-white placeholder-slate-400 pl-8 pr-8 py-2 rounded-lg"
+                className="w-full bg-white/[0.05] border border-white/[0.08] focus:border-white/25 focus:outline-none text-xs text-white placeholder-slate-500 pl-9 pr-8 py-2 rounded-full"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                   aria-label="Limpar busca"
                 >
                   <X size={14} />
@@ -210,93 +200,6 @@ export default function Header({
             </div>
           </div>
         )}
-
-        {/* Micro-Barra Visual Lúdica de Segurança (1 Linha Ultra-Compacta, Zero Textão!) */}
-        <div className="bg-slate-950/90 border-t border-slate-800/80">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 text-[11px]">
-            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
-              <span className="inline-flex items-center gap-1 font-extrabold text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                <ShieldCheck size={12} />
-                <span>Rota 100% Segura</span>
-              </span>
-
-              <span className="text-slate-400 hidden sm:inline">•</span>
-
-              {/* Fluxo visual criativo em vez de parágrafo longo */}
-              <div className="inline-flex items-center gap-1 text-slate-300 font-medium">
-                <span>Escolha a oferta</span>
-                <ArrowRight size={11} className="text-yellow-400 shrink-0" />
-                <span>Compre direto na</span>
-                <span className="font-black text-[#FF9900]">Amazon</span>,
-                <span className="font-black text-[#FFE600]">Meli</span>
-                <span>ou</span>
-                <span className="font-black text-[#ff6b4a]">Shopee</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowTrustPopover((prev) => !prev)}
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-yellow-400 shrink-0 cursor-pointer transition-colors"
-            >
-              <HelpCircle size={12} />
-              <span className="underline decoration-dotted">Segurança</span>
-            </button>
-          </div>
-
-          {/* Mini Popover Visual e Criativo (Só abre se o usuário clicar em "Segurança") */}
-          {showTrustPopover && (
-            <div className="bg-slate-900 border-t border-slate-800 px-4 py-3 animate-fade-in">
-              <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 flex-1 w-full text-xs">
-                  <div className="bg-slate-950/80 border border-slate-800 rounded-lg p-2.5 flex items-center gap-2.5">
-                    <span className="w-7 h-7 rounded-lg bg-yellow-400/15 text-yellow-400 flex items-center justify-center font-black shrink-0">
-                      1
-                    </span>
-                    <div>
-                      <strong className="text-white block">Radar de Preços</strong>
-                      <span className="text-slate-400 text-[11px]">
-                        Filtramos apenas descontos reais.
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950/80 border border-slate-800 rounded-lg p-2.5 flex items-center gap-2.5">
-                    <span className="w-7 h-7 rounded-lg bg-emerald-400/15 text-emerald-400 flex items-center justify-center font-black shrink-0">
-                      2
-                    </span>
-                    <div>
-                      <strong className="text-white block">Zero Dados Aqui</strong>
-                      <span className="text-slate-400 text-[11px]">
-                        Não somos loja e não pedimos senha/cartão.
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950/80 border border-slate-800 rounded-lg p-2.5 flex items-center gap-2.5">
-                    <span className="w-7 h-7 rounded-lg bg-blue-400/15 text-blue-400 flex items-center justify-center font-black shrink-0">
-                      3
-                    </span>
-                    <div>
-                      <strong className="text-white block">App Oficial</strong>
-                      <span className="text-slate-400 text-[11px]">
-                        Você finaliza na Amazon, Meli ou Shopee.
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowTrustPopover(false)}
-                  className="text-xs font-bold text-slate-400 hover:text-white px-2 py-1 self-end sm:self-center cursor-pointer"
-                >
-                  Fechar ✕
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
       </header>
 
       <NotificationModal

@@ -1,105 +1,104 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Clock, Copy, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, Check, Copy, Heart, Star } from "lucide-react";
 
-const STORE_CONFIG = {
+const STORE_ACCENT = {
   Amazon: {
-    badgeLabel: "Vendido na Amazon",
+    dot: "bg-amber-400",
     shortLabel: "Amazon",
-    badgeClass: "bg-[#FF9900] text-slate-950",
-    borderHover: "hover:border-[#FF9900]/70",
-    ctaClass:
-      "bg-[#FF9900] hover:bg-[#e68a00] text-slate-950 shadow-amber-500/15",
   },
   "Mercado Livre": {
-    badgeLabel: "Oficial Mercado Livre",
+    dot: "bg-yellow-300",
     shortLabel: "Mercado Livre",
-    badgeClass: "bg-[#FFE600] text-slate-950",
-    borderHover: "hover:border-[#FFE600]/70",
-    ctaClass:
-      "bg-[#FFE600] hover:bg-[#f2da00] text-slate-950 shadow-yellow-400/15",
   },
   Shopee: {
-    badgeLabel: "Achado Shopee",
+    dot: "bg-orange-500",
     shortLabel: "Shopee",
-    badgeClass: "bg-[#EE4D2D] text-white",
-    borderHover: "hover:border-[#EE4D2D]/70",
-    ctaClass:
-      "bg-[#EE4D2D] hover:bg-[#d94122] text-white shadow-orange-500/20",
   },
 };
 
 export function formatRelativeVerifiedTime(criadoEm, fallbackText) {
   if (!criadoEm) {
-    return fallbackText || "Verificado hoje";
+    return fallbackText || "Hoje";
   }
 
   const parsed = new Date(criadoEm).getTime();
   if (Number.isNaN(parsed)) {
-    return fallbackText || "Verificado hoje";
+    return fallbackText || "Hoje";
   }
 
   const diffMs = Date.now() - parsed;
   if (diffMs < 0) {
-    return "Verificado agora";
+    return "Agora";
   }
 
   const diffMin = Math.floor(diffMs / 60000);
   if (diffMin < 2) {
-    return "Verificado agora";
+    return "Agora";
   }
   if (diffMin < 60) {
-    return `Verificado há ${diffMin} min`;
+    return `há ${diffMin} min`;
   }
 
   const diffHours = Math.floor(diffMin / 60);
   if (diffHours < 24) {
-    return `Verificado há ${diffHours}h`;
+    return `há ${diffHours}h`;
   }
 
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays === 1) {
-    return "Verificado ontem";
+    return "Ontem";
   }
 
-  return fallbackText || "Verificado hoje";
+  return "Hoje";
 }
 
-export function calculateDiscountPercentage(precoAntigo, precoAtual, manualPercent) {
+export function calculateDiscountPercentage(
+  precoAntigo,
+  precoAtual,
+  manualPercent
+) {
   const manual = Number(manualPercent);
   if (!Number.isNaN(manual) && manual > 0) {
     return Math.round(manual);
   }
   const oldVal = Number(precoAntigo);
   const newVal = Number(precoAtual);
-  if (!Number.isNaN(oldVal) && !Number.isNaN(newVal) && oldVal > newVal && oldVal > 0) {
+  if (
+    !Number.isNaN(oldVal) &&
+    !Number.isNaN(newVal) &&
+    oldVal > newVal &&
+    oldVal > 0
+  ) {
     return Math.round(((oldVal - newVal) / oldVal) * 100);
   }
   return 0;
 }
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, isSaved = false, onToggleSave }) {
   const [couponCopied, setCouponCopied] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const precoAntigo = Number(product.precoAntigo ?? product.precoOriginal ?? 0);
   const precoAtual = Number(product.precoAtual ?? product.precoDesconto ?? 0);
   const imagemUrl = product.imagemUrl ?? product.urlImagem ?? "";
   const loja = product.loja || "Amazon";
-  const destaqueTag = product.destaqueTag ?? product.tag ?? "Oferta do Dia";
-  const fallbackVerificado = product.verificadoEm || "Verificado hoje";
   const cupomOpcional = product.cupomOpcional || "";
   const linkAfiliado = product.linkAfiliado || "#";
+  const nota = product.nota || "";
 
   const [relativeTime, setRelativeTime] = useState(() =>
-    product.criadoEm ? formatRelativeVerifiedTime(product.criadoEm, fallbackVerificado) : fallbackVerificado
+    product.criadoEm
+      ? formatRelativeVerifiedTime(product.criadoEm, product.verificadoEm)
+      : "Hoje"
   );
 
   useEffect(() => {
     setRelativeTime(
-      formatRelativeVerifiedTime(product.criadoEm, fallbackVerificado)
+      formatRelativeVerifiedTime(product.criadoEm, product.verificadoEm)
     );
-  }, [product.criadoEm, fallbackVerificado]);
+  }, [product.criadoEm, product.verificadoEm]);
 
   const descontoPercentual = calculateDiscountPercentage(
     precoAntigo,
@@ -107,12 +106,9 @@ export default function ProductCard({ product }) {
     product.descontoPercentual
   );
 
-  const storeInfo = STORE_CONFIG[loja] || {
-    badgeLabel: `Oficial ${loja}`,
+  const storeStyle = STORE_ACCENT[loja] || {
+    dot: "bg-slate-400",
     shortLabel: loja,
-    badgeClass: "bg-[#FFE600] text-slate-950",
-    borderHover: "hover:border-yellow-400/60",
-    ctaClass: "bg-[#FFE600] hover:bg-yellow-300 text-slate-950",
   };
 
   const formatPrice = (price) => {
@@ -132,132 +128,143 @@ export default function ProductCard({ product }) {
         await navigator.clipboard.writeText(cupomOpcional);
       }
     } catch (err) {
-      console.warn("Erro ao copiar cupom do produto:", err);
+      console.warn("Erro ao copiar cupom:", err);
     }
 
     setCouponCopied(true);
-    setTimeout(() => setCouponCopied(false), 3000);
+    setTimeout(() => setCouponCopied(false), 2500);
   };
 
   return (
-    <article
-      className={`bg-slate-900/95 rounded-2xl overflow-hidden shadow-lg border border-slate-800 ${storeInfo.borderHover} flex flex-col group relative transition-all duration-200 hover:-translate-y-1`}
-    >
-      {/* Área da Foto com Fundo Branco Puro (Padrão Mercado Livre / Amazon) */}
-      <a
-        href={linkAfiliado}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative w-full h-40 sm:h-48 bg-white overflow-hidden flex items-center justify-center p-3 sm:p-4 block"
-      >
-        {/* Selo da Loja Oficial no Topo Esquerdo */}
-        <span
-          className={`absolute top-2 left-2 z-10 text-[10px] sm:text-[11px] font-black uppercase tracking-tight px-2 py-0.5 rounded-md shadow-sm ${storeInfo.badgeClass}`}
+    <article className="bg-[#111827]/80 hover:bg-[#141c2f] rounded-2xl border border-white/[0.06] hover:border-white/[0.14] flex flex-col group transition-all duration-200 overflow-hidden">
+      {/* 1. Foto Limpa (Apenas 1 badge de desconto no canto + coração discreto de salvar) */}
+      <div className="relative p-2.5 pb-0">
+        <a
+          href={linkAfiliado}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative w-full h-40 sm:h-48 bg-white rounded-xl overflow-hidden flex items-center justify-center p-4 block"
         >
-          <span className="sm:hidden">{storeInfo.shortLabel}</span>
-          <span className="hidden sm:inline">{storeInfo.badgeLabel}</span>
-        </span>
-
-        {/* Badge de % OFF no Topo Direito (Estilo Shopee / Meli) */}
-        {descontoPercentual > 0 && (
-          <span className="absolute top-2 right-2 z-10 bg-emerald-600 text-white text-[10px] sm:text-xs font-black px-2 py-0.5 rounded-md shadow-sm">
-            -{descontoPercentual}% OFF
-          </span>
-        )}
-
-        <img
-          src={imagemUrl}
-          alt={product.titulo}
-          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-        />
-      </a>
-
-      {/* Corpo do Card Enxuto e Focado em Conversão */}
-      <div className="p-3 sm:p-4 flex flex-col flex-grow justify-between gap-2">
-        <div>
-          {/* Linha de Destaque Tag + Tempo Relativo Dinâmico */}
-          <div className="flex items-center justify-between gap-1 mb-1.5">
-            <span className="text-[10px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-yellow-400/15 text-yellow-300 truncate">
-              {destaqueTag}
+          {descontoPercentual > 0 && (
+            <span className="absolute top-2.5 right-2.5 z-10 bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">
+              -{descontoPercentual}%
             </span>
-            <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-slate-400 shrink-0">
-              <Clock size={10} />
-              {relativeTime}
+          )}
+
+          {!imgError && imagemUrl ? (
+            <img
+              src={imagemUrl}
+              alt={product.titulo}
+              onError={() => setImgError(true)}
+              className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          ) : (
+            <span className="text-xs font-semibold text-slate-400">
+              {storeStyle.shortLabel}
+            </span>
+          )}
+        </a>
+
+        {/* Botão Discreto de Salvar Oferta (Retenção do usuário) */}
+        {onToggleSave && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onToggleSave(product.id);
+            }}
+            aria-label={isSaved ? "Remover dos salvos" : "Salvar oferta"}
+            title={isSaved ? "Salvo" : "Salvar para ver depois"}
+            className={`absolute top-4 left-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              isSaved
+                ? "bg-rose-500 text-white shadow-md"
+                : "bg-slate-900/65 text-white/80 hover:bg-slate-900 hover:text-white opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
+            }`}
+          >
+            <Heart size={14} className={isSaved ? "fill-white" : ""} />
+          </button>
+        )}
+      </div>
+
+      {/* 2. Conteúdo Enxuto e Respirado ("Trust Trio": Loja • Nota/Tempo • Preço) */}
+      <div className="p-3.5 sm:p-4 flex flex-col flex-grow justify-between gap-3">
+        <div>
+          {/* Metadados silenciosos (Sem poluição visual!) */}
+          <div className="flex items-center justify-between gap-2 text-[11px] text-slate-400 mb-1.5">
+            <span className="inline-flex items-center gap-1.5 font-medium truncate">
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${storeStyle.dot}`} />
+              <span className="truncate">{storeStyle.shortLabel}</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 text-slate-500 shrink-0">
+              {nota && (
+                <span className="inline-flex items-center gap-0.5 text-slate-400 font-medium">
+                  <Star size={10} className="fill-amber-400 text-amber-400" />
+                  {nota}
+                </span>
+              )}
+              <span className="hidden sm:inline">{relativeTime}</span>
             </span>
           </div>
 
-          {/* Título do Produto */}
+          {/* Título Limpo */}
           <a
             href={linkAfiliado}
             target="_blank"
             rel="noopener noreferrer"
             className="block"
           >
-            <h3 className="text-slate-100 font-bold text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-[#FFE600] transition-colors">
+            <h3 className="text-slate-100 font-semibold text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors">
               {product.titulo}
             </h3>
           </a>
         </div>
 
-        <div className="pt-1">
-          {/* Bloco de Preço Estilo Mercado Livre (Preço riscado + Preço Gigante + % Verde) */}
-          <div className="mb-2">
+        {/* 3. Hierarquia de Preço Única + Cupom Discreto + CTA Coeso */}
+        <div className="space-y-2.5 pt-1">
+          <div>
             {precoAntigo > precoAtual && (
-              <span className="block text-slate-400 text-[11px] sm:text-xs line-through leading-none mb-0.5">
+              <span className="block text-slate-500 text-[11px] sm:text-xs line-through">
                 {formatPrice(precoAntigo)}
               </span>
             )}
-
-            <div className="flex items-baseline flex-wrap gap-1.5">
-              <span className="text-lg sm:text-2xl font-black text-white tracking-tight leading-none">
-                {formatPrice(precoAtual)}
-              </span>
-              {descontoPercentual > 0 && (
-                <span className="text-[11px] sm:text-xs font-black text-emerald-400">
-                  {descontoPercentual}% OFF
-                </span>
-              )}
-            </div>
+            <span className="text-lg sm:text-2xl font-extrabold text-white tracking-tight leading-none">
+              {formatPrice(precoAtual)}
+            </span>
           </div>
 
-          {/* Mini-tag de Cupom Opcional (Click-to-Copy estilo Voucher Shopee) */}
+          {/* Mini chip discreto de cupom (somente se existir) */}
           {cupomOpcional && (
             <button
               type="button"
               onClick={handleCopyCoupon}
-              title="Clique para copiar o cupom"
-              className={`w-full mb-2 px-2.5 py-1.5 rounded-lg border border-dashed text-[11px] font-bold flex items-center justify-between gap-1 transition-all cursor-pointer ${
+              className={`w-full px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold flex items-center justify-between gap-1.5 transition-colors cursor-pointer ${
                 couponCopied
-                  ? "bg-emerald-950/90 border-emerald-400 text-emerald-300"
-                  : "bg-yellow-400/10 hover:bg-yellow-400/20 border-yellow-400/50 text-yellow-300"
+                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                  : "bg-white/[0.03] hover:bg-white/[0.07] border-dashed border-white/15 text-slate-300"
               }`}
             >
-              <span className="truncate">
-                {couponCopied
-                  ? `✅ ${cupomOpcional} copiado!`
-                  : `🎟️ Use o cupom: ${cupomOpcional}`}
+              <span className="truncate font-mono">
+                {couponCopied ? `Copiado: ${cupomOpcional}` : `Cupom: ${cupomOpcional}`}
               </span>
-              <Copy size={11} className="shrink-0" />
+              {couponCopied ? (
+                <Check size={12} className="shrink-0 text-emerald-400" />
+              ) : (
+                <Copy size={11} className="shrink-0 text-slate-400" />
+              )}
             </button>
           )}
 
-          {/* Garantia curta de Loja Oficial */}
-          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-emerald-400/90 font-medium mb-2.5 truncate">
-            <ShieldCheck size={12} className="shrink-0 text-emerald-400" />
-            <span className="truncate">
-              ✓ Compra garantida direto no site/app oficial da {loja}
-            </span>
-          </div>
-
-          {/* Botão CTA Direto com a Identidade da Loja */}
+          {/* CTA Unificado e Elegante (Acende em Amarelo Sidão no hover) */}
           <a
             href={linkAfiliado}
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-full font-black py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 shadow-md active:scale-95 text-xs sm:text-sm ${storeInfo.ctaClass}`}
+            className="w-full py-2.5 px-3 rounded-xl bg-white/[0.07] hover:bg-[#facc15] text-white hover:text-slate-950 border border-white/[0.08] hover:border-[#facc15] font-bold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all active:scale-[0.98]"
           >
-            <span>Ver Oferta na {storeInfo.shortLabel} ↗</span>
+            <span>Ir para {storeStyle.shortLabel}</span>
+            <ArrowUpRight size={14} className="shrink-0" />
           </a>
         </div>
       </div>

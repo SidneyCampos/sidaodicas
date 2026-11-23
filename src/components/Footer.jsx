@@ -40,7 +40,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-slate-950 border-t border-slate-800/80 text-slate-400 mt-12">
+    <footer className="bg-[#060910] border-t border-white/[0.06] text-slate-400 mt-12">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Linha Principal: Identidade + Redes Sociais */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-slate-800/70">

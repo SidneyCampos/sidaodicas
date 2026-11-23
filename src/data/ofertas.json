@@ -1,18 +1,57 @@
 [
   {
-    "id": 1,
-    "titulo": "Apple iPhone 15 (128 GB) - Preto - Distribuidor Autorizado",
-    "precoAntigo": 7299.00,
-    "precoAtual": 4699.00,
-    "descontoPercentual": 36,
+    "id": 101,
+    "titulo": "Amazon Kindle Colorsoft 16 GB - Tela Colorida e Luz Ajustável",
+    "subtitulo": "Leia em cores com alto contraste suave aos olhos e bateria para até 8 semanas.",
+    "precoAntigo": 1499.00,
+    "precoAtual": 999.00,
+    "descontoPercentual": 33,
     "loja": "Amazon",
     "categoria": "Eletrônicos",
     "cupomOpcional": "",
     "destaqueTag": "MENOR PREÇO EM 30 DIAS",
-    "imagemUrl": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://www.amazon.com.br/s?k=iphone+15+128gb",
-    "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T19:05:00.000Z"
+    "nota": "4,7",
+    "vendidos": "+5 mil compras",
+    "imagemUrl": "https://m.media-amazon.com/images/I/71lORNHYWLL._AC_SX679_.jpg",
+    "linkAfiliado": "https://link.amazon/B03bOPgKG",
+    "verificadoEm": "Verificado agora",
+    "criadoEm": "2026-11-23T16:50:00.000Z"
+  },
+  {
+    "id": 102,
+    "titulo": "Sony PlayStation Store Gift Card R$ 150 (Digital)",
+    "subtitulo": "Loja oficial PlayStation • Parcelamento em até 5x sem juros",
+    "precoAntigo": 165.00,
+    "precoAtual": 150.00,
+    "descontoPercentual": 9,
+    "loja": "Mercado Livre",
+    "categoria": "Games",
+    "cupomOpcional": "",
+    "destaqueTag": "MAIS VENDIDO",
+    "nota": "5,0",
+    "vendidos": "+50 mil vendidos",
+    "imagemUrl": "https://http2.mlstatic.com/D_NQ_NP_902418-MLA116666090065_082026-F.jpg",
+    "linkAfiliado": "https://meli.la/2ZXCfb3",
+    "verificadoEm": "Verificado há 10 min",
+    "criadoEm": "2026-11-23T16:40:00.000Z"
+  },
+  {
+    "id": 103,
+    "titulo": "Kit Estética Automotiva Vonixx V-Floc Tok Final Intense + Pneu Pretinho + Acessórios",
+    "subtitulo": "Kit completo Vonixx para brilho e proteção profissional no carro em casa.",
+    "precoAntigo": 199.90,
+    "precoAtual": 129.90,
+    "descontoPercentual": 35,
+    "loja": "Shopee",
+    "categoria": "Casa",
+    "cupomOpcional": "SHOPEE15",
+    "destaqueTag": "OFERTA VERIFICADA",
+    "nota": "4,9",
+    "vendidos": "+2 mil vendidos",
+    "imagemUrl": "https://down-br.img.susercontent.com/file/br-11134207-820lt-mqhpbloq1q0x0e",
+    "linkAfiliado": "https://s.shopee.com.br/2BGfv50zwh",
+    "verificadoEm": "Verificado há 20 min",
+    "criadoEm": "2026-11-23T16:30:00.000Z"
   },
   {
     "id": 2,
@@ -24,25 +63,12 @@
     "categoria": "Games",
     "cupomOpcional": "GAME100",
     "destaqueTag": "OFERTA VERIFICADA",
+    "nota": "4,9",
+    "vendidos": "+10 mil vendidos",
     "imagemUrl": "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://lista.mercadolivre.com.br/playstation-5-slim",
-    "verificadoEm": "Verificado há 15 min",
-    "criadoEm": "2026-11-18T18:52:00.000Z"
-  },
-  {
-    "id": 3,
-    "titulo": "Fritadeira Sem Óleo Air Fryer Mondial Family Inox 4L 1500W",
-    "precoAntigo": 499.90,
-    "precoAtual": 269.90,
-    "descontoPercentual": 46,
-    "loja": "Mercado Livre",
-    "categoria": "Casa",
-    "cupomOpcional": "CASA20",
-    "destaqueTag": "MAIS VENDIDO",
-    "imagemUrl": "https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://lista.mercadolivre.com.br/air-fryer-mondial-4l",
-    "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T18:35:00.000Z"
+    "linkAfiliado": "https://www.mercadolivre.com.br/social/casi3341967",
+    "verificadoEm": "Verificado há 35 min",
+    "criadoEm": "2026-11-23T16:15:00.000Z"
   },
   {
     "id": 4,
@@ -54,10 +80,12 @@
     "categoria": "Eletrônicos",
     "cupomOpcional": "",
     "destaqueTag": "ESQUENTA BLACK FRIDAY",
+    "nota": "4,8",
+    "vendidos": "+3 mil compras",
     "imagemUrl": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://www.amazon.com.br/s?k=smart+tv+55+4k+samsung",
-    "verificadoEm": "Verificado há 30 min",
-    "criadoEm": "2026-11-18T18:10:00.000Z"
+    "linkAfiliado": "https://www.amazon.com.br/s?k=smart+tv+55+4k+samsung&tag=sidaodicas-20",
+    "verificadoEm": "Verificado há 45 min",
+    "criadoEm": "2026-11-23T16:00:00.000Z"
   },
   {
     "id": 5,
@@ -69,10 +97,12 @@
     "categoria": "Games",
     "cupomOpcional": "TECH150",
     "destaqueTag": "MENOR PREÇO EM 30 DIAS",
+    "nota": "4,8",
+    "vendidos": "+1 mil compras",
     "imagemUrl": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://www.amazon.com.br/s?k=notebook+gamer+acer+nitro",
+    "linkAfiliado": "https://www.amazon.com.br/s?k=notebook+gamer+acer+nitro&tag=sidaodicas-20",
     "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T17:40:00.000Z"
+    "criadoEm": "2026-11-23T15:30:00.000Z"
   },
   {
     "id": 6,
@@ -84,10 +114,12 @@
     "categoria": "Mais Vendidos",
     "cupomOpcional": "SHOPEE15",
     "destaqueTag": "OFERTA VERIFICADA",
+    "nota": "4,9",
+    "vendidos": "+20 mil vendidos",
     "imagemUrl": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://shopee.com.br/search?keyword=jbl%20tune%20520bt",
     "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T17:15:00.000Z"
+    "criadoEm": "2026-11-23T15:00:00.000Z"
   },
   {
     "id": 7,
@@ -99,25 +131,12 @@
     "categoria": "Games",
     "cupomOpcional": "FRETEGRATIS",
     "destaqueTag": "ESQUENTA BLACK FRIDAY",
+    "nota": "4,7",
+    "vendidos": "+4 mil vendidos",
     "imagemUrl": "https://images.unsplash.com/photo-1598550476439-6847785fcea6?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://shopee.com.br/search?keyword=cadeira%20gamer%20ergonomica",
     "verificadoEm": "Verificado há 1 hora",
-    "criadoEm": "2026-11-18T16:45:00.000Z"
-  },
-  {
-    "id": 8,
-    "titulo": "Robô Aspirador de Pó Inteligente 3 em 1 Passa Pano Recarregável",
-    "precoAntigo": 899.90,
-    "precoAtual": 489.00,
-    "descontoPercentual": 46,
-    "loja": "Mercado Livre",
-    "categoria": "Casa",
-    "cupomOpcional": "MELI30",
-    "destaqueTag": "MAIS VENDIDO",
-    "imagemUrl": "https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://lista.mercadolivre.com.br/robo-aspirador",
-    "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T16:10:00.000Z"
+    "criadoEm": "2026-11-23T14:40:00.000Z"
   },
   {
     "id": 9,
@@ -129,10 +148,12 @@
     "categoria": "Mais Vendidos",
     "cupomOpcional": "",
     "destaqueTag": "OFERTA VERIFICADA",
+    "nota": "4,9",
+    "vendidos": "+10 mil compras",
     "imagemUrl": "https://images.unsplash.com/photo-1543512214-318c7553f230?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://www.amazon.com.br/s?k=echo+dot+5+geracao",
+    "linkAfiliado": "https://www.amazon.com.br/s?k=echo+dot+5+geracao&tag=sidaodicas-20",
     "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T15:30:00.000Z"
+    "criadoEm": "2026-11-23T14:10:00.000Z"
   },
   {
     "id": 10,
@@ -144,10 +165,12 @@
     "categoria": "Games",
     "cupomOpcional": "",
     "destaqueTag": "MAIS VENDIDO",
+    "nota": "4,8",
+    "vendidos": "+8 mil compras",
     "imagemUrl": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://www.amazon.com.br/s?k=logitech+g305",
+    "linkAfiliado": "https://www.amazon.com.br/s?k=logitech+g305&tag=sidaodicas-20",
     "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T14:50:00.000Z"
+    "criadoEm": "2026-11-23T13:50:00.000Z"
   },
   {
     "id": 11,
@@ -159,10 +182,12 @@
     "categoria": "Casa",
     "cupomOpcional": "CASA20",
     "destaqueTag": "MENOR PREÇO EM 30 DIAS",
+    "nota": "4,8",
+    "vendidos": "+3 mil vendidos",
     "imagemUrl": "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://lista.mercadolivre.com.br/nespresso-vertuo-pop",
+    "linkAfiliado": "https://www.mercadolivre.com.br/social/casi3341967",
     "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T14:15:00.000Z"
+    "criadoEm": "2026-11-23T13:15:00.000Z"
   },
   {
     "id": 12,
@@ -174,10 +199,12 @@
     "categoria": "Eletrônicos",
     "cupomOpcional": "SHOPEE15",
     "destaqueTag": "OFERTA VERIFICADA",
+    "nota": "4,9",
+    "vendidos": "+6 mil vendidos",
     "imagemUrl": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop",
     "linkAfiliado": "https://shopee.com.br/search?keyword=redmi%20watch%204",
     "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T13:30:00.000Z"
+    "criadoEm": "2026-11-23T12:40:00.000Z"
   },
   {
     "id": 13,
@@ -189,10 +216,12 @@
     "categoria": "Games",
     "cupomOpcional": "",
     "destaqueTag": "ESQUENTA BLACK FRIDAY",
+    "nota": "4,9",
+    "vendidos": "+12 mil compras",
     "imagemUrl": "https://images.unsplash.com/photo-1592840496694-26d035b52b48?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://www.amazon.com.br/s?k=controle+dualsense+ps5",
+    "linkAfiliado": "https://www.amazon.com.br/s?k=controle+dualsense+ps5&tag=sidaodicas-20",
     "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T12:45:00.000Z"
+    "criadoEm": "2026-11-23T12:00:00.000Z"
   },
   {
     "id": 14,
@@ -202,26 +231,13 @@
     "descontoPercentual": 31,
     "loja": "Mercado Livre",
     "categoria": "Mais Vendidos",
-    "cupomOpcional": "MELI30",
+    "cupomOpcional": "",
     "destaqueTag": "MAIS VENDIDO",
+    "nota": "4,9",
+    "vendidos": "+9 mil vendidos",
     "imagemUrl": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://lista.mercadolivre.com.br/jbl-flip-6",
+    "linkAfiliado": "https://www.mercadolivre.com.br/social/casi3341967",
     "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T11:20:00.000Z"
-  },
-  {
-    "id": 15,
-    "titulo": "Aspirador de Pó Vertical Sem Fio 2 em 1 Portátil Ciclone 1200W",
-    "precoAntigo": 389.90,
-    "precoAtual": 219.90,
-    "descontoPercentual": 44,
-    "loja": "Shopee",
-    "categoria": "Casa",
-    "cupomOpcional": "SHOPEE15",
-    "destaqueTag": "OFERTA VERIFICADA",
-    "imagemUrl": "https://images.unsplash.com/photo-1558317374-067fb5f30001?q=80&w=600&auto=format&fit=crop",
-    "linkAfiliado": "https://shopee.com.br/search?keyword=aspirador%20vertical",
-    "verificadoEm": "Verificado hoje",
-    "criadoEm": "2026-11-18T10:00:00.000Z"
+    "criadoEm": "2026-11-23T11:20:00.000Z"
   }
 ]
