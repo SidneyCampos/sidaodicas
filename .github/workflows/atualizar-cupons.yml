@@ -1,0 +1,37 @@
+name: Atualizar Cupons Diariamente (Piloto Automático)
+
+on:
+  schedule:
+    # Roda automaticamente todo dia às 08:00 e 16:00 (horário de Brasília)
+    - cron: "0 11,19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-coupons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Buscar cupons ativos (Amazon, Mercado Livre e Shopee)
+        run: node scripts/sync-coupons.mjs
+
+      - name: Salvar e publicar cupons atualizados automaticamente
+        run: |
+          git config user.name "Sidao Dicas Bot"
+          git config user.email "bot@sidaodicas.com.br"
+          git add src/data/cupons.json src/data/affiliateConfig.json
+          if git diff --staged --quiet; then
+            echo "Nenhuma alteração nos cupons hoje."
+          else
+            git commit -m "chore: atualizacao automatica diaria de cupons"
+            git push
+          fi

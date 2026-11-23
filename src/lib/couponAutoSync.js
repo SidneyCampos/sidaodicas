@@ -1,6 +1,6 @@
 import { readJsonData, writeJsonData } from "./adminStorage.js";
 
-const SOURCES = [
+const PROMOBIT_SOURCES = [
   {
     loja: "Mercado Livre",
     slugMatch: ["mercado-livre", "mercadolivre"],
@@ -18,15 +18,33 @@ const SOURCES = [
   },
 ];
 
+const DESCONTOSTOP_SOURCES = [
+  {
+    loja: "Amazon",
+    url: "https://descontostop.com.br/loja/cupom-desconto-amazon/",
+  },
+  {
+    loja: "Mercado Livre",
+    url: "https://descontostop.com.br/loja/cupom-desconto-mercado-livre/",
+  },
+  {
+    loja: "Shopee",
+    url: "https://descontostop.com.br/loja/cupom-desconto-shopee/",
+  },
+];
+
 const BLOCKED_BRAND_KEYWORDS = [
   "PROMOBIT",
   "PR0M0B1T",
   "PELANDO",
   "CUPONOMIA",
   "MELIUZ",
-  "CUPO",
+  "DESCONTOSTOP",
   "RESGATE",
 ];
+
+const UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
 // Cache em memória (2 horas) para manter a Home instantânea e sempre atualizada automaticamente
 let cachedAutoCoupons = null;
@@ -53,6 +71,18 @@ export async function getAffiliateConfig() {
   return defaults;
 }
 
+function decodeHtml(text = "") {
+  return String(text)
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function isCleanCouponCode(code = "") {
   const clean = String(code).trim().toUpperCase();
   if (!/^[A-Z0-9_-]{3,24}$/.test(clean)) return false;
@@ -61,10 +91,13 @@ function isCleanCouponCode(code = "") {
 }
 
 function cleanDescription(title = "", loja = "") {
-  return String(title)
-    .replace(/Promobit/gi, "Sidão Dicas")
-    .replace(/\s+/g, " ")
-    .trim() || `Desconto ativo em produtos selecionados na ${loja}`;
+  return (
+    decodeHtml(title)
+      .replace(/Promobit/gi, "Sidão Dicas")
+      .replace(/Descontos\s*Top/gi, "Sidão Dicas")
+      .replace(/\*+$/g, "")
+      .trim() || `Desconto ativo em produtos selecionados na ${loja}`
+  );
 }
 
 function formatValidity(couponUntil) {
@@ -84,16 +117,75 @@ function formatValidity(couponUntil) {
   return "Ativo hoje • Uso limitado";
 }
 
-async function fetchStoreLiveCoupons(source, affiliateLink) {
+// FONTE 1: DescontosTop (excelente cobertura para Amazon, Mercado Livre e Shopee)
+async function fetchFromDescontosTop(source, affiliateLink) {
   try {
     const res = await fetch(source.url, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "User-Agent": UA,
         "Accept-Language": "pt-BR,pt;q=0.9",
       },
       cache: "no-store",
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(8500),
+    });
+
+    if (!res.ok) return [];
+    const html = await res.text();
+
+    // Captura apenas blocos ativos (`coupon-live`)
+    const liveBlocks = html.split(/class="[^"]*coupon-live[^"]*"/i).slice(1);
+    const items = [];
+    const seen = new Set();
+
+    for (const block of liveBlocks) {
+      const snippet = block.slice(0, 1400);
+      const codeMatch = snippet.match(
+        /data-code=["']?([A-Z0-9_-]{3,24})["']?/i
+      );
+      if (!codeMatch) continue;
+
+      const code = codeMatch[1].trim().toUpperCase();
+      if (!isCleanCouponCode(code) || seen.has(code)) continue;
+
+      const titleMatch = snippet.match(
+        /<h3[^>]*class="[^"]*coupon-title[^"]*"[^>]*>([\s\S]*?)<\/h3>/i
+      );
+      const rawTitle = titleMatch ? titleMatch[1] : "";
+      const descricao = cleanDescription(rawTitle, source.loja);
+
+      seen.add(code);
+      items.push({
+        id: `auto-${source.loja.toLowerCase().replace(/\s+/g, "")}-${code}`,
+        loja: source.loja,
+        codigo: code,
+        descricao,
+        linkAfiliadoLoja: affiliateLink,
+        validade: "Ativo hoje • Uso limitado",
+        autoSynced: true,
+        fonte: "auto",
+        atualizadoEm: new Date().toISOString(),
+      });
+
+      if (items.length >= 4) break;
+    }
+
+    return items;
+  } catch (err) {
+    console.warn(`Aviso Fonte 1 (${source.loja}):`, err.message);
+    return [];
+  }
+}
+
+// FONTE 2: Promobit (__NEXT_DATA__ estruturado para Mercado Livre, Amazon e Shopee)
+async function fetchFromPromobit(source, affiliateLink) {
+  try {
+    const res = await fetch(source.url, {
+      headers: {
+        "User-Agent": UA,
+        "Accept-Language": "pt-BR,pt;q=0.9",
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(8500),
     });
 
     if (!res.ok) return [];
@@ -128,12 +220,10 @@ async function fetchStoreLiveCoupons(source, affiliateLink) {
       const code = String(c.couponCode || "").trim().toUpperCase();
       if (!isCleanCouponCode(code) || seenCodes.has(code)) continue;
 
-      // Confirma que o cupom pertence mesmo a essa loja (evita cross-promoções)
       const slug = String(c.storeSlug || c.storeName || "").toLowerCase();
       const matchesStore = source.slugMatch.some((s) => slug.includes(s));
       if (!matchesStore) continue;
 
-      // Ignora cupons expirados
       const statusName = String(c.couponStatusName || "").toLowerCase();
       if (statusName.includes("expir") || statusName.includes("encerr")) {
         continue;
@@ -153,6 +243,7 @@ async function fetchStoreLiveCoupons(source, affiliateLink) {
         linkAfiliadoLoja: affiliateLink,
         validade: formatValidity(c.couponUntil),
         autoSynced: true,
+        fonte: "auto",
         atualizadoEm: new Date().toISOString(),
       });
 
@@ -161,32 +252,61 @@ async function fetchStoreLiveCoupons(source, affiliateLink) {
 
     return valid;
   } catch (err) {
-    console.warn(`Aviso ao sincronizar cupons (${source.loja}):`, err.message);
+    console.warn(`Aviso Fonte 2 (${source.loja}):`, err.message);
     return [];
   }
 }
 
 export async function fetchLiveCouponsAllStores() {
   const config = await getAffiliateConfig();
-  const results = await Promise.all(
-    SOURCES.map((src) =>
-      fetchStoreLiveCoupons(src, config[src.loja] || "https://www.amazon.com.br")
-    )
-  );
-  return results.flat();
+
+  const [dtResults, pbResults] = await Promise.all([
+    Promise.all(
+      DESCONTOSTOP_SOURCES.map((src) =>
+        fetchFromDescontosTop(
+          src,
+          config[src.loja] || "https://www.amazon.com.br"
+        )
+      )
+    ),
+    Promise.all(
+      PROMOBIT_SOURCES.map((src) =>
+        fetchFromPromobit(src, config[src.loja] || "https://www.amazon.com.br")
+      )
+    ),
+  ]);
+
+  // Combina as 2 fontes por loja, remove duplicados e limita aos 5 melhores cupons por loja (15 total)
+  const storesOrder = ["Amazon", "Mercado Livre", "Shopee"];
+  const allCombined = [...dtResults.flat(), ...pbResults.flat()];
+  const finalCoupons = [];
+
+  for (const loja of storesOrder) {
+    const seenForStore = new Set();
+    let count = 0;
+    for (const c of allCombined) {
+      if (c.loja !== loja) continue;
+      if (seenForStore.has(c.codigo)) continue;
+      seenForStore.add(c.codigo);
+      finalCoupons.push(c);
+      count++;
+      if (count >= 5) break;
+    }
+  }
+
+  return finalCoupons;
 }
 
 export async function syncAndPersistCoupons() {
   const [liveCoupons, existingCoupons, config] = await Promise.all([
     fetchLiveCouponsAllStores(),
-    readJsonData("cupons.json"),
+    readJsonData("cupons.json", { bypassCache: true }),
     getAffiliateConfig(),
   ]);
 
-  // Mantém cupons criados manualmente pelo admin (sem autoSynced) + adiciona os novos sincronizados
-  const manualCoupons = (Array.isArray(existingCoupons) ? existingCoupons : []).filter(
-    (c) => !c.autoSynced
-  );
+  const manualCoupons = (
+    Array.isArray(existingCoupons) ? existingCoupons : []
+  ).filter((c) => !c.autoSynced);
 
   const manualCodes = new Set(
     manualCoupons.map((c) => String(c.codigo || "").toUpperCase())
@@ -197,7 +317,6 @@ export async function syncAndPersistCoupons() {
     ...liveCoupons.filter((c) => !manualCodes.has(c.codigo)),
   ];
 
-  // Atualiza cache em memória
   cachedAutoCoupons = merged;
   cachedAtMs = Date.now();
 
@@ -205,7 +324,7 @@ export async function syncAndPersistCoupons() {
     await writeJsonData(
       "cupons.json",
       merged,
-      `Sincronizacao automatica de ${liveCoupons.length} cupons ativos`
+      `Sincronizacao automatica diaria: ${liveCoupons.length} cupons ativos`
     );
     await writeJsonData(
       "affiliateConfig.json",
@@ -220,7 +339,8 @@ export async function syncAndPersistCoupons() {
     cupons: merged,
     byStore: {
       Amazon: liveCoupons.filter((c) => c.loja === "Amazon").length,
-      "Mercado Livre": liveCoupons.filter((c) => c.loja === "Mercado Livre").length,
+      "Mercado Livre": liveCoupons.filter((c) => c.loja === "Mercado Livre")
+        .length,
       Shopee: liveCoupons.filter((c) => c.loja === "Shopee").length,
     },
   };
@@ -229,7 +349,7 @@ export async function syncAndPersistCoupons() {
 /**
  * Usado pela Home (`src/app/page.js`):
  * Garante que os cupons do site estejam sempre frescos (auto-atualizados a cada 2h)
- * sem bloquear o carregamento se alguma fonte externa oscilar.
+ * além da sincronização automática diária do GitHub Actions.
  */
 export async function getFreshCouponsForHome() {
   const saved = await readJsonData("cupons.json");
@@ -252,7 +372,10 @@ export async function getFreshCouponsForHome() {
       const manualCodes = new Set(
         manual.map((c) => String(c.codigo || "").toUpperCase())
       );
-      const merged = [...manual, ...live.filter((c) => !manualCodes.has(c.codigo))];
+      const merged = [
+        ...manual,
+        ...live.filter((c) => !manualCodes.has(c.codigo)),
+      ];
       cachedAutoCoupons = merged;
       cachedAtMs = Date.now();
       return merged;

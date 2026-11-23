@@ -102,6 +102,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
 
   // Estado do formulário de Cupom + Automação de Cupons
   const [couponForm, setCouponForm] = useState(INITIAL_COUPON_FORM);
+  const [showManualCouponForm, setShowManualCouponForm] = useState(false);
   const [isSavingCoupon, setIsSavingCoupon] = useState(false);
   const [isSyncingCoupons, setIsSyncingCoupons] = useState(false);
   const [affiliateConfig, setAffiliateConfig] = useState({
@@ -545,14 +546,6 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
 
   const filteredAdminOffers = useMemo(() => {
     const q = adminSearch.trim().toLowerCase();
-    const list = !q
-      ? ofertas
-      : ofertas.filter(
-        (o) =>
-          (o.titulo && o.titulo.toLowerCase().includes(q)) ||
-          (o.loja && o.loja.toLowerCase().includes(q)) ||
-          (o.cupomOpcional && o.cupomOpcional.toLowerCase().includes(q))
-      );
     const list = ofertas.filter((o) => {
       const matchesStore =
         adminStoreFilter === "Todas" ||
@@ -571,8 +564,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       if (timeB !== timeA) return timeB - timeA;
       return (Number(b.id) || 0) - (Number(a.id) || 0);
     });
-  }, [ofertas, adminSearch]);
-}, [ofertas, adminSearch, adminStoreFilter]);
+  }, [ofertas, adminSearch, adminStoreFilter]);
 
 const visibleAdminOffers = useMemo(() => {
   return filteredAdminOffers.slice(0, adminVisibleCount);
@@ -842,7 +834,7 @@ return (
             }`}
         >
           <Ticket size={17} />
-          <span>🎟️ Gerenciar Cupons ({cupons.length})</span>
+          <span>🤖 Cupons Automáticos ({cupons.length})</span>
         </button>
 
         <button
@@ -1305,20 +1297,22 @@ return (
       )}
 
       {/* ===================================================================
-            ABA B: 🎟️ GERENCIAR CUPONS (COM SINCRONIZAÇÃO AUTOMÁTICA!)
+            ABA B: 🤖 CUPONS AUTOMÁTICOS (PILOTO AUTOMÁTICO 24H)
         =================================================================== */}
       {activeTab === "cupons" && (
         <div className="space-y-6">
-          {/* Painel de Automação de Cupons (1 Clique + Links Padrão do Afiliado) */}
-          <section className="bg-gradient-to-r from-slate-900 via-[#0f172a] to-slate-900 border border-[#FFE600]/40 rounded-2xl p-5 shadow-xl">
+          {/* Painel de Piloto Automático de Cupons */}
+          <section className="bg-gradient-to-r from-emerald-950/40 via-[#0f172a] to-slate-900 border border-emerald-500/40 rounded-2xl p-5 shadow-xl">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-800">
               <div>
-                <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                  <Sparkles size={18} className="text-[#FFE600]" />
-                  <span>🤖 Automação de Cupons (24h automático no site)</span>
+                <div className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full mb-1.5">
+                  <span>● Piloto Automático Ativo</span>
+                </div>
+                <h2 className="text-base sm:text-lg font-black text-white">
+                  🤖 Cupons Atualizados Sozinhos Todo Dia!
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  O site busca automaticamente cupons ativos de Amazon, Mercado Livre e Shopee e coloca <strong>os seus links de afiliado</strong> neles. Configure seus 3 links abaixo uma única vez!
+                <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                  <strong>Você não precisa procurar nem cadastrar cupons na mão.</strong> Nosso robô busca automaticamente os cupons ativos da Amazon, Mercado Livre e Shopee todos os dias (08h e 16h via GitHub Actions + atualização a cada 2h na página) e coloca os <strong>seus 3 links de afiliado</strong> abaixo em cada cupom.
                 </p>
               </div>
 
@@ -1331,12 +1325,12 @@ return (
                 {isSyncingCoupons ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    <span>Buscando cupons ativos...</span>
+                    <span>Atualizando agora...</span>
                   </>
                 ) : (
                   <>
                     <Wand2 size={16} />
-                    <span>🤖 Atualizar Cupons Automaticamente Agora</span>
+                    <span>🔄 Forçar Atualização Agora</span>
                   </>
                 )}
               </button>
@@ -1408,7 +1402,7 @@ return (
                   }
                   className="accent-[#FFE600] w-4 h-4"
                 />
-                <span>Manter cupons atualizados automaticamente no site (a cada 2h)</span>
+                <span>Manter cupons atualizados automaticamente no site (todo dia)</span>
               </label>
 
               <button
@@ -1422,34 +1416,58 @@ return (
             </div>
           </section>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <section className="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl self-start">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+          {/* Lista Principal de Cupons Ativos no Site */}
+          <section className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+              <div>
                 <h2 className="text-base sm:text-lg font-black text-white">
-                  {couponForm.id ? "✏️ Editar Cupom" : "🎟️ Novo Cupom Ativo"}
+                  Cupons Ativos no Site ({cupons.length})
                 </h2>
-                {couponForm.id && (
-                  <button
-                    type="button"
-                    onClick={() => setCouponForm(INITIAL_COUPON_FORM)}
-                    className="text-xs font-bold text-slate-400 hover:text-white"
-                  >
-                    Cancelar
-                  </button>
-                )}
+                <p className="text-xs text-slate-400">
+                  Todos abaixo já apontam automaticamente para o seu link de afiliado da respectiva loja.
+                </p>
               </div>
 
-              <form onSubmit={handleSaveCoupon} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1">
-                    Loja *
-                  </label>
+              <button
+                type="button"
+                onClick={() => setShowManualCouponForm((prev) => !prev)}
+                className="text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3.5 py-2 rounded-xl self-start sm:self-auto cursor-pointer"
+              >
+                {showManualCouponForm
+                  ? "Ocultar formulário manual"
+                  : "+ Adicionar cupom manual (opcional)"}
+              </button>
+            </div>
+
+            {(showManualCouponForm || couponForm.id) && (
+              <form
+                onSubmit={handleSaveCoupon}
+                className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 mb-5 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase text-[#FFE600]">
+                    {couponForm.id
+                      ? "✏️ Editar Cupom"
+                      : "➕ Adicionar Cupom Manual Extra"}
+                  </span>
+                  {couponForm.id && (
+                    <button
+                      type="button"
+                      onClick={() => setCouponForm(INITIAL_COUPON_FORM)}
+                      className="text-xs font-bold text-slate-400 hover:text-white"
+                    >
+                      Cancelar edição
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <select
                     value={couponForm.loja}
                     onChange={(e) =>
                       setCouponForm({ ...couponForm, loja: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
+                    className="bg-slate-900 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2.5 rounded-xl"
                   >
                     {STORES.map((loja) => (
                       <option key={loja} value={loja}>
@@ -1457,12 +1475,7 @@ return (
                       </option>
                     ))}
                   </select>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1">
-                    Código do Cupom *
-                  </label>
                   <input
                     type="text"
                     required
@@ -1473,15 +1486,25 @@ return (
                         codigo: e.target.value.toUpperCase(),
                       })
                     }
-                    placeholder="Ex: MELI30"
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm font-mono uppercase text-[#FFE600] px-3.5 py-2.5 rounded-xl"
+                    placeholder="Código (ex: MELI30)"
+                    className="bg-slate-900 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs font-mono uppercase text-[#FFE600] px-3 py-2.5 rounded-xl"
+                  />
+
+                  <input
+                    type="text"
+                    value={couponForm.validade}
+                    onChange={(e) =>
+                      setCouponForm({
+                        ...couponForm,
+                        validade: e.target.value,
+                      })
+                    }
+                    placeholder="Validade (ex: Ativo hoje)"
+                    className="bg-slate-900 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2.5 rounded-xl"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1">
-                    Descrição do Benefício *
-                  </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
                     required
@@ -1492,33 +1515,10 @@ return (
                         descricao: e.target.value,
                       })
                     }
-                    placeholder="Ex: R$ 30 OFF em compras acima de R$ 299"
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
+                    placeholder="Descrição (ex: R$ 30 OFF acima de R$ 299)"
+                    className="bg-slate-900 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2.5 rounded-xl"
                   />
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1">
-                    Texto de Validade
-                  </label>
-                  <input
-                    type="text"
-                    value={couponForm.validade}
-                    onChange={(e) =>
-                      setCouponForm({
-                        ...couponForm,
-                        validade: e.target.value,
-                      })
-                    }
-                    placeholder="Ex: Válido hoje • Estoque limitado"
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1">
-                    Link de Afiliado da Loja *
-                  </label>
                   <input
                     type="url"
                     required
@@ -1529,95 +1529,87 @@ return (
                         linkAfiliadoLoja: e.target.value,
                       })
                     }
-                    placeholder="https://..."
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
+                    placeholder="Link de afiliado da loja (https://...)"
+                    className="bg-slate-900 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2.5 rounded-xl"
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isSavingCoupon}
-                  className="w-full bg-[#FFE600] hover:bg-yellow-300 text-slate-950 font-black text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
-                >
-                  <Ticket size={17} />
-                  <span>
-                    {couponForm.id ? "Atualizar Cupom" : "Adicionar Cupom"}
-                  </span>
-                </button>
-              </form>
-            </section>
-
-            <section className="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
-              <h2 className="text-base sm:text-lg font-black text-white mb-4 pb-3 border-b border-slate-800">
-                Cupons Cadastrados ({cupons.length})
-              </h2>
-
-              <div className="space-y-3">
-                {cupons.map((cupom) => (
-                  <div
-                    key={cupom.id}
-                    className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isSavingCoupon}
+                    className="bg-[#FFE600] hover:bg-yellow-300 text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl cursor-pointer"
                   >
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-black uppercase bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 px-2 py-0.5 rounded">
-                          {cupom.loja}
-                        </span>
-                        <code className="text-sm font-mono font-black text-[#FFE600] bg-slate-900 px-2.5 py-0.5 rounded border border-dashed border-yellow-400/40">
-                          {cupom.codigo}
-                        </code>
-                        <span className="text-[11px] text-slate-400">
-                          {cupom.validade}
-                        </span>
-                      </div>
-                      <p className="text-sm font-bold text-slate-100">
-                        {cupom.descricao}
-                      </p>
-                      <a
-                        href={cupom.linkAfiliadoLoja}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11px] text-slate-400 hover:text-yellow-400 truncate block max-w-md mt-0.5"
-                      >
-                        {cupom.linkAfiliadoLoja}
-                      </a>
-                    </div>
+                    {couponForm.id ? "Salvar Alterações" : "Salvar Cupom Manual"}
+                  </button>
+                </div>
+              </form>
+            )}
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setCouponForm(cupom)}
-                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer"
-                      >
-                        <Edit3 size={14} />
-                        <span>Editar</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteCoupon(cupom.id)}
-                        className="bg-red-950/80 hover:bg-red-900/80 border border-red-500/30 text-red-300 text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer"
-                      >
-                        <Trash2 size={14} />
-                        <span>Excluir</span>
-                      </button>
+            <div className="space-y-2.5">
+              {cupons.map((cupom) => (
+                <div
+                  key={cupom.id}
+                  className="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="text-[11px] font-black uppercase bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 px-2 py-0.5 rounded">
+                        {cupom.loja}
+                      </span>
+                      <code className="text-xs sm:text-sm font-mono font-black text-[#FFE600] bg-slate-900 px-2.5 py-0.5 rounded border border-dashed border-yellow-400/40">
+                        {cupom.codigo}
+                      </code>
+                      {cupom.autoSynced && (
+                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                          🤖 Automático
+                        </span>
+                      )}
+                      <span className="text-[11px] text-slate-400">
+                        {cupom.validade}
+                      </span>
                     </div>
+                    <p className="text-xs sm:text-sm font-bold text-slate-100">
+                      {cupom.descricao}
+                    </p>
                   </div>
-                ))}
 
-                {cupons.length === 0 && (
-                  <p className="text-sm text-slate-400 text-center py-8">
-                    Nenhum cupom ativo no momento. Clique em &quot;Atualizar Cupons Automaticamente Agora&quot; acima!
-                  </p>
-                )}
-              </div>
-            </section>
-          </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCouponForm(cupom);
+                        setShowManualCouponForm(true);
+                      }}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"
+                    >
+                      <Edit3 size={13} />
+                      <span>Editar</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCoupon(cupom.id)}
+                      className="bg-red-950/80 hover:bg-red-900/80 border border-red-500/30 text-red-300 text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {cupons.length === 0 && (
+                <p className="text-sm text-slate-400 text-center py-8">
+                  Nenhum cupom ativo no momento. Clique em &quot;Forçar Atualização Agora&quot; acima!
+                </p>
+              )}
+            </div>
+          </section>
         </div>
       )}
 
       {/* ===================================================================
-            ABA C: 📋 OFERTAS ATIVAS (GERENCIAR + ARTE & COPY WHATSAPP)
+            ABA C: 📋 OFERTAS ATIVAS (GERENCIAR + ARTE & COPY WHATSAPP / INSTA)
         =================================================================== */}
       {activeTab === "ofertas-ativas" && (
         <section className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
@@ -1627,271 +1619,238 @@ return (
                 📋 Ofertas Ativas na Vitrine ({ofertas.length})
               </h2>
               <p className="text-xs text-slate-400">
-                Gere a imagem + texto do WhatsApp, mova ofertas para o topo ou exclua promoções encerradas.
+                Abra a arte PNG, copie o texto para WhatsApp ou Instagram, acesse o link de afiliado ou gerencie suas promoções.
               </p>
             </div>
 
-            <div className="relative w-full sm:w-72">
-              <Search
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                type="text"
-                value={adminSearch}
-                onChange={(e) => setAdminSearch(e.target.value)}
-                placeholder="Filtrar ofertas cadastradas..."
-                className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white pl-8 pr-3 py-2 rounded-xl"
-              />
-              <div className="flex flex-wrap items-center gap-2">
-                <select
-                  value={adminStoreFilter}
-                  onChange={(e) => setAdminStoreFilter(e.target.value)}
-                  className="bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2 rounded-xl"
-                >
-                  <option value="Todas">Todas as Lojas</option>
-                  {STORES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={adminStoreFilter}
+                onChange={(e) => setAdminStoreFilter(e.target.value)}
+                className="bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2 rounded-xl"
+              >
+                <option value="Todas">Todas as Lojas</option>
+                {STORES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
 
-                <div className="relative w-full sm:w-64">
-                  <Search
-                    size={15}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-                  <input
-                    type="text"
-                    value={adminSearch}
-                    onChange={(e) => setAdminSearch(e.target.value)}
-                    placeholder="Filtrar ofertas cadastradas..."
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white pl-8 pr-3 py-2 rounded-xl"
-                  />
-                </div>
+              <div className="relative w-full sm:w-64">
+                <Search
+                  size={15}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="text"
+                  value={adminSearch}
+                  onChange={(e) => setAdminSearch(e.target.value)}
+                  placeholder="Filtrar ofertas cadastradas..."
+                  className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white pl-8 pr-3 py-2 rounded-xl"
+                />
               </div>
             </div>
+          </div>
 
-            {isLoading ? (
-              <div className="py-12 text-center text-slate-400 flex items-center justify-center gap-2">
-                <Loader2 size={20} className="animate-spin text-[#FFE600]" />
-                <span>Carregando ofertas...</span>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredAdminOffers.map((item, idx) => {
-                  {
-                    visibleAdminOffers.map((item, idx) => {
-                      const discount = calculateDiscountPercentage(
-                        item.precoAntigo,
-                        item.precoAtual,
-                        item.descontoPercentual
-                      );
-                      const isCopied = copiedWhatsAppId === item.id;
-                      const isWaCopied = copiedWhatsAppId === item.id;
-                      const isIgCopied = copiedInstagramId === item.id;
+          {isLoading ? (
+            <div className="py-12 text-center text-slate-400 flex items-center justify-center gap-2">
+              <Loader2 size={20} className="animate-spin text-[#FFE600]" />
+              <span>Carregando ofertas...</span>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {visibleAdminOffers.map((item, idx) => {
+                const discount = calculateDiscountPercentage(
+                  item.precoAntigo,
+                  item.precoAtual,
+                  item.descontoPercentual
+                );
+                const isWaCopied = copiedWhatsAppId === item.id;
+                const isIgCopied = copiedInstagramId === item.id;
 
-                      return (
-                        <div
-                          key={item.id}
-                          className="bg-slate-950/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-3.5 sm:p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-colors"
-                        >
-                          <div className="flex items-center gap-3.5 min-w-0">
-                            <div className="w-16 h-16 rounded-xl bg-white p-1.5 flex items-center justify-center shrink-0">
-                              <img
-                                src={item.imagemUrl}
-                                alt={item.titulo}
-                                className="max-h-full max-w-full object-contain"
-                              />
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                <span className="text-[10px] font-black uppercase bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
-                                  #{idx + 1}
-                                </span>
-                                <span className="text-[10px] font-black uppercase bg-yellow-400/15 text-[#FFE600] px-2 py-0.5 rounded">
-                                  {item.loja}
-                                </span>
-                                <span className="text-[10px] font-bold text-slate-400 bg-slate-900 px-2 py-0.5 rounded">
-                                  {item.categoria}
-                                </span>
-                                <span className="text-[10px] text-emerald-400 font-semibold">
-                                  •{" "}
-                                  {formatRelativeVerifiedTime(
-                                    item.criadoEm,
-                                    item.verificadoEm
-                                  )}
-                                </span>
-                              </div>
-
-                              <h3 className="text-sm font-bold text-white truncate">
-                                {item.titulo}
-                              </h3>
-
-                              <div className="flex flex-wrap items-center gap-2 mt-1">
-                                {Number(item.precoAntigo) >
-                                  Number(item.precoAtual) && (
-                                    <span className="text-xs text-slate-500 line-through">
-                                      {formatBRLPrice(item.precoAntigo)}
-                                    </span>
-                                  )}
-                                <span className="text-sm font-black text-[#FFE600]">
-                                  {formatBRLPrice(item.precoAtual)}
-                                </span>
-                                {discount > 0 && (
-                                  <span className="text-[11px] font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.2 rounded">
-                                    -{discount}% OFF
-                                  </span>
-                                )}
-                                {item.cupomOpcional && (
-                                  <span className="text-[11px] font-mono font-bold text-yellow-300 bg-yellow-400/10 border border-dashed border-yellow-400/40 px-2 py-0.2 rounded">
-                                    🎟️ {item.cupomOpcional}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-2 shrink-0">
-                            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => setStudioModalOffer(item)}
-                                className="bg-pink-600 hover:bg-pink-500 text-white text-xs font-black px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-md"
-                                className="bg-slate-800 hover:bg-slate-700 border border-[#FFE600]/40 text-[#FFE600] text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                                title="Abrir gerador de Arte PNG + Texto WhatsApp + Legenda Instagram"
-                              >
-                                <Sparkles size={14} />
-                                <span>🎨 Arte + Texto</span>
-                                <span>🎨 Arte + Textos</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleCopyWhatsApp(item)}
-                                className={`text-xs font-black px-3 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${isCopied
-                                  ? "bg-emerald-500 text-slate-950"
-                          className={`text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${isWaCopied
-                                  ? "bg-emerald-400 text-slate-950"
-                                  : "bg-[#25D366] hover:bg-[#1fae54] text-slate-950"
-                                  }`}
-                                title="Copiar texto formatado para WhatsApp"
-                              >
-                                {isCopied ? (
-                                  {
-                                    isWaCopied?(
-                            <>
-                              <Check size={14} strokeWidth={3} />
-                              <span>✅ Copiado!</span>
-                              <span>Copiado!</span>
-                            </>
-                              ) : (
-                              <>
-                                <Copy size={14} />
-                                <span>📲 Copy</span>
-                                <Copy size={13} />
-                                <span>📲 WhatsApp</span>
-                              </>
-                          )}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleCopyInstagram(item)}
-                              className={`text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${isIgCopied
-                                ? "bg-emerald-400 text-slate-950"
-                                : "bg-gradient-to-r from-pink-600 to-amber-500 hover:brightness-110 text-white"
-                                }`}
-                              title="Copiar legenda formatada para Instagram"
-                            >
-                              {isIgCopied ? (
-                                <>
-                                  <Check size={14} strokeWidth={3} />
-                                  <span>Copiado!</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Camera size={13} />
-                                  <span>📸 Insta</span>
-                                </>
-                              )}
-                            </button>
-
-                            <a
-                              href={item.linkAfiliado}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl inline-flex items-center gap-1"
-                              title="Abrir link de afiliado em nova aba"
-                            >
-                              <ExternalLink size={13} />
-                              <span>Link</span>
-                            </a>
-
-                            <button
-                              type="button"
-                              onClick={() => handleMoveOfferToTop(item.id)}
-                              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer"
-                              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
-                              title="Mover para o topo da vitrine"
-                            >
-                              <ArrowUp size={14} className="text-[#FFE600]" />
-                              <ArrowUp size={13} className="text-[#FFE600]" />
-                              <span>Topo</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleEditOffer(item)}
-                              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer"
-                              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
-                            >
-                              <Edit3 size={14} />
-                              <Edit3 size={13} />
-                              <span>Editar</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteOffer(item.id)}
-                              className="bg-red-950/80 hover:bg-red-900 border border-red-500/30 text-red-300 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer"
-                              className="bg-red-950/80 hover:bg-red-900 border border-red-500/30 text-red-300 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
-                            >
-                              <Trash2 size={14} />
-                              <span>Excluir</span>
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  }
-
-                  {
-                    filteredAdminOffers.length > adminVisibleCount && (
-                      <div className="pt-4 flex justify-center">
-                        <button
-                          type="button"
-                          onClick={() => setAdminVisibleCount((prev) => prev + 20)}
-                          className="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <span>
-                            Carregar mais ofertas (+
-                            {Math.min(
-                              20,
-                              filteredAdminOffers.length - adminVisibleCount
-                            )}
-                            )
-                          </span>
-                          <ChevronDown size={14} className="text-[#FFE600]" />
-                        </button>
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-slate-950/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-3.5 sm:p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-colors"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-16 h-16 rounded-xl bg-white p-1.5 flex items-center justify-center shrink-0">
+                        <img
+                          src={item.imagemUrl}
+                          alt={item.titulo}
+                          className="max-h-full max-w-full object-contain"
+                        />
                       </div>
-                    )
-                  }
-              </div>
-            )}
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                          <span className="text-[10px] font-black uppercase bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
+                            #{idx + 1}
+                          </span>
+                          <span className="text-[10px] font-black uppercase bg-yellow-400/15 text-[#FFE600] px-2 py-0.5 rounded">
+                            {item.loja}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-400 bg-slate-900 px-2 py-0.5 rounded">
+                            {item.categoria}
+                          </span>
+                          <span className="text-[10px] text-emerald-400 font-semibold">
+                            •{" "}
+                            {formatRelativeVerifiedTime(
+                              item.criadoEm,
+                              item.verificadoEm
+                            )}
+                          </span>
+                        </div>
+
+                        <h3 className="text-sm font-bold text-white truncate">
+                          {item.titulo}
+                        </h3>
+
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          {Number(item.precoAntigo) >
+                            Number(item.precoAtual) && (
+                            <span className="text-xs text-slate-500 line-through">
+                              {formatBRLPrice(item.precoAntigo)}
+                            </span>
+                          )}
+                          <span className="text-sm font-black text-[#FFE600]">
+                            {formatBRLPrice(item.precoAtual)}
+                          </span>
+                          {discount > 0 && (
+                            <span className="text-[11px] font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.2 rounded">
+                              -{discount}% OFF
+                            </span>
+                          )}
+                          {item.cupomOpcional && (
+                            <span className="text-[11px] font-mono font-bold text-yellow-300 bg-yellow-400/10 border border-dashed border-yellow-400/40 px-2 py-0.2 rounded">
+                              🎟️ {item.cupomOpcional}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setStudioModalOffer(item)}
+                        className="bg-slate-800 hover:bg-slate-700 border border-[#FFE600]/40 text-[#FFE600] text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                        title="Abrir gerador de Arte PNG + Texto WhatsApp + Legenda Instagram"
+                      >
+                        <Sparkles size={14} />
+                        <span>🎨 Arte + Textos</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopyWhatsApp(item)}
+                        className={`text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                          isWaCopied
+                            ? "bg-emerald-400 text-slate-950"
+                            : "bg-[#25D366] hover:bg-[#1fae54] text-slate-950"
+                        }`}
+                        title="Copiar texto formatado para WhatsApp"
+                      >
+                        {isWaCopied ? (
+                          <>
+                            <Check size={14} strokeWidth={3} />
+                            <span>Copiado!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={13} />
+                            <span>📲 WhatsApp</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopyInstagram(item)}
+                        className={`text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                          isIgCopied
+                            ? "bg-emerald-400 text-slate-950"
+                            : "bg-gradient-to-r from-pink-600 to-amber-500 hover:brightness-110 text-white"
+                        }`}
+                        title="Copiar legenda formatada para Instagram"
+                      >
+                        {isIgCopied ? (
+                          <>
+                            <Check size={14} strokeWidth={3} />
+                            <span>Copiado!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Camera size={13} />
+                            <span>📸 Insta</span>
+                          </>
+                        )}
+                      </button>
+
+                      <a
+                        href={item.linkAfiliado}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl inline-flex items-center gap-1"
+                        title="Abrir link de afiliado em nova aba"
+                      >
+                        <ExternalLink size={13} />
+                        <span>Link</span>
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={() => handleMoveOfferToTop(item.id)}
+                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
+                        title="Mover para o topo da vitrine"
+                      >
+                        <ArrowUp size={13} className="text-[#FFE600]" />
+                        <span>Topo</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleEditOffer(item)}
+                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
+                      >
+                        <Edit3 size={13} />
+                        <span>Editar</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteOffer(item.id)}
+                        className="bg-red-950/80 hover:bg-red-900 border border-red-500/30 text-red-300 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {filteredAdminOffers.length > adminVisibleCount && (
+                <div className="pt-4 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setAdminVisibleCount((prev) => prev + 20)}
+                    className="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>
+                      Carregar mais ofertas (+
+                      {Math.min(
+                        20,
+                        filteredAdminOffers.length - adminVisibleCount
+                      )}
+                      )
+                    </span>
+                    <ChevronDown size={14} className="text-[#FFE600]" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </section>
       )}
     </main>
