@@ -39,6 +39,7 @@ export async function POST(request) {
     const novaOferta = {
       id: Date.now(),
       titulo: (body.titulo || "").trim(),
+      subtitulo: (body.subtitulo || "").trim(),
       precoAntigo,
       precoAtual,
       descontoPercentual,
@@ -46,6 +47,8 @@ export async function POST(request) {
       categoria: body.categoria || "Mais Vendidos",
       cupomOpcional: (body.cupomOpcional || "").trim().toUpperCase(),
       destaqueTag: body.destaqueTag || "OFERTA VERIFICADA",
+      nota: (body.nota || "").trim(),
+      vendidos: (body.vendidos || "").trim(),
       imagemUrl: (body.imagemUrl || "").trim(),
       linkAfiliado: (body.linkAfiliado || "").trim(),
       verificadoEm: "Verificado agora",
@@ -127,6 +130,10 @@ export async function PUT(request) {
       return {
         ...item,
         titulo: body.titulo !== undefined ? body.titulo.trim() : item.titulo,
+        subtitulo:
+          body.subtitulo !== undefined
+            ? body.subtitulo.trim()
+            : item.subtitulo || "",
         precoAntigo,
         precoAtual,
         descontoPercentual: calcDiscount(precoAntigo, precoAtual),
@@ -137,6 +144,11 @@ export async function PUT(request) {
             ? body.cupomOpcional.trim().toUpperCase()
             : item.cupomOpcional,
         destaqueTag: body.destaqueTag || item.destaqueTag,
+        nota: body.nota !== undefined ? body.nota.trim() : item.nota || "",
+        vendidos:
+          body.vendidos !== undefined
+            ? body.vendidos.trim()
+            : item.vendidos || "",
         imagemUrl:
           body.imagemUrl !== undefined ? body.imagemUrl.trim() : item.imagemUrl,
         linkAfiliado:

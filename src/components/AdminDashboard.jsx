@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  AlertTriangle,
   ArrowUp,
   Check,
+  CheckCircle2,
   Copy,
   Edit3,
   ExternalLink,
@@ -11,6 +13,7 @@ import {
   EyeOff,
   Image as ImageIcon,
   KeyRound,
+  Link2,
   Loader2,
   Lock,
   LogOut,
@@ -19,16 +22,24 @@ import {
   Rocket,
   Search,
   ShieldCheck,
+  Sparkles,
+  Star,
   Ticket,
   Trash2,
+  TrendingUp,
   User,
   Wand2,
+  X,
   Zap,
 } from "lucide-react";
 import {
   calculateDiscountPercentage,
   formatRelativeVerifiedTime,
 } from "./ProductCard";
+import WhatsAppCreativeStudio, {
+  buildViralWhatsAppCopy,
+  formatBRLPrice,
+} from "./WhatsAppCreativeStudio";
 
 const STORES = ["Amazon", "Mercado Livre", "Shopee"];
 const CATEGORIES = ["Mais Vendidos", "Eletrônicos", "Games", "Casa"];
@@ -41,16 +52,18 @@ const HIGHLIGHT_TAGS = [
 
 const INITIAL_OFFER_FORM = {
   id: null,
-  urlExtracao: "",
+  linkAfiliado: "",
   titulo: "",
+  subtitulo: "",
   loja: "Amazon",
   categoria: "Mais Vendidos",
   precoAntigo: "",
   precoAtual: "",
   destaqueTag: "OFERTA VERIFICADA",
   cupomOpcional: "",
+  nota: "",
+  vendidos: "",
   imagemUrl: "",
-  linkAfiliado: "",
 };
 
 const INITIAL_COUPON_FORM = {
@@ -76,19 +89,22 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
   const [cupons, setCupons] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Estado do formulário de Oferta
+  // Estado do formulário de Oferta & Extração Automática
   const [offerForm, setOfferForm] = useState(INITIAL_OFFER_FORM);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionReport, setExtractionReport] = useState(null);
   const [isSavingOffer, setIsSavingOffer] = useState(false);
   const [imagePreviewError, setImagePreviewError] = useState(false);
+  const lastExtractedUrlRef = useRef("");
 
   // Estado do formulário de Cupom
   const [couponForm, setCouponForm] = useState(INITIAL_COUPON_FORM);
   const [isSavingCoupon, setIsSavingCoupon] = useState(false);
 
-  // Estado da lista de Ofertas Ativas & WhatsApp Copy
+  // Estado da lista de Ofertas Ativas & Modal de Kit WhatsApp
   const [adminSearch, setAdminSearch] = useState("");
   const [copiedWhatsAppId, setCopiedWhatsAppId] = useState(null);
+  const [studioModalOffer, setStudioModalOffer] = useState(null);
 
   // Estado do Auto Deploy (Git Push / Cloud Sync)
   const [isPublishing, setIsPublishing] = useState(false);
@@ -176,68 +192,8 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     );
   }, [offerForm.precoAntigo, offerForm.precoAtual]);
 
-  const formatBRL = (value) => {
-    const num = Number(value) || 0;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(num);
-  };
-
-  // Gerador de Copy Persuasiva para WhatsApp
-  const generateWhatsAppCopy = (product) => {
-    const precoAntigo = Number(product.precoAntigo) || 0;
-    const precoAtual = Number(product.precoAtual) || 0;
-    const desconto = calculateDiscountPercentage(
-      precoAntigo,
-      precoAtual,
-      product.descontoPercentual
-    );
-
-    const storeEmoji =
-      product.loja === "Amazon"
-        ? "📦"
-        : product.loja === "Mercado Livre"
-        ? "🤝"
-        : "🛍️";
-
-    const lines = [
-      `🔥 *${product.destaqueTag || "OFERTA VERIFICADA"}* ${storeEmoji} *${
-        product.loja
-      }*`,
-      ``,
-      `📌 *${product.titulo}*`,
-      ``,
-    ];
-
-    if (precoAntigo > precoAtual) {
-      lines.push(
-        `❌ De: ~${formatBRL(precoAntigo)}~`,
-        `✅ *Por apenas: ${formatBRL(precoAtual)}* ${
-          desconto > 0 ? `(_-${desconto}% OFF_)` : ""
-        }`
-      );
-    } else {
-      lines.push(`✅ *Por apenas: ${formatBRL(precoAtual)}*`);
-    }
-
-    if (product.cupomOpcional) {
-      lines.push(`🎟️ Use o cupom: *${product.cupomOpcional}*`);
-    }
-
-    lines.push(
-      ``,
-      `🛒 *Compre direto na loja oficial:*`,
-      `${product.linkAfiliado}`,
-      ``,
-      `⚡ _Preços e estoque sujeitos a alteração a qualquer momento!_`
-    );
-
-    return lines.join("\n");
-  };
-
   const handleCopyWhatsApp = async (product) => {
-    const copyText = generateWhatsAppCopy(product);
+    const copyText = buildViralWhatsAppCopy(product);
     try {
       await navigator.clipboard.writeText(copyText);
       setCopiedWhatsAppId(product.id);
@@ -249,56 +205,94 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     }
   };
 
-  // Extrair Título e Foto da URL
-  const handleExtractFromUrl = async () => {
-    const targetUrl = offerForm.urlExtracao.trim();
-    if (!targetUrl) {
-      showMessage("error", "Cole a URL original do produto antes de extrair.");
+  // Extração Automática Completa a partir do Link de Associado
+  const runAutoExtraction = async (rawUrl) => {
+    const targetUrl = String(rawUrl || "").trim();
+    if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
+      showMessage(
+        "error",
+        "Cole um link de associado válido (Amazon, Shopee ou Mercado Livre)."
+      );
       return;
     }
 
+    lastExtractedUrlRef.current = targetUrl;
     setIsExtracting(true);
+    setExtractionReport(null);
     setFeedback(null);
+
     try {
       const response = await fetch("/api/admin/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: targetUrl }),
       });
+
+      if (response.status === 401) {
+        setIsLoggedIn(false);
+        return;
+      }
+
       const data = await response.json();
 
       setOfferForm((prev) => ({
         ...prev,
-        titulo: data.titulo || prev.titulo,
-        imagemUrl: data.imagemUrl || prev.imagemUrl,
+        linkAfiliado: targetUrl,
         loja: data.loja || prev.loja,
+        categoria: data.categoria || prev.categoria,
+        titulo: data.titulo || "",
+        subtitulo: data.subtitulo || "",
+        imagemUrl: data.imagemUrl || "",
         precoAtual:
-          data.precoSugerido && !prev.precoAtual
-            ? String(data.precoSugerido)
-            : prev.precoAtual,
-        linkAfiliado: prev.linkAfiliado || targetUrl,
+          data.precoAtual !== null && data.precoAtual !== undefined
+            ? String(data.precoAtual)
+            : "",
+        precoAntigo:
+          data.precoAntigo !== null && data.precoAntigo !== undefined
+            ? String(data.precoAntigo)
+            : "",
+        nota: data.nota || "",
+        vendidos: data.vendidos || "",
+        destaqueTag: data.destaqueTag || "OFERTA VERIFICADA",
       }));
       setImagePreviewError(false);
 
-      if (data.success) {
-        showMessage(
-          "success",
-          "✨ Dados extraídos da URL! Confira o título, a foto e preencha os preços."
-        );
-      } else {
-        showMessage(
-          "warning",
-          data.error ||
-            "Não foi possível extrair todos os campos automaticamente. Complete manualmente abaixo."
-        );
-      }
+      setExtractionReport({
+        loja: data.loja,
+        loadedFields: data.loadedFields || [],
+        missingFields: data.missingFields || [],
+        warningMessage: data.warningMessage || "",
+        success: Boolean(data.success),
+      });
     } catch {
-      showMessage(
-        "warning",
-        "Não foi possível acessar a URL informada. Preencha os campos manualmente."
-      );
+      setExtractionReport({
+        loja: null,
+        loadedFields: [],
+        missingFields: [
+          "Loja",
+          "Título do Produto",
+          "URL da Imagem (Foto)",
+          "Preço Atual",
+          "Preço Antigo",
+          "Nota",
+          "Qtd. Vendidos",
+        ],
+        warningMessage:
+          "Erro ao conectar com a página do link informado. Preencha os campos manualmente ou verifique se a loja alterou o formato da página.",
+        success: false,
+      });
     } finally {
       setIsExtracting(false);
+    }
+  };
+
+  // Dispara a extração automaticamente no exato momento em que o usuário cola o link!
+  const handleAffiliateUrlPaste = (e) => {
+    const pasted = e.clipboardData?.getData("text")?.trim();
+    if (pasted && /^https?:\/\//i.test(pasted)) {
+      e.preventDefault();
+      setOfferForm((prev) => ({ ...prev, linkAfiliado: pasted }));
+      runAutoExtraction(pasted);
     }
   };
 
@@ -312,7 +306,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     ) {
       showMessage(
         "error",
-        "Preencha pelo menos o Título, Preço Atual e Link de Afiliado."
+        "Preencha pelo menos o Link de Associado, Título e Preço Atual para publicar."
       );
       return;
     }
@@ -333,14 +327,16 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       }
 
       setOfertas(data.ofertas || []);
+      const savedOffer = data.oferta || offerForm;
       setOfferForm(INITIAL_OFFER_FORM);
+      setExtractionReport(null);
       setImagePreviewError(false);
 
       showMessage(
         "success",
         isEditing
-          ? "✅ Oferta atualizada com sucesso!"
-          : "✅ Nova oferta cadastrada no topo da vitrine!"
+          ? "✅ Oferta atualizada na vitrine com sucesso!"
+          : `✅ Oferta "${savedOffer.titulo}" publicada no topo da vitrine! Clique em "🚀 Salvar e Publicar no Site" se quiser forçar o deploy no Git.`
       );
       setActiveTab("ofertas-ativas");
     } catch (error) {
@@ -350,7 +346,6 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     }
   };
 
-  // Mover Oferta para o Topo
   const handleMoveOfferToTop = async (id) => {
     try {
       const response = await fetch("/api/admin/ofertas", {
@@ -371,7 +366,6 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     }
   };
 
-  // Excluir Oferta
   const handleDeleteOffer = async (id) => {
     try {
       const response = await fetch(`/api/admin/ofertas?id=${id}`, {
@@ -387,26 +381,27 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     }
   };
 
-  // Carregar Oferta para Edição
   const handleEditOffer = (product) => {
     setOfferForm({
       id: product.id,
-      urlExtracao: "",
+      linkAfiliado: product.linkAfiliado || "",
       titulo: product.titulo || "",
+      subtitulo: product.subtitulo || "",
       loja: product.loja || "Amazon",
       categoria: product.categoria || "Mais Vendidos",
       precoAntigo: product.precoAntigo ?? "",
       precoAtual: product.precoAtual ?? "",
       destaqueTag: product.destaqueTag || "OFERTA VERIFICADA",
       cupomOpcional: product.cupomOpcional || "",
+      nota: product.nota || "",
+      vendidos: product.vendidos || "",
       imagemUrl: product.imagemUrl || "",
-      linkAfiliado: product.linkAfiliado || "",
     });
+    setExtractionReport(null);
     setImagePreviewError(false);
     setActiveTab("nova-oferta");
   };
 
-  // Salvar ou Editar Cupom
   const handleSaveCoupon = async (e) => {
     e.preventDefault();
     if (!couponForm.codigo.trim() || !couponForm.descricao.trim()) {
@@ -444,7 +439,6 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     }
   };
 
-  // Excluir Cupom
   const handleDeleteCoupon = async (id) => {
     try {
       const response = await fetch(`/api/admin/cupons?id=${id}`, {
@@ -460,7 +454,6 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     }
   };
 
-  // Publicação Automática (Cloud Sync / Auto Git Push)
   const handlePublishToSite = async () => {
     setIsPublishing(true);
     setFeedback(null);
@@ -508,8 +501,16 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     });
   }, [ofertas, adminSearch]);
 
+  // Verifica se determinado campo falhou na extração para destacar a borda
+  const isFieldMissing = (keyword) => {
+    if (!extractionReport?.missingFields?.length) return false;
+    return extractionReport.missingFields.some((f) =>
+      f.toLowerCase().includes(keyword.toLowerCase())
+    );
+  };
+
   // =========================================================================
-  // TELA DE LOGIN COM USUÁRIO E SENHA (ACESSÍVEL DE QUALQUER COMPUTADOR)
+  // TELA DE LOGIN COM USUÁRIO E SENHA
   // =========================================================================
   if (!isLoggedIn) {
     return (
@@ -623,7 +624,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
   // =========================================================================
   return (
     <div className="min-h-screen bg-[#080d1a] text-white font-sans pb-16">
-      {/* Top Bar do Painel Admin com Botão de Auto Deploy e Logout */}
+      {/* Top Bar do Painel Admin */}
       <header className="sticky top-0 z-50 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center justify-between">
@@ -641,7 +642,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Gerenciador Remoto de Ofertas &amp; Cupons
+                  Cole o link de associado → Carrega tudo + Arte e Texto WhatsApp
                 </p>
               </div>
             </div>
@@ -711,7 +712,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 pt-6">
-        {/* Banner de Feedback / Status do Deploy */}
+        {/* Banner de Feedback Geral */}
         {feedback && (
           <div
             className={`mb-6 p-4 rounded-2xl border flex items-start justify-between gap-3 ${
@@ -753,7 +754,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
           >
             <PlusCircle size={17} />
             <span>
-              {offerForm.id ? "✏️ Editando Oferta" : "➕ Nova Oferta"}
+              {offerForm.id ? "✏️ Editando Oferta" : "➕ Nova Oferta (Auto)"}
             </span>
           </button>
 
@@ -785,313 +786,456 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
         </div>
 
         {/* ===================================================================
-            ABA A: ➕ NOVA OFERTA
+            ABA A: ➕ NOVA OFERTA (COLAR LINK -> CARREGA TUDO + KIT WHATSAPP)
         =================================================================== */}
         {activeTab === "nova-oferta" && (
-          <section className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-5 mb-6 border-b border-slate-800">
-              <div>
-                <h2 className="text-lg sm:text-xl font-black text-white">
-                  {offerForm.id
-                    ? "✏️ Editar Oferta Existente"
-                    : "➕ Cadastrar Nova Oferta"}
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Cole o link para extrair título e foto ou preencha os campos abaixo. A porcentagem de desconto é calculada sozinha!
-                </p>
-              </div>
-
-              {offerForm.id && (
-                <button
-                  type="button"
-                  onClick={() => setOfferForm(INITIAL_OFFER_FORM)}
-                  className="text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl self-start sm:self-auto"
-                >
-                  Cancelar Edição
-                </button>
-              )}
-            </div>
-
-            {/* Extrator Automático de Título e Foto via OpenGraph */}
-            <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 mb-6">
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#FFE600] mb-2">
-                ⚡ Extrator Rápido de Produto (Opcional)
-              </label>
-              <div className="flex flex-col sm:flex-row gap-2.5">
-                <input
-                  type="url"
-                  value={offerForm.urlExtracao}
-                  onChange={(e) =>
-                    setOfferForm({ ...offerForm, urlExtracao: e.target.value })
-                  }
-                  placeholder="Cole aqui a URL original do produto (Amazon, Mercado Livre ou Shopee)..."
-                  className="flex-1 bg-slate-900 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white placeholder-slate-500 px-3.5 py-2.5 rounded-xl"
-                />
-                <button
-                  type="button"
-                  onClick={handleExtractFromUrl}
-                  disabled={isExtracting}
-                  className="bg-slate-800 hover:bg-slate-700 border border-yellow-400/40 text-[#FFE600] font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shrink-0 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {isExtracting ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      <span>Extraindo...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 size={16} />
-                      <span>🔍 Tentar Extrair Título e Foto</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Formulário Principal da Oferta */}
-            <form onSubmit={handleSaveOffer} className="space-y-5">
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                  Título do Produto *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={offerForm.titulo}
-                  onChange={(e) =>
-                    setOfferForm({ ...offerForm, titulo: e.target.value })
-                  }
-                  placeholder="Ex: Smart TV 55” 4K UHD LED Samsung Crystal Gaming Hub"
-                  className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                    Loja Oficial *
+          <div className="space-y-6">
+            <section className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+              {/* PASSO 1: COLAR LINK DE ASSOCIADO (DISPARA AUTOMATICAMENTE) */}
+              <div className="bg-gradient-to-r from-slate-950 via-[#0f172a] to-slate-950 border-2 border-[#FFE600]/60 rounded-2xl p-4 sm:p-5 mb-6 shadow-lg">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+                  <label className="text-xs sm:text-sm font-black uppercase tracking-wide text-[#FFE600] flex items-center gap-2">
+                    <Link2 size={17} />
+                    <span>
+                      1. Cole seu Link de Associado (Carrega Tudo Automaticamente!)
+                    </span>
                   </label>
-                  <select
-                    value={offerForm.loja}
-                    onChange={(e) =>
-                      setOfferForm({ ...offerForm, loja: e.target.value })
-                    }
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
-                  >
-                    {STORES.map((loja) => (
-                      <option key={loja} value={loja}>
-                        {loja}
-                      </option>
-                    ))}
-                  </select>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    Aceita: <strong className="text-[#FF9900]">link.amazon</strong> •{" "}
+                    <strong className="text-[#ff6b4a]">s.shopee.com.br</strong> •{" "}
+                    <strong className="text-[#FFE600]">meli.la</strong>
+                  </span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                    Categoria *
-                  </label>
-                  <select
-                    value={offerForm.categoria}
-                    onChange={(e) =>
-                      setOfferForm({ ...offerForm, categoria: e.target.value })
-                    }
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
-                  >
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                    Tag de Destaque *
-                  </label>
-                  <select
-                    value={offerForm.destaqueTag}
-                    onChange={(e) =>
-                      setOfferForm({
-                        ...offerForm,
-                        destaqueTag: e.target.value,
-                      })
-                    }
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
-                  >
-                    {HIGHLIGHT_TAGS.map((tag) => (
-                      <option key={tag} value={tag}>
-                        {tag}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                    Preço Antigo (R$)
-                  </label>
+                <div className="flex flex-col sm:flex-row gap-2.5">
                   <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={offerForm.precoAntigo}
-                    onChange={(e) =>
-                      setOfferForm({
-                        ...offerForm,
-                        precoAntigo: e.target.value,
-                      })
-                    }
-                    placeholder="Ex: 3399.00"
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                    Preço Atual (R$) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
+                    type="url"
                     required
-                    value={offerForm.precoAtual}
+                    value={offerForm.linkAfiliado}
+                    onPaste={handleAffiliateUrlPaste}
                     onChange={(e) =>
                       setOfferForm({
                         ...offerForm,
-                        precoAtual: e.target.value,
+                        linkAfiliado: e.target.value,
                       })
                     }
-                    placeholder="Ex: 2299.00"
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
+                    placeholder="Cole aqui o link (ex: https://link.amazon/... ou https://s.shopee.com.br/... ou https://meli.la/...)"
+                    className="flex-1 bg-slate-900 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white placeholder-slate-500 px-4 py-3 rounded-xl"
                   />
-                </div>
 
-                <div className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
-                  <span className="text-xs text-slate-400 font-bold">
-                    Desconto:
-                  </span>
-                  <span
-                    className={`text-sm font-black px-2.5 py-0.5 rounded-lg ${
-                      previewDiscount > 0
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : "bg-slate-800 text-slate-400"
-                    }`}
+                  <button
+                    type="button"
+                    onClick={() => runAutoExtraction(offerForm.linkAfiliado)}
+                    disabled={isExtracting || !offerForm.linkAfiliado.trim()}
+                    className="bg-[#FFE600] hover:bg-yellow-300 disabled:opacity-50 text-slate-950 font-black text-xs sm:text-sm px-5 py-3 rounded-xl flex items-center justify-center gap-2 shrink-0 transition-all active:scale-95 cursor-pointer"
                   >
-                    -{previewDiscount}% OFF
-                  </span>
+                    {isExtracting ? (
+                      <>
+                        <Loader2 size={17} className="animate-spin" />
+                        <span>Lendo Página...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 size={17} />
+                        <span>🔍 Carregar Dados</span>
+                      </>
+                    )}
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                    Cupom Opcional
-                  </label>
-                  <input
-                    type="text"
-                    value={offerForm.cupomOpcional}
-                    onChange={(e) =>
-                      setOfferForm({
-                        ...offerForm,
-                        cupomOpcional: e.target.value.toUpperCase(),
-                      })
-                    }
-                    placeholder="Ex: BLACK10 (ou vazio)"
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm font-mono uppercase text-yellow-400 px-3.5 py-2.5 rounded-xl"
-                  />
-                </div>
+                {/* DIAGNÓSTICO EXPLÍCITO: O QUE CARREGOU vs O QUE NÃO CARREGOU */}
+                {extractionReport && (
+                  <div className="mt-4 space-y-2.5 pt-3 border-t border-slate-800/90">
+                    {/* Campos que carregaram com sucesso */}
+                    {extractionReport.loadedFields.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[11px] font-bold text-emerald-400 mr-1 flex items-center gap-1">
+                          <CheckCircle2 size={14} /> Carregado automaticamente:
+                        </span>
+                        {extractionReport.loadedFields.map((field) => (
+                          <span
+                            key={field}
+                            className="text-[11px] font-bold bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 px-2.5 py-0.5 rounded-full"
+                          >
+                            ✅ {field}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Aviso claro se QUALQUER dado ou imagem não carregou */}
+                    {extractionReport.missingFields.length > 0 && (
+                      <div className="p-3.5 rounded-xl bg-amber-950/75 border border-amber-500/50 text-amber-100">
+                        <div className="flex items-start gap-2.5">
+                          <AlertTriangle
+                            size={18}
+                            className="text-amber-400 shrink-0 mt-0.5"
+                          />
+                          <div className="text-xs leading-relaxed">
+                            <p className="font-black text-amber-300 mb-1">
+                              ⚠️ Atenção — O que NÃO carregou automaticamente:
+                            </p>
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                              {extractionReport.missingFields.map((field) => (
+                                <span
+                                  key={field}
+                                  className="text-[11px] font-extrabold bg-amber-900/80 border border-amber-400/50 text-amber-200 px-2 py-0.5 rounded-md"
+                                >
+                                  ❌ {field}
+                                </span>
+                              ))}
+                            </div>
+                            <p className="text-amber-200/90">
+                              {extractionReport.warningMessage}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-slate-950/60 border border-slate-800 rounded-2xl p-4">
-                <div className="md:col-span-2 space-y-4">
+              {/* PASSO 2: CONFIRMAR / AJUSTAR DADOS ANTES DE PUBLICAR */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm sm:text-base font-black text-white uppercase tracking-wide">
+                  2. Confirme os Dados da Oferta
+                </h2>
+                {offerForm.id && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOfferForm(INITIAL_OFFER_FORM);
+                      setExtractionReport(null);
+                    }}
+                    className="text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl"
+                  >
+                    Cancelar Edição
+                  </button>
+                )}
+              </div>
+
+              <form onSubmit={handleSaveOffer} className="space-y-4">
+                {/* Título + Subtítulo/Benefício (usado no texto do WhatsApp) */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                      URL da Imagem do Produto *
+                      Título do Produto *
                     </label>
                     <input
-                      type="url"
+                      type="text"
                       required
-                      value={offerForm.imagemUrl}
-                      onChange={(e) => {
-                        setOfferForm({
-                          ...offerForm,
-                          imagemUrl: e.target.value,
-                        });
-                        setImagePreviewError(false);
-                      }}
-                      placeholder="https://..."
-                      className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
+                      value={offerForm.titulo}
+                      onChange={(e) =>
+                        setOfferForm({ ...offerForm, titulo: e.target.value })
+                      }
+                      placeholder="Ex: Mini Chapinha e Modelador de Cachos 2 em 1 (Bivolt)"
+                      className={`w-full bg-slate-950 border focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl ${
+                        isFieldMissing("título") && !offerForm.titulo
+                          ? "border-amber-500 ring-1 ring-amber-500/40"
+                          : "border-slate-700"
+                      }`}
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                      Seu Link de Afiliado *
+                      Frase de Benefício / Resumo (Vai na Copy do WhatsApp ✨)
                     </label>
                     <input
-                      type="url"
-                      required
-                      value={offerForm.linkAfiliado}
+                      type="text"
+                      value={offerForm.subtitulo}
                       onChange={(e) =>
                         setOfferForm({
                           ...offerForm,
-                          linkAfiliado: e.target.value,
+                          subtitulo: e.target.value,
                         })
                       }
-                      placeholder="Cole seu link de afiliado da Amazon, Mercado Livre ou Shopee..."
+                      placeholder="Ex: Liso ou cacheado com um aparelho só — cabe na bolsa"
                       className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center bg-white rounded-xl h-40 p-3 relative overflow-hidden border-2 border-slate-700">
-                  {offerForm.imagemUrl && !imagePreviewError ? (
-                    <img
-                      src={offerForm.imagemUrl}
-                      alt="Preview do produto"
-                      onError={() => setImagePreviewError(true)}
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  ) : (
-                    <div className="text-center text-slate-400 flex flex-col items-center gap-1.5">
-                      <ImageIcon size={28} className="text-slate-300" />
-                      <span className="text-xs font-bold text-slate-500">
-                        {imagePreviewError
-                          ? "⚠️ Imagem quebrada ou bloqueada"
-                          : "Preview da Foto"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
+                {/* Loja, Categoria e Tag de Destaque */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Loja Oficial *
+                    </label>
+                    <select
+                      value={offerForm.loja}
+                      onChange={(e) =>
+                        setOfferForm({ ...offerForm, loja: e.target.value })
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
+                    >
+                      {STORES.map((loja) => (
+                        <option key={loja} value={loja}>
+                          {loja}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <div className="flex justify-end pt-2">
-                <button
-                  type="submit"
-                  disabled={isSavingOffer}
-                  className="w-full sm:w-auto bg-[#FFE600] hover:bg-yellow-300 text-slate-950 font-black text-sm px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
-                >
-                  {isSavingOffer ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      <span>Salvando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <PlusCircle size={18} />
-                      <span>
-                        {offerForm.id
-                          ? "Salvar Alterações da Oferta"
-                          : "Adicionar Oferta na Vitrine"}
-                      </span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </section>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Categoria *
+                    </label>
+                    <select
+                      value={offerForm.categoria}
+                      onChange={(e) =>
+                        setOfferForm({
+                          ...offerForm,
+                          categoria: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Tag de Destaque *
+                    </label>
+                    <select
+                      value={offerForm.destaqueTag}
+                      onChange={(e) =>
+                        setOfferForm({
+                          ...offerForm,
+                          destaqueTag: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl"
+                    >
+                      {HIGHLIGHT_TAGS.map((tag) => (
+                        <option key={tag} value={tag}>
+                          {tag}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Preço Antigo, Preço Atual, Desconto Calculado e Cupom */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Preço Antigo (R$)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={offerForm.precoAntigo}
+                      onChange={(e) =>
+                        setOfferForm({
+                          ...offerForm,
+                          precoAntigo: e.target.value,
+                        })
+                      }
+                      placeholder="Ex: 119.98"
+                      className={`w-full bg-slate-950 border focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl ${
+                        isFieldMissing("preço antigo") && !offerForm.precoAntigo
+                          ? "border-amber-500/70"
+                          : "border-slate-700"
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Preço Atual (R$) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      required
+                      value={offerForm.precoAtual}
+                      onChange={(e) =>
+                        setOfferForm({
+                          ...offerForm,
+                          precoAtual: e.target.value,
+                        })
+                      }
+                      placeholder="Ex: 20.99"
+                      className={`w-full bg-slate-950 border focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl ${
+                        isFieldMissing("preço atual") && !offerForm.precoAtual
+                          ? "border-amber-500 ring-1 ring-amber-500/40"
+                          : "border-slate-700"
+                      }`}
+                    />
+                  </div>
+
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+                    <span className="text-xs text-slate-400 font-bold">
+                      Desconto:
+                    </span>
+                    <span
+                      className={`text-sm font-black px-2.5 py-0.5 rounded-lg ${
+                        previewDiscount > 0
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-slate-800 text-slate-400"
+                      }`}
+                    >
+                      -{previewDiscount}% OFF
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Cupom Opcional
+                    </label>
+                    <input
+                      type="text"
+                      value={offerForm.cupomOpcional}
+                      onChange={(e) =>
+                        setOfferForm({
+                          ...offerForm,
+                          cupomOpcional: e.target.value.toUpperCase(),
+                        })
+                      }
+                      placeholder="Ex: BLACK10"
+                      className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm font-mono uppercase text-yellow-400 px-3.5 py-2.5 rounded-xl"
+                    />
+                  </div>
+                </div>
+
+                {/* Prova Social para Arte e Copy (Vendidos + Nota + URL da Imagem) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-950/60 border border-slate-800 rounded-2xl p-4">
+                  <div className="md:col-span-9 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5 flex items-center gap-1">
+                          <TrendingUp size={13} className="text-[#FFE600]" />
+                          Qtd. Vendidos (Faixa da Arte &amp; Copy)
+                        </label>
+                        <input
+                          type="text"
+                          value={offerForm.vendidos}
+                          onChange={(e) =>
+                            setOfferForm({
+                              ...offerForm,
+                              vendidos: e.target.value,
+                            })
+                          }
+                          placeholder="Ex: +80 mil vendidos"
+                          className={`w-full bg-slate-950 border focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl ${
+                            isFieldMissing("vendidos") && !offerForm.vendidos
+                              ? "border-amber-500/70"
+                              : "border-slate-700"
+                          }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5 flex items-center gap-1">
+                          <Star size={13} className="text-[#FFE600]" />
+                          Nota do Produto (Ex: 4,7)
+                        </label>
+                        <input
+                          type="text"
+                          value={offerForm.nota}
+                          onChange={(e) =>
+                            setOfferForm({ ...offerForm, nota: e.target.value })
+                          }
+                          placeholder="Ex: 4,7"
+                          className={`w-full bg-slate-950 border focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl ${
+                            isFieldMissing("nota") && !offerForm.nota
+                              ? "border-amber-500/70"
+                              : "border-slate-700"
+                          }`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                        URL da Imagem do Produto *
+                      </label>
+                      <input
+                        type="url"
+                        required
+                        value={offerForm.imagemUrl}
+                        onChange={(e) => {
+                          setOfferForm({
+                            ...offerForm,
+                            imagemUrl: e.target.value,
+                          });
+                          setImagePreviewError(false);
+                        }}
+                        placeholder="https://..."
+                        className={`w-full bg-slate-950 border focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2.5 rounded-xl ${
+                          isFieldMissing("imagem") && !offerForm.imagemUrl
+                            ? "border-amber-500 ring-1 ring-amber-500/40"
+                            : "border-slate-700"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Preview rápido da Foto Original */}
+                  <div className="md:col-span-3 flex flex-col items-center justify-center bg-white rounded-xl h-36 p-2.5 relative overflow-hidden border-2 border-slate-700">
+                    {offerForm.imagemUrl && !imagePreviewError ? (
+                      <img
+                        src={offerForm.imagemUrl}
+                        alt="Preview da foto"
+                        onError={() => setImagePreviewError(true)}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <div className="text-center text-slate-400 flex flex-col items-center gap-1">
+                        <ImageIcon size={24} className="text-slate-300" />
+                        <span className="text-[11px] font-bold text-slate-500">
+                          {imagePreviewError
+                            ? "⚠️ Foto quebrada!"
+                            : "Foto do Produto"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Botão Confirmar e Publicar na Vitrine */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                  <p className="text-xs text-slate-400">
+                    Revise a arte e o texto do WhatsApp abaixo e clique para confirmar e publicar na vitrine.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={isSavingOffer}
+                    className="w-full sm:w-auto bg-[#FFE600] hover:bg-yellow-300 text-slate-950 font-black text-sm px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
+                  >
+                    {isSavingOffer ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Publicando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 size={18} />
+                        <span>
+                          {offerForm.id
+                            ? "Confirmar Edição da Oferta"
+                            : "✅ Confirmar e Publicar na Vitrine"}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            {/* PASSO 3: STUDIO EM TEMPO REAL (IMAGEM PNG + COPY WHATSAPP IGUAL AO PRINT!) */}
+            <WhatsAppCreativeStudio offer={offerForm} />
+          </div>
         )}
 
         {/* ===================================================================
@@ -1292,7 +1436,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
         )}
 
         {/* ===================================================================
-            ABA C: 📋 OFERTAS ATIVAS (GERENCIAR + COPIAR PARA WHATSAPP)
+            ABA C: 📋 OFERTAS ATIVAS (GERENCIAR + ARTE & COPY WHATSAPP)
         =================================================================== */}
         {activeTab === "ofertas-ativas" && (
           <section className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
@@ -1302,7 +1446,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
                   📋 Ofertas Ativas na Vitrine ({ofertas.length})
                 </h2>
                 <p className="text-xs text-slate-400">
-                  Copie o texto formatado para o Grupo VIP do WhatsApp, mova ofertas para o topo ou exclua promoções encerradas.
+                  Gere a imagem + texto do WhatsApp, mova ofertas para o topo ou exclua promoções encerradas.
                 </p>
               </div>
 
@@ -1378,11 +1522,11 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
                             {Number(item.precoAntigo) >
                               Number(item.precoAtual) && (
                               <span className="text-xs text-slate-500 line-through">
-                                {formatBRL(item.precoAntigo)}
+                                {formatBRLPrice(item.precoAntigo)}
                               </span>
                             )}
                             <span className="text-sm font-black text-[#FFE600]">
-                              {formatBRL(item.precoAtual)}
+                              {formatBRLPrice(item.precoAtual)}
                             </span>
                             {discount > 0 && (
                               <span className="text-[11px] font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.2 rounded">
@@ -1401,22 +1545,31 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
                       <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <button
                           type="button"
+                          onClick={() => setStudioModalOffer(item)}
+                          className="bg-pink-600 hover:bg-pink-500 text-white text-xs font-black px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-md"
+                        >
+                          <Sparkles size={14} />
+                          <span>🎨 Arte + Texto</span>
+                        </button>
+
+                        <button
+                          type="button"
                           onClick={() => handleCopyWhatsApp(item)}
-                          className={`text-xs font-black px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                          className={`text-xs font-black px-3 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
                             isCopied
                               ? "bg-emerald-500 text-slate-950"
-                              : "bg-[#25D366] hover:bg-[#1fae54] text-slate-950 shadow-md shadow-green-950/30"
+                              : "bg-[#25D366] hover:bg-[#1fae54] text-slate-950"
                           }`}
                         >
                           {isCopied ? (
                             <>
                               <Check size={14} strokeWidth={3} />
-                              <span>✅ Copy Copiada!</span>
+                              <span>✅ Copiado!</span>
                             </>
                           ) : (
                             <>
                               <Copy size={14} />
-                              <span>📲 Copiar Copy WhatsApp</span>
+                              <span>📲 Copy</span>
                             </>
                           )}
                         </button>
@@ -1428,7 +1581,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
                           title="Mover para o topo da vitrine"
                         >
                           <ArrowUp size={14} className="text-[#FFE600]" />
-                          <span>⬆️ Mover para o Topo</span>
+                          <span>Topo</span>
                         </button>
 
                         <button
@@ -1446,7 +1599,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
                           className="bg-red-950/80 hover:bg-red-900 border border-red-500/30 text-red-300 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer"
                         >
                           <Trash2 size={14} />
-                          <span>🗑️ Excluir</span>
+                          <span>Excluir</span>
                         </button>
                       </div>
                     </div>
@@ -1457,6 +1610,27 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
           </section>
         )}
       </main>
+
+      {/* Modal do Studio WhatsApp para Ofertas Já Cadastradas */}
+      {studioModalOffer && (
+        <div
+          className="fixed inset-0 z-[90] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="max-w-5xl w-full relative my-auto">
+            <button
+              type="button"
+              onClick={() => setStudioModalOffer(null)}
+              className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white flex items-center justify-center shadow-lg cursor-pointer"
+              aria-label="Fechar estúdio WhatsApp"
+            >
+              <X size={18} />
+            </button>
+            <WhatsAppCreativeStudio offer={studioModalOffer} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
