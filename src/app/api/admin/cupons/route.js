@@ -1,44 +1,26 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { isAuthenticated } from "../../../../lib/adminAuth";
+import { readJsonData, writeJsonData } from "../../../../lib/adminStorage";
 
-const CUPONS_PATH = path.join(process.cwd(), "src", "data", "cupons.json");
-
-function isProduction() {
-  return process.env.NODE_ENV === "production";
-}
-
-async function readCupons() {
-  try {
-    const raw = await fs.readFile(CUPONS_PATH, "utf-8");
-    return JSON.parse(raw);
-  } catch (err) {
-    console.error("Erro ao ler cupons.json:", err);
-    return [];
-  }
-}
-
-async function writeCupons(cupons) {
-  await fs.writeFile(CUPONS_PATH, JSON.stringify(cupons, null, 2) + "\n", "utf-8");
-}
+const FILENAME = "cupons.json";
 
 export async function GET() {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const cupons = await readCupons();
+  const cupons = await readJsonData(FILENAME);
   return NextResponse.json({ cupons });
 }
 
 export async function POST(request) {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    const cupons = await readCupons();
+    const cupons = await readJsonData(FILENAME);
 
     const novoCupom = {
       id: Date.now(),
@@ -50,7 +32,11 @@ export async function POST(request) {
     };
 
     const atualizados = [novoCupom, ...cupons];
-    await writeCupons(atualizados);
+    await writeJsonData(
+      FILENAME,
+      atualizados,
+      `Novo cupom: ${novoCupom.codigo}`
+    );
 
     return NextResponse.json({
       success: true,
@@ -60,20 +46,20 @@ export async function POST(request) {
   } catch (error) {
     console.error("Erro ao criar cupom:", error);
     return NextResponse.json(
-      { error: "Falha ao adicionar cupom." },
+      { error: error.message || "Falha ao adicionar cupom." },
       { status: 500 }
     );
   }
 }
 
 export async function PUT(request) {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    const cupons = await readCupons();
+    const cupons = await readJsonData(FILENAME);
 
     const atualizados = cupons.map((item) => {
       if (String(item.id) !== String(body.id)) return item;
@@ -97,7 +83,11 @@ export async function PUT(request) {
       };
     });
 
-    await writeCupons(atualizados);
+    await writeJsonData(
+      FILENAME,
+      atualizados,
+      "Cupom atualizado via Painel Admin"
+    );
 
     return NextResponse.json({
       success: true,
@@ -106,15 +96,15 @@ export async function PUT(request) {
   } catch (error) {
     console.error("Erro ao editar cupom:", error);
     return NextResponse.json(
-      { error: "Falha ao atualizar cupom." },
+      { error: error.message || "Falha ao atualizar cupom." },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(request) {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   try {
@@ -133,9 +123,13 @@ export async function DELETE(request) {
       );
     }
 
-    const cupons = await readCupons();
+    const cupons = await readJsonData(FILENAME);
     const atualizados = cupons.filter((item) => String(item.id) !== String(id));
-    await writeCupons(atualizados);
+    await writeJsonData(
+      FILENAME,
+      atualizados,
+      "Cupom removido via Painel Admin"
+    );
 
     return NextResponse.json({
       success: true,
@@ -144,7 +138,7 @@ export async function DELETE(request) {
   } catch (error) {
     console.error("Erro ao excluir cupom:", error);
     return NextResponse.json(
-      { error: "Falha ao remover cupom." },
+      { error: error.message || "Falha ao remover cupom." },
       { status: 500 }
     );
   }

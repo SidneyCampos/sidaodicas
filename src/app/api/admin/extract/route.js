@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-
-function isProduction() {
-  return process.env.NODE_ENV === "production";
-}
+import { isAuthenticated } from "../../../../lib/adminAuth";
 
 function decodeHtmlEntities(text = "") {
   return text
@@ -35,7 +32,6 @@ function detectStoreFromUrl(targetUrl = "") {
 
 function extractMetaTag(html, propertyNames) {
   for (const prop of propertyNames) {
-    // Formato 1: <meta property="og:title" content="..." />
     const regex1 = new RegExp(
       `<meta[^>]+(?:property|name|itemprop)=["']${prop}["'][^>]+content=["']([^"']+)["']`,
       "i"
@@ -43,7 +39,6 @@ function extractMetaTag(html, propertyNames) {
     const match1 = html.match(regex1);
     if (match1 && match1[1]) return decodeHtmlEntities(match1[1]);
 
-    // Formato 2: <meta content="..." property="og:title" />
     const regex2 = new RegExp(
       `<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name|itemprop)=["']${prop}["']`,
       "i"
@@ -55,8 +50,8 @@ function extractMetaTag(html, propertyNames) {
 }
 
 export async function POST(request) {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   try {
@@ -96,12 +91,7 @@ export async function POST(request) {
     const detectedStore =
       detectStoreFromUrl(finalUrl) || detectStoreFromUrl(url);
 
-    // 1. Tenta extrair Título via OpenGraph / Twitter / Tags específicas da loja / <title>
-    let titulo = extractMetaTag(html, [
-      "og:title",
-      "twitter:title",
-      "name",
-    ]);
+    let titulo = extractMetaTag(html, ["og:title", "twitter:title", "name"]);
 
     if (!titulo) {
       const amazonTitleMatch = html.match(
@@ -119,7 +109,6 @@ export async function POST(request) {
       }
     }
 
-    // Limpa sufixos genéricos das lojas no título
     if (titulo) {
       titulo = titulo
         .replace(/\s*[:|-]\s*Amazon\.com\.br.*$/i, "")
@@ -128,7 +117,6 @@ export async function POST(request) {
         .trim();
     }
 
-    // 2. Tenta extrair Imagem via OpenGraph / Twitter / Amazon hi-res
     let imagemUrl = extractMetaTag(html, [
       "og:image",
       "og:image:secure_url",
@@ -146,7 +134,6 @@ export async function POST(request) {
       }
     }
 
-    // 3. Tenta extrair Preço caso a página exponha em meta tag
     const rawPrice = extractMetaTag(html, [
       "product:price:amount",
       "og:price:amount",

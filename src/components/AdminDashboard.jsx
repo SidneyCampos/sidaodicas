@@ -3,23 +3,27 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ArrowUp,
-  BadgeCheck,
   Check,
   Copy,
   Edit3,
   ExternalLink,
+  Eye,
+  EyeOff,
   Image as ImageIcon,
+  KeyRound,
   Loader2,
+  Lock,
+  LogOut,
   MessageCircle,
   PlusCircle,
   Rocket,
   Search,
-  Sparkles,
+  ShieldCheck,
   Ticket,
   Trash2,
+  User,
   Wand2,
   Zap,
-  AlertCircle,
 } from "lucide-react";
 import {
   calculateDiscountPercentage,
@@ -58,11 +62,19 @@ const INITIAL_COUPON_FORM = {
   linkAfiliadoLoja: "",
 };
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ initialAuthenticated = false }) {
+  // Estado de Autenticação (Usuário e Senha)
+  const [isLoggedIn, setIsLoggedIn] = useState(initialAuthenticated);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   const [activeTab, setActiveTab] = useState("nova-oferta");
   const [ofertas, setOfertas] = useState([]);
   const [cupons, setCupons] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Estado do formulário de Oferta
   const [offerForm, setOfferForm] = useState(INITIAL_OFFER_FORM);
@@ -78,7 +90,7 @@ export default function AdminDashboard() {
   const [adminSearch, setAdminSearch] = useState("");
   const [copiedWhatsAppId, setCopiedWhatsAppId] = useState(null);
 
-  // Estado do Auto Deploy (Git Push)
+  // Estado do Auto Deploy (Git Push / Cloud Sync)
   const [isPublishing, setIsPublishing] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
@@ -93,6 +105,12 @@ export default function AdminDashboard() {
         fetch("/api/admin/ofertas"),
         fetch("/api/admin/cupons"),
       ]);
+
+      if (resOfertas.status === 401 || resCupons.status === 401) {
+        setIsLoggedIn(false);
+        return;
+      }
+
       const dataOfertas = await resOfertas.json();
       const dataCupons = await resCupons.json();
 
@@ -100,15 +118,54 @@ export default function AdminDashboard() {
       if (dataCupons.cupons) setCupons(dataCupons.cupons);
     } catch (error) {
       console.error("Erro ao carregar dados no painel admin:", error);
-      showMessage("error", "Falha ao carregar os arquivos JSON locais.");
+      showMessage("error", "Falha ao carregar as ofertas e cupons.");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    if (isLoggedIn) {
+      fetchAllData();
+    }
+  }, [isLoggedIn]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError("");
+    setIsLoggingIn(true);
+
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setLoginError(data.error || "Usuário ou senha incorretos.");
+        return;
+      }
+
+      setIsLoggedIn(true);
+      setPassword("");
+    } catch {
+      setLoginError("Erro de conexão ao tentar entrar.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/auth", { method: "DELETE" });
+    } finally {
+      setIsLoggedIn(false);
+      setUsername("");
+      setPassword("");
+    }
+  };
 
   // Cálculo em tempo real da % de desconto no formulário
   const previewDiscount = useMemo(() => {
@@ -235,7 +292,7 @@ export default function AdminDashboard() {
             "Não foi possível extrair todos os campos automaticamente. Complete manualmente abaixo."
         );
       }
-    } catch (error) {
+    } catch {
       showMessage(
         "warning",
         "Não foi possível acessar a URL informada. Preencha os campos manualmente."
@@ -248,7 +305,11 @@ export default function AdminDashboard() {
   // Salvar Nova Oferta ou Editar Oferta Existente
   const handleSaveOffer = async (e) => {
     e.preventDefault();
-    if (!offerForm.titulo.trim() || !offerForm.precoAtual || !offerForm.linkAfiliado.trim()) {
+    if (
+      !offerForm.titulo.trim() ||
+      !offerForm.precoAtual ||
+      !offerForm.linkAfiliado.trim()
+    ) {
       showMessage(
         "error",
         "Preencha pelo menos o Título, Preço Atual e Link de Afiliado."
@@ -278,8 +339,8 @@ export default function AdminDashboard() {
       showMessage(
         "success",
         isEditing
-          ? "✅ Oferta atualizada com sucesso em ofertas.json!"
-          : "✅ Nova oferta cadastrada no topo da vitrine (ofertas.json)!"
+          ? "✅ Oferta atualizada com sucesso!"
+          : "✅ Nova oferta cadastrada no topo da vitrine!"
       );
       setActiveTab("ofertas-ativas");
     } catch (error) {
@@ -300,9 +361,12 @@ export default function AdminDashboard() {
       const data = await response.json();
       if (data.ofertas) {
         setOfertas(data.ofertas);
-        showMessage("success", "⬆️ Oferta movida para o topo e marcada como 'Verificado agora'!");
+        showMessage(
+          "success",
+          "⬆️ Oferta movida para o topo e marcada como 'Verificado agora'!"
+        );
       }
-    } catch (error) {
+    } catch {
       showMessage("error", "Falha ao mover oferta para o topo.");
     }
   };
@@ -316,9 +380,9 @@ export default function AdminDashboard() {
       const data = await response.json();
       if (data.ofertas) {
         setOfertas(data.ofertas);
-        showMessage("success", "🗑️ Oferta removida de ofertas.json.");
+        showMessage("success", "🗑️ Oferta removida com sucesso.");
       }
-    } catch (error) {
+    } catch {
       showMessage("error", "Falha ao excluir oferta.");
     }
   };
@@ -370,8 +434,8 @@ export default function AdminDashboard() {
       showMessage(
         "success",
         isEditing
-          ? "✅ Cupom atualizado em cupons.json!"
-          : "✅ Novo cupom adicionado em cupons.json!"
+          ? "✅ Cupom atualizado com sucesso!"
+          : "✅ Novo cupom adicionado com sucesso!"
       );
     } catch (error) {
       showMessage("error", error.message || "Falha ao salvar cupom.");
@@ -389,14 +453,14 @@ export default function AdminDashboard() {
       const data = await response.json();
       if (data.cupons) {
         setCupons(data.cupons);
-        showMessage("success", "🗑️ Cupom excluído de cupons.json.");
+        showMessage("success", "🗑️ Cupom excluído com sucesso.");
       }
-    } catch (error) {
+    } catch {
       showMessage("error", "Falha ao remover cupom.");
     }
   };
 
-  // Publicação Automática (Auto Git Push)
+  // Publicação Automática (Cloud Sync / Auto Git Push)
   const handlePublishToSite = async () => {
     setIsPublishing(true);
     setFeedback(null);
@@ -415,7 +479,7 @@ export default function AdminDashboard() {
           data.details
         );
       }
-    } catch (error) {
+    } catch {
       showMessage(
         "error",
         "Erro de comunicação ao tentar executar o Auto Deploy."
@@ -444,9 +508,122 @@ export default function AdminDashboard() {
     });
   }, [ofertas, adminSearch]);
 
+  // =========================================================================
+  // TELA DE LOGIN COM USUÁRIO E SENHA (ACESSÍVEL DE QUALQUER COMPUTADOR)
+  // =========================================================================
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[#080d1a] text-white font-sans flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#FFE600]/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-[#FFE600] text-slate-950 flex items-center justify-center font-black shadow-lg shadow-yellow-500/20 mb-3">
+              <Zap size={30} fill="currentColor" />
+            </div>
+            <h1 className="text-2xl font-black text-white tracking-tight">
+              Sidão Dicas <span className="text-[#FFE600]">Admin</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              Entre com seu usuário e senha para gerenciar ofertas de qualquer computador.
+            </p>
+          </div>
+
+          {loginError && (
+            <div className="mb-4 p-3 rounded-xl bg-red-950/80 border border-red-500/40 text-red-200 text-xs font-bold text-center">
+              {loginError}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                Usuário
+              </label>
+              <div className="relative">
+                <User
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="text"
+                  required
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Digite seu usuário..."
+                  className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white pl-10 pr-4 py-3 rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                Senha
+              </label>
+              <div className="relative">
+                <KeyRound
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Digite sua senha..."
+                  className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white pl-10 pr-10 py-3 rounded-xl"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  aria-label="Mostrar ou ocultar senha"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoggingIn}
+              className="w-full bg-[#FFE600] hover:bg-yellow-300 disabled:opacity-60 text-slate-950 font-black text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-yellow-400/15 transition-all active:scale-95 cursor-pointer mt-2"
+            >
+              {isLoggingIn ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Verificando...</span>
+                </>
+              ) : (
+                <>
+                  <Lock size={17} />
+                  <span>Entrar no Painel Admin</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+            <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+              <ShieldCheck size={14} /> Sessão Criptografada
+            </span>
+            <a href="/" className="hover:text-[#FFE600] font-bold">
+              ← Voltar para a Vitrine
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // PAINEL ADMIN AUTENTICADO
+  // =========================================================================
   return (
     <div className="min-h-screen bg-[#080d1a] text-white font-sans pb-16">
-      {/* Top Bar do Painel Admin com Botão de Auto Deploy */}
+      {/* Top Bar do Painel Admin com Botão de Auto Deploy e Logout */}
       <header className="sticky top-0 z-50 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center justify-between">
@@ -460,27 +637,37 @@ export default function AdminDashboard() {
                     Sidão Dicas <span className="text-[#FFE600]">Admin</span>
                   </h1>
                   <span className="text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                    🔒 Localhost
+                    🌐 Acesso Web Seguro
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Gerenciador Visual de Ofertas &amp; Cupons
+                  Gerenciador Remoto de Ofertas &amp; Cupons
                 </p>
               </div>
             </div>
 
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="sm:hidden text-xs font-bold text-slate-300 hover:text-[#FFE600] inline-flex items-center gap-1 bg-slate-900 border border-slate-800 px-2.5 py-1.5 rounded-lg"
-            >
-              <span>Ver Site</span>
-              <ExternalLink size={12} />
-            </a>
+            <div className="flex items-center gap-1.5 sm:hidden">
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-bold text-slate-300 hover:text-[#FFE600] inline-flex items-center gap-1 bg-slate-900 border border-slate-800 px-2.5 py-1.5 rounded-lg"
+              >
+                <span>Site</span>
+                <ExternalLink size={12} />
+              </a>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-xs font-bold text-red-300 bg-red-950/60 border border-red-500/30 px-2.5 py-1.5 rounded-lg"
+                title="Sair"
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <a
               href="/"
               target="_blank"
@@ -495,12 +682,12 @@ export default function AdminDashboard() {
               type="button"
               onClick={handlePublishToSite}
               disabled={isPublishing}
-              className="w-full sm:w-auto bg-gradient-to-r from-[#FFE600] via-amber-400 to-[#FF9900] hover:brightness-105 disabled:opacity-60 text-slate-950 font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20 active:scale-95 transition-all cursor-pointer"
+              className="flex-1 sm:flex-initial bg-gradient-to-r from-[#FFE600] via-amber-400 to-[#FF9900] hover:brightness-105 disabled:opacity-60 text-slate-950 font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20 active:scale-95 transition-all cursor-pointer"
             >
               {isPublishing ? (
                 <>
                   <Loader2 size={17} className="animate-spin" />
-                  <span>Publicando no Git / Vercel...</span>
+                  <span>Sincronizando...</span>
                 </>
               ) : (
                 <>
@@ -508,6 +695,16 @@ export default function AdminDashboard() {
                   <span>🚀 Salvar e Publicar no Site (Auto Deploy)</span>
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-red-300 bg-slate-900 hover:bg-red-950/50 border border-slate-700 hover:border-red-500/40 px-3 py-2.5 rounded-xl transition-colors cursor-pointer"
+              title="Encerrar sessão neste computador"
+            >
+              <LogOut size={15} />
+              <span>Sair</span>
             </button>
           </div>
         </div>
@@ -653,7 +850,6 @@ export default function AdminDashboard() {
 
             {/* Formulário Principal da Oferta */}
             <form onSubmit={handleSaveOffer} className="space-y-5">
-              {/* Título do Produto */}
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
                   Título do Produto *
@@ -670,7 +866,6 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              {/* Loja, Categoria e Tag de Destaque */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
@@ -733,7 +928,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Preço Antigo, Preço Atual, Preview de % OFF e Cupom Opcional */}
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
                 <div>
                   <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
@@ -776,7 +970,6 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                {/* Preview Instantâneo da % de Desconto */}
                 <div className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
                   <span className="text-xs text-slate-400 font-bold">
                     Desconto:
@@ -811,7 +1004,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* URL da Imagem com Preview Ao Lado */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-slate-950/60 border border-slate-800 rounded-2xl p-4">
                 <div className="md:col-span-2 space-y-4">
                   <div>
@@ -854,7 +1046,6 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Caixa de Preview da Foto */}
                 <div className="flex flex-col items-center justify-center bg-white rounded-xl h-40 p-3 relative overflow-hidden border-2 border-slate-700">
                   {offerForm.imagemUrl && !imagePreviewError ? (
                     <img
@@ -908,7 +1099,6 @@ export default function AdminDashboard() {
         =================================================================== */}
         {activeTab === "cupons" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Formulário de Cupom */}
             <section className="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl self-start">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
                 <h2 className="text-base sm:text-lg font-black text-white">
@@ -1033,7 +1223,6 @@ export default function AdminDashboard() {
               </form>
             </section>
 
-            {/* Lista de Cupons Ativos */}
             <section className="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
               <h2 className="text-base sm:text-lg font-black text-white mb-4 pb-3 border-b border-slate-800">
                 Cupons Cadastrados ({cupons.length})
@@ -1152,7 +1341,6 @@ export default function AdminDashboard() {
                       key={item.id}
                       className="bg-slate-950/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-3.5 sm:p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-colors"
                     >
-                      {/* Info do Produto */}
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div className="w-16 h-16 rounded-xl bg-white p-1.5 flex items-center justify-center shrink-0">
                           <img
@@ -1210,7 +1398,6 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      {/* Botões de Ação: Copy WhatsApp, Mover Topo, Editar, Excluir */}
                       <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <button
                           type="button"

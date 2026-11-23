@@ -1,26 +1,8 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { isAuthenticated } from "../../../../lib/adminAuth";
+import { readJsonData, writeJsonData } from "../../../../lib/adminStorage";
 
-const OFERTAS_PATH = path.join(process.cwd(), "src", "data", "ofertas.json");
-
-function isProduction() {
-  return process.env.NODE_ENV === "production";
-}
-
-async function readOfertas() {
-  try {
-    const raw = await fs.readFile(OFERTAS_PATH, "utf-8");
-    return JSON.parse(raw);
-  } catch (err) {
-    console.error("Erro ao ler ofertas.json:", err);
-    return [];
-  }
-}
-
-async function writeOfertas(ofertas) {
-  await fs.writeFile(OFERTAS_PATH, JSON.stringify(ofertas, null, 2) + "\n", "utf-8");
-}
+const FILENAME = "ofertas.json";
 
 function calcDiscount(precoAntigo, precoAtual) {
   const oldP = Number(precoAntigo);
@@ -32,22 +14,22 @@ function calcDiscount(precoAntigo, precoAtual) {
 }
 
 export async function GET() {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const ofertas = await readOfertas();
+  const ofertas = await readJsonData(FILENAME);
   return NextResponse.json({ ofertas });
 }
 
 export async function POST(request) {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    const ofertas = await readOfertas();
+    const ofertas = await readJsonData(FILENAME);
 
     const precoAntigo = Number(body.precoAntigo) || 0;
     const precoAtual = Number(body.precoAtual) || 0;
@@ -71,7 +53,11 @@ export async function POST(request) {
     };
 
     const atualizadas = [novaOferta, ...ofertas];
-    await writeOfertas(atualizadas);
+    await writeJsonData(
+      FILENAME,
+      atualizadas,
+      `Nova oferta: ${novaOferta.titulo.slice(0, 40)}`
+    );
 
     return NextResponse.json({
       success: true,
@@ -81,20 +67,20 @@ export async function POST(request) {
   } catch (error) {
     console.error("Erro ao adicionar oferta:", error);
     return NextResponse.json(
-      { error: "Falha ao salvar a nova oferta." },
+      { error: error.message || "Falha ao salvar a nova oferta." },
       { status: 500 }
     );
   }
 }
 
 export async function PUT(request) {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    const ofertas = await readOfertas();
+    const ofertas = await readJsonData(FILENAME);
 
     // Ação: Mover oferta para o topo
     if (body.action === "move_to_top" && body.id !== undefined) {
@@ -118,7 +104,11 @@ export async function PUT(request) {
         (item) => String(item.id) !== String(body.id)
       );
       const atualizadas = [target, ...remaining];
-      await writeOfertas(atualizadas);
+      await writeJsonData(
+        FILENAME,
+        atualizadas,
+        `Oferta movida para o topo: ${target.titulo.slice(0, 40)}`
+      );
 
       return NextResponse.json({
         success: true,
@@ -158,7 +148,11 @@ export async function PUT(request) {
       };
     });
 
-    await writeOfertas(atualizadas);
+    await writeJsonData(
+      FILENAME,
+      atualizadas,
+      "Oferta editada via Painel Admin"
+    );
 
     return NextResponse.json({
       success: true,
@@ -167,15 +161,15 @@ export async function PUT(request) {
   } catch (error) {
     console.error("Erro ao atualizar oferta:", error);
     return NextResponse.json(
-      { error: "Falha ao atualizar a oferta." },
+      { error: error.message || "Falha ao atualizar a oferta." },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(request) {
-  if (isProduction()) {
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   try {
@@ -194,9 +188,13 @@ export async function DELETE(request) {
       );
     }
 
-    const ofertas = await readOfertas();
+    const ofertas = await readJsonData(FILENAME);
     const atualizadas = ofertas.filter((item) => String(item.id) !== String(id));
-    await writeOfertas(atualizadas);
+    await writeJsonData(
+      FILENAME,
+      atualizadas,
+      "Oferta removida via Painel Admin"
+    );
 
     return NextResponse.json({
       success: true,
@@ -205,7 +203,7 @@ export async function DELETE(request) {
   } catch (error) {
     console.error("Erro ao remover oferta:", error);
     return NextResponse.json(
-      { error: "Falha ao excluir a oferta." },
+      { error: error.message || "Falha ao excluir a oferta." },
       { status: 500 }
     );
   }

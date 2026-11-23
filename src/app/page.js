@@ -1,8 +1,9 @@
 import React from "react";
 import OffersShowcase from "../components/OffersShowcase";
 import Footer from "../components/Footer";
-import ofertas from "../data/ofertas.json";
-import cupons from "../data/cupons.json";
+import { readJsonData } from "../lib/adminStorage";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Sidão Dicas & Ofertas | Radar de Ofertas Verificadas em Tempo Real",
@@ -17,7 +18,12 @@ export const metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const [ofertas, cupons] = await Promise.all([
+    readJsonData("ofertas.json"),
+    readJsonData("cupons.json"),
+  ]);
+
   return (
     <div className="min-h-screen flex flex-col bg-[#080d1a] text-white font-sans">
       {/* Header Unificado + Barra de Cupons Retrátil + Vitrine Imediata de Produtos */}
