@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { isAuthenticated } from "../../../../lib/adminAuth";
 import { readJsonData, writeJsonData } from "../../../../lib/adminStorage";
 
@@ -18,7 +19,7 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const ofertas = await readJsonData(FILENAME);
+  const ofertas = await readJsonData(FILENAME, { bypassCache: true });
   return NextResponse.json({ ofertas });
 }
 
@@ -61,6 +62,7 @@ export async function POST(request) {
       atualizadas,
       `Nova oferta: ${novaOferta.titulo.slice(0, 40)}`
     );
+    revalidatePath("/");
 
     return NextResponse.json({
       success: true,
@@ -112,6 +114,7 @@ export async function PUT(request) {
         atualizadas,
         `Oferta movida para o topo: ${target.titulo.slice(0, 40)}`
       );
+      revalidatePath("/");
 
       return NextResponse.json({
         success: true,
@@ -165,6 +168,7 @@ export async function PUT(request) {
       atualizadas,
       "Oferta editada via Painel Admin"
     );
+    revalidatePath("/");
 
     return NextResponse.json({
       success: true,
@@ -207,6 +211,7 @@ export async function DELETE(request) {
       atualizadas,
       "Oferta removida via Painel Admin"
     );
+    revalidatePath("/");
 
     return NextResponse.json({
       success: true,

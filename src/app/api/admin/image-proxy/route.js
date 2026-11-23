@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "../../../../lib/adminAuth";
 
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
+
 export async function GET(request) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
@@ -38,9 +40,29 @@ export async function GET(request) {
         );
       }
 
-      const contentType =
-        response.headers.get("content-type") || "image/jpeg";
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.startsWith("image/")) {
+        return NextResponse.json(
+          { error: "O link informado não retornou uma imagem válida." },
+          { status: 400 }
+        );
+      }
+
+      const contentLength = Number(response.headers.get("content-length") || 0);
+      if (contentLength > MAX_IMAGE_BYTES) {
+        return NextResponse.json(
+          { error: "Imagem excede o limite de 10 MB." },
+          { status: 413 }
+        );
+      }
+
       const arrayBuffer = await response.arrayBuffer();
+      if (arrayBuffer.byteLength > MAX_IMAGE_BYTES) {
+        return NextResponse.json(
+          { error: "Imagem excede o limite de 10 MB." },
+          { status: 413 }
+        );
+      }
 
       return new NextResponse(arrayBuffer, {
         status: 200,

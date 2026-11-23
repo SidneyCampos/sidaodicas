@@ -4,8 +4,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowUp,
+  Camera,
   Check,
   CheckCircle2,
+  ChevronDown,
   Copy,
   Edit3,
   ExternalLink,
@@ -37,6 +39,7 @@ import {
   formatRelativeVerifiedTime,
 } from "./ProductCard";
 import WhatsAppCreativeStudio, {
+  buildInstagramCaption,
   buildViralWhatsAppCopy,
   formatBRLPrice,
 } from "./WhatsAppCreativeStudio";
@@ -109,9 +112,12 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     lastAutoSyncAt: null,
   });
 
-  // Estado da lista de Ofertas Ativas & Modal de Kit WhatsApp
+  // Estado da lista de Ofertas Ativas (Paginação escalável + Filtro + Kit WhatsApp/Instagram)
   const [adminSearch, setAdminSearch] = useState("");
+  const [adminStoreFilter, setAdminStoreFilter] = useState("Todas");
+  const [adminVisibleCount, setAdminVisibleCount] = useState(20);
   const [copiedWhatsAppId, setCopiedWhatsAppId] = useState(null);
+  const [copiedInstagramId, setCopiedInstagramId] = useState(null);
   const [studioModalOffer, setStudioModalOffer] = useState(null);
 
   // Estado do Auto Deploy (Git Push / Cloud Sync)
@@ -213,6 +219,19 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       }, 3000);
     } catch (err) {
       console.error("Erro ao copiar texto para WhatsApp:", err);
+    }
+  };
+
+  const handleCopyInstagram = async (product) => {
+    const captionText = buildInstagramCaption(product);
+    try {
+      await navigator.clipboard.writeText(captionText);
+      setCopiedInstagramId(product.id);
+      setTimeout(() => {
+        setCopiedInstagramId((prev) => (prev === product.id ? null : prev));
+      }, 3000);
+    } catch (err) {
+      console.error("Erro ao copiar legenda para Instagram:", err);
     }
   };
 
@@ -519,16 +538,23 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     }
   };
 
+  useEffect(() => {
+    setAdminVisibleCount(20);
+  }, [adminSearch, adminStoreFilter]);
+
   const filteredAdminOffers = useMemo(() => {
     const q = adminSearch.trim().toLowerCase();
-    const list = !q
-      ? ofertas
-      : ofertas.filter(
-          (o) =>
-            (o.titulo && o.titulo.toLowerCase().includes(q)) ||
-            (o.loja && o.loja.toLowerCase().includes(q)) ||
-            (o.cupomOpcional && o.cupomOpcional.toLowerCase().includes(q))
-        );
+    const list = ofertas.filter((o) => {
+      const matchesStore =
+        adminStoreFilter === "Todas" ||
+        (o.loja && o.loja.toLowerCase() === adminStoreFilter.toLowerCase());
+      const matchesSearch =
+        !q ||
+        (o.titulo && o.titulo.toLowerCase().includes(q)) ||
+        (o.loja && o.loja.toLowerCase().includes(q)) ||
+        (o.cupomOpcional && o.cupomOpcional.toLowerCase().includes(q));
+      return matchesStore && matchesSearch;
+    });
 
     return [...list].sort((a, b) => {
       const timeA = a.criadoEm ? new Date(a.criadoEm).getTime() : 0;
@@ -536,7 +562,11 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       if (timeB !== timeA) return timeB - timeA;
       return (Number(b.id) || 0) - (Number(a.id) || 0);
     });
-  }, [ofertas, adminSearch]);
+  }, [ofertas, adminSearch, adminStoreFilter]);
+
+  const visibleAdminOffers = useMemo(() => {
+    return filteredAdminOffers.slice(0, adminVisibleCount);
+  }, [filteredAdminOffers, adminVisibleCount]);
 
   // Verifica se determinado campo falhou na extração para destacar a borda
   const isFieldMissing = (keyword) => {
@@ -1602,18 +1632,33 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
                 </p>
               </div>
 
-              <div className="relative w-full sm:w-72">
-                <Search
-                  size={15}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  type="text"
-                  value={adminSearch}
-                  onChange={(e) => setAdminSearch(e.target.value)}
-                  placeholder="Filtrar ofertas cadastradas..."
-                  className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white pl-8 pr-3 py-2 rounded-xl"
-                />
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={adminStoreFilter}
+                  onChange={(e) => setAdminStoreFilter(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white px-3 py-2 rounded-xl"
+                >
+                  <option value="Todas">Todas as Lojas</option>
+                  {STORES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="relative w-full sm:w-64">
+                  <Search
+                    size={15}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="text"
+                    value={adminSearch}
+                    onChange={(e) => setAdminSearch(e.target.value)}
+                    placeholder="Filtrar ofertas cadastradas..."
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-xs text-white pl-8 pr-3 py-2 rounded-xl"
+                  />
+                </div>
               </div>
             </div>
 
@@ -1624,13 +1669,14 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredAdminOffers.map((item, idx) => {
+                {visibleAdminOffers.map((item, idx) => {
                   const discount = calculateDiscountPercentage(
                     item.precoAntigo,
                     item.precoAtual,
                     item.descontoPercentual
                   );
-                  const isCopied = copiedWhatsAppId === item.id;
+                  const isWaCopied = copiedWhatsAppId === item.id;
+                  const isIgCopied = copiedInstagramId === item.id;
 
                   return (
                     <div
@@ -1694,69 +1740,124 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                         <button
                           type="button"
                           onClick={() => setStudioModalOffer(item)}
-                          className="bg-pink-600 hover:bg-pink-500 text-white text-xs font-black px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-md"
+                          className="bg-slate-800 hover:bg-slate-700 border border-[#FFE600]/40 text-[#FFE600] text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                          title="Abrir gerador de Arte PNG + Texto WhatsApp + Legenda Instagram"
                         >
                           <Sparkles size={14} />
-                          <span>🎨 Arte + Texto</span>
+                          <span>🎨 Arte + Textos</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => handleCopyWhatsApp(item)}
-                          className={`text-xs font-black px-3 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
-                            isCopied
-                              ? "bg-emerald-500 text-slate-950"
+                          className={`text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                            isWaCopied
+                              ? "bg-emerald-400 text-slate-950"
                               : "bg-[#25D366] hover:bg-[#1fae54] text-slate-950"
                           }`}
+                          title="Copiar texto formatado para WhatsApp"
                         >
-                          {isCopied ? (
+                          {isWaCopied ? (
                             <>
                               <Check size={14} strokeWidth={3} />
-                              <span>✅ Copiado!</span>
+                              <span>Copiado!</span>
                             </>
                           ) : (
                             <>
-                              <Copy size={14} />
-                              <span>📲 Copy</span>
+                              <Copy size={13} />
+                              <span>📲 WhatsApp</span>
                             </>
                           )}
                         </button>
 
                         <button
                           type="button"
+                          onClick={() => handleCopyInstagram(item)}
+                          className={`text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                            isIgCopied
+                              ? "bg-emerald-400 text-slate-950"
+                              : "bg-gradient-to-r from-pink-600 to-amber-500 hover:brightness-110 text-white"
+                          }`}
+                          title="Copiar legenda formatada para Instagram"
+                        >
+                          {isIgCopied ? (
+                            <>
+                              <Check size={14} strokeWidth={3} />
+                              <span>Copiado!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Camera size={13} />
+                              <span>📸 Insta</span>
+                            </>
+                          )}
+                        </button>
+
+                        <a
+                          href={item.linkAfiliado}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl inline-flex items-center gap-1"
+                          title="Abrir link de afiliado em nova aba"
+                        >
+                          <ExternalLink size={13} />
+                          <span>Link</span>
+                        </a>
+
+                        <button
+                          type="button"
                           onClick={() => handleMoveOfferToTop(item.id)}
-                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer"
+                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
                           title="Mover para o topo da vitrine"
                         >
-                          <ArrowUp size={14} className="text-[#FFE600]" />
+                          <ArrowUp size={13} className="text-[#FFE600]" />
                           <span>Topo</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => handleEditOffer(item)}
-                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer"
+                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
                         >
-                          <Edit3 size={14} />
+                          <Edit3 size={13} />
                           <span>Editar</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => handleDeleteOffer(item.id)}
-                          className="bg-red-950/80 hover:bg-red-900 border border-red-500/30 text-red-300 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center gap-1 cursor-pointer"
+                          className="bg-red-950/80 hover:bg-red-900 border border-red-500/30 text-red-300 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer"
                         >
-                          <Trash2 size={14} />
-                          <span>Excluir</span>
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </div>
                   );
                 })}
+
+                {filteredAdminOffers.length > adminVisibleCount && (
+                  <div className="pt-4 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setAdminVisibleCount((prev) => prev + 20)}
+                      className="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <span>
+                        Carregar mais ofertas (+
+                        {Math.min(
+                          20,
+                          filteredAdminOffers.length - adminVisibleCount
+                        )}
+                        )
+                      </span>
+                      <ChevronDown size={14} className="text-[#FFE600]" />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </section>

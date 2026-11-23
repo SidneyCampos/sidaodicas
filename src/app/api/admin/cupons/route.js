@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { isAuthenticated } from "../../../../lib/adminAuth";
 import { readJsonData, writeJsonData } from "../../../../lib/adminStorage";
 
@@ -9,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const cupons = await readJsonData(FILENAME);
+  const cupons = await readJsonData(FILENAME, { bypassCache: true });
   return NextResponse.json({ cupons });
 }
 
@@ -37,6 +38,7 @@ export async function POST(request) {
       atualizados,
       `Novo cupom: ${novoCupom.codigo}`
     );
+    revalidatePath("/");
 
     return NextResponse.json({
       success: true,
@@ -88,6 +90,7 @@ export async function PUT(request) {
       atualizados,
       "Cupom atualizado via Painel Admin"
     );
+    revalidatePath("/");
 
     return NextResponse.json({
       success: true,
@@ -130,6 +133,7 @@ export async function DELETE(request) {
       atualizados,
       "Cupom removido via Painel Admin"
     );
+    revalidatePath("/");
 
     return NextResponse.json({
       success: true,

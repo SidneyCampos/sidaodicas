@@ -6,6 +6,10 @@ const REPO_OWNER = process.env.GITHUB_OWNER || "SidneyCampos";
 const REPO_NAME = process.env.GITHUB_REPO || "sidaodicas";
 const REPO_BRANCH = process.env.GITHUB_BRANCH || "main";
 
+// Cache em memória de leitura (protege contra picos de tráfego viral e limites da API do GitHub)
+const memoryCache = new Map();
+const READ_CACHE_TTL_MS = 60 * 1000; // 60 segundos entre revalidações automáticas
+
 function getPaths(filename) {
   const projectPath = path.join(
     /*turbopackIgnore: true*/ process.cwd(),
@@ -33,6 +37,18 @@ async function fetchFromGitHub(githubPath) {
   if (!res.ok) return null;
 
   const json = await res.json();
+
+  // Suporte escalável: se o JSON ultrapassar 1 MB, a API Contents omite `content` e fornece `download_url`
+  if (!json.content && json.download_url) {
+    const rawRes = await fetch(json.download_url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      cache: "no-store",
+    });
+    if (!rawRes.ok) return null;
+    const rawText = await rawRes.text();
+    return { data: JSON.parse(rawText), sha: json.sha };
+  }
+
   if (!json.content) return null;
 
   const decoded = Buffer.from(json.content, "base64").toString("utf-8");
@@ -42,7 +58,7 @@ async function fetchFromGitHub(githubPath) {
   };
 }
 
-async function saveToGitHub(githubPath, data, commitMessage) {
+async function saveToGitHub(githubPath, data, commitMessage, retries = 2) {
   const token = process.env.GITHUB_TOKEN;
   if (!token) return { savedToGitHub: false };
 
@@ -53,47 +69,64 @@ async function saveToGitHub(githubPath, data, commitMessage) {
     "User-Agent": "SidaoDicas-Admin",
   };
 
-  const getUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${githubPath}?ref=${REPO_BRANCH}`;
-  let sha;
-  const getRes = await fetch(getUrl, { headers, cache: "no-store" });
-  if (getRes.ok) {
-    const existing = await getRes.json();
-    sha = existing.sha;
-  }
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const getUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${githubPath}?ref=${REPO_BRANCH}`;
+    let sha;
+    const getRes = await fetch(getUrl, { headers, cache: "no-store" });
+    if (getRes.ok) {
+      const existing = await getRes.json();
+      sha = existing.sha;
+    }
 
-  const contentBase64 = Buffer.from(
-    JSON.stringify(data, null, 2) + "\n",
-    "utf-8"
-  ).toString("base64");
+    const contentBase64 = Buffer.from(
+      JSON.stringify(data, null, 2) + "\n",
+      "utf-8"
+    ).toString("base64");
 
-  const putUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${githubPath}`;
-  const putRes = await fetch(putUrl, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({
-      message: commitMessage || `Atualizacao de ${githubPath} via Painel Admin`,
-      content: contentBase64,
-      sha,
-      branch: REPO_BRANCH,
-    }),
-  });
+    const putUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${githubPath}`;
+    const putRes = await fetch(putUrl, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({
+        message: commitMessage || `Atualizacao de ${githubPath} via Painel Admin`,
+        content: contentBase64,
+        sha,
+        branch: REPO_BRANCH,
+      }),
+    });
 
-  if (!putRes.ok) {
+    if (putRes.ok) {
+      return { savedToGitHub: true };
+    }
+
+    // Retry automático em caso de conflito de SHA (409) por edições muito rápidas
+    if (putRes.status === 409 && attempt < retries) {
+      continue;
+    }
+
     const errText = await putRes.text();
-    throw new Error(`Erro GitHub API: ${errText}`);
+    throw new Error(`Erro GitHub API (${putRes.status}): ${errText}`);
   }
 
-  return { savedToGitHub: true };
+  return { savedToGitHub: false };
 }
 
-export async function readJsonData(filename) {
+export async function readJsonData(filename, { bypassCache = false } = {}) {
+  const now = Date.now();
+  const cached = memoryCache.get(filename);
+
+  if (!bypassCache && cached && now - cached.timestamp < READ_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
   const { projectPath, tmpPath, githubPath } = getPaths(filename);
 
-  // 1. Se houver GITHUB_TOKEN configurado na Vercel, lê a versão mais recente do repositório
+  // 1. Se houver GITHUB_TOKEN configurado na Vercel, lê a versão mais recente do repositório (com cache)
   if (process.env.GITHUB_TOKEN) {
     try {
       const gh = await fetchFromGitHub(githubPath);
       if (gh && gh.data && typeof gh.data === "object") {
+        memoryCache.set(filename, { data: gh.data, timestamp: now });
         return gh.data;
       }
     } catch (e) {
@@ -105,7 +138,10 @@ export async function readJsonData(filename) {
   try {
     const tmpRaw = await fs.readFile(tmpPath, "utf-8");
     const parsed = JSON.parse(tmpRaw);
-    if (parsed && typeof parsed === "object") return parsed;
+    if (parsed && typeof parsed === "object") {
+      memoryCache.set(filename, { data: parsed, timestamp: now });
+      return parsed;
+    }
   } catch {
     // Ignora se /tmp ainda não existir
   }
@@ -113,16 +149,21 @@ export async function readJsonData(filename) {
   // 3. Lê do arquivo local do projeto (src/data/*.json)
   try {
     const raw = await fs.readFile(projectPath, "utf-8");
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    memoryCache.set(filename, { data: parsed, timestamp: now });
+    return parsed;
   } catch (err) {
     console.error(`Erro ao ler ${filename}:`, err);
-    return [];
+    return filename.includes("Config") ? {} : [];
   }
 }
 
 export async function writeJsonData(filename, data, commitMessage) {
   const { projectPath, tmpPath, githubPath } = getPaths(filename);
   const formatted = JSON.stringify(data, null, 2) + "\n";
+
+  // Atualiza cache em memória imediatamente para zero atraso na interface
+  memoryCache.set(filename, { data, timestamp: Date.now() });
 
   // 1. Tenta salvar no arquivo local do projeto (funciona em servidor próprio/PC)
   try {
@@ -138,7 +179,7 @@ export async function writeJsonData(filename, data, commitMessage) {
     // Ignora falha em /tmp
   }
 
-  // 3. Se GITHUB_TOKEN estiver configurado, comita direto no GitHub via API (sincroniza entre todos os 3 PCs!)
+  // 3. Se GITHUB_TOKEN estiver configurado, comita direto no GitHub via API (com retry contra conflito 409)
   if (process.env.GITHUB_TOKEN) {
     await saveToGitHub(githubPath, data, commitMessage);
   }

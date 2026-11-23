@@ -2,15 +2,14 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {
+  AlertTriangle,
+  Camera,
   Check,
   Copy,
   Download,
-  Image as ImageIcon,
-  Palette,
+  MessageCircle,
   RefreshCw,
-  Share2,
   Sparkles,
-  AlertTriangle,
 } from "lucide-react";
 import { calculateDiscountPercentage } from "./ProductCard";
 
@@ -102,8 +101,9 @@ export function buildViralWhatsAppCopy(offer = {}) {
   const cupom = (offer.cupomOpcional || "").trim().toUpperCase();
   const link = (offer.linkAfiliado || "").trim();
 
-  // Linha 1 (Gancho viral igual ao print)
-  let headline = `🔥 *${(offer.destaqueTag || "OFERTA VERIFICADA").toUpperCase()} NA ${loja.toUpperCase()}* 😱`;
+  let headline = `🔥 *${(
+    offer.destaqueTag || "OFERTA VERIFICADA"
+  ).toUpperCase()} NA ${loja.toUpperCase()}* 😱`;
   if (vendidos) {
     const cleanSold = vendidos
       .replace(/vendidos/i, "")
@@ -155,6 +155,88 @@ export function buildViralWhatsAppCopy(offer = {}) {
   return lines.join("\n");
 }
 
+export function buildInstagramCaption(offer = {}) {
+  const titulo = (offer.titulo || "Produto em Oferta").trim();
+  const subtitulo = (offer.subtitulo || "").trim();
+  const loja = offer.loja || "Loja Oficial";
+  const categoria = offer.categoria || "Mais Vendidos";
+  const precoAntigo = Number(offer.precoAntigo) || 0;
+  const precoAtual = Number(offer.precoAtual) || 0;
+  const desconto = calculateDiscountPercentage(
+    precoAntigo,
+    precoAtual,
+    offer.descontoPercentual
+  );
+  const economia = precoAntigo > precoAtual ? precoAntigo - precoAtual : 0;
+  const nota = (offer.nota || "").trim();
+  const vendidos = (offer.vendidos || "").trim();
+  const cupom = (offer.cupomOpcional || "").trim().toUpperCase();
+
+  const storeHashtag =
+    loja === "Amazon"
+      ? "#amazonbrasil #achadosamazon"
+      : loja === "Mercado Livre"
+      ? "#mercadolivre #achadosmercadolivre"
+      : "#shopee #achadinhosshopee #shopeebrasil";
+
+  const catHashtag =
+    categoria === "Games"
+      ? "#games #gamer #setupgamer"
+      : categoria === "Eletrônicos"
+      ? "#eletronicos #tecnologia #tech"
+      : categoria === "Casa"
+      ? "#casa #utilidadesdomesticas #dicasdecasa"
+      : "#maisvendidos #imperdivel";
+
+  const lines = [
+    `🚨 ACHADO DO DIA ${desconto > 0 ? `COM ${desconto}% OFF ` : ""}NA ${loja.toUpperCase()}! 🔥`,
+    ``,
+    `✨ ${titulo}`,
+  ];
+
+  if (subtitulo) {
+    lines.push(`💡 ${subtitulo}`);
+  }
+
+  lines.push(``);
+
+  if (precoAntigo > precoAtual && precoAtual > 0) {
+    lines.push(`❌ De ${formatBRLPrice(precoAntigo)}`);
+    lines.push(`✅ Por apenas ${formatBRLPrice(precoAtual)}!`);
+    lines.push(`💸 Você economiza ${formatBRLPrice(economia)} hoje!`);
+  } else if (precoAtual > 0) {
+    lines.push(`✅ Por apenas ${formatBRLPrice(precoAtual)}!`);
+  }
+
+  if (cupom) {
+    lines.push(`🎟️ Aplique o cupom: ${cupom}`);
+  }
+
+  if (vendidos || nota) {
+    const proof = [
+      vendidos ? `🔥 ${vendidos}` : null,
+      nota ? `⭐ Nota ${nota} de 5` : null,
+    ]
+      .filter(Boolean)
+      .join("  •  ");
+    lines.push(``);
+    lines.push(proof);
+  }
+
+  lines.push(
+    ``,
+    `👇 COMO GARANTIR ESSA OFERTA:`,
+    `💬 Comente "QUERO" que te envio o link no Direct, ou acesse direto pelo LINK NA BIO / STORIES!`,
+    ``,
+    `⚠️ Atenção: os preços e estoques podem mudar a qualquer momento na loja oficial.`,
+    `📌 Salve este post para não perder e marque alguém que precisa ver isso! 💛`,
+    ``,
+    `#sidaodicas #promocao #ofertasdodia #achadinhos #desconto ${storeHashtag} ${catHashtag}`
+  );
+
+  return lines.join("\n");
+}
+
 function drawRoundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -188,12 +270,14 @@ function wrapTextLines(ctx, text, maxWidth, maxLines = 2) {
     lines.push(current);
   }
 
-  // Trunca com "..." se a última linha ainda passar do limite
   if (lines.length === maxLines) {
     let last = lines[maxLines - 1];
     const usedWords = lines.join(" ").split(/\s+/).length;
     if (usedWords < words.length) {
-      while (ctx.measureText(last + "...").width > maxWidth && last.length > 3) {
+      while (
+        ctx.measureText(last + "...").width > maxWidth &&
+        last.length > 3
+      ) {
         last = last.slice(0, -1);
       }
       lines[maxLines - 1] = last.trim() + "...";
@@ -206,26 +290,34 @@ function wrapTextLines(ctx, text, maxWidth, maxLines = 2) {
 export default function WhatsAppCreativeStudio({ offer }) {
   const canvasRef = useRef(null);
   const [selectedTheme, setSelectedTheme] = useState("rosa");
-  const [customCopy, setCustomCopy] = useState("");
-  const [isCopyEditedManually, setIsCopyEditedManually] = useState(false);
-  const [copiedText, setCopiedText] = useState(false);
-  const [copiedImage, setCopiedImage] = useState(false);
+  const [textTab, setTextTab] = useState("whatsapp"); // "whatsapp" | "instagram"
+
+  const [customWaCopy, setCustomWaCopy] = useState("");
+  const [isWaEdited, setIsWaEdited] = useState(false);
+
+  const [customIgCopy, setCustomIgCopy] = useState("");
+  const [isIgEdited, setIsIgEdited] = useState(false);
+
+  const [copiedMode, setCopiedMode] = useState(null); // "wa" | "ig" | "img"
   const [imageLoadError, setImageLoadError] = useState(false);
   const [isRenderingCanvas, setIsRenderingCanvas] = useState(false);
 
-  const generatedCopy = buildViralWhatsAppCopy(offer);
+  const generatedWaCopy = buildViralWhatsAppCopy(offer);
+  const generatedIgCopy = buildInstagramCaption(offer);
 
-  // Atualiza automaticamente o texto quando os dados da oferta mudam (a menos que o usuário tenha editado manualmente)
   useEffect(() => {
-    if (!isCopyEditedManually) {
-      setCustomCopy(generatedCopy);
-    }
-  }, [generatedCopy, isCopyEditedManually]);
+    if (!isWaEdited) setCustomWaCopy(generatedWaCopy);
+  }, [generatedWaCopy, isWaEdited]);
 
-  // Reseta a edição manual quando troca de produto
   useEffect(() => {
-    setIsCopyEditedManually(false);
-    setCustomCopy(buildViralWhatsAppCopy(offer));
+    if (!isIgEdited) setCustomIgCopy(generatedIgCopy);
+  }, [generatedIgCopy, isIgEdited]);
+
+  useEffect(() => {
+    setIsWaEdited(false);
+    setIsIgEdited(false);
+    setCustomWaCopy(buildViralWhatsAppCopy(offer));
+    setCustomIgCopy(buildInstagramCaption(offer));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [offer.linkAfiliado, offer.id]);
 
@@ -249,14 +341,12 @@ export default function WhatsAppCreativeStudio({ offer }) {
       canvas.width = W;
       canvas.height = H;
 
-      // 1. Fundo Gradiente Vibrante
       const grad = ctx.createLinearGradient(0, 0, 0, H);
       grad.addColorStop(0, theme.bgTop);
       grad.addColorStop(1, theme.bgBottom);
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, W, H);
 
-      // 2. Cartão Branco Arredondado da Foto (com sombra suave)
       const cardX = 86;
       const cardY = 52;
       const cardW = W - cardX * 2;
@@ -271,7 +361,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
       ctx.fill();
       ctx.restore();
 
-      // 3. Desenha Foto do Produto via Proxy (evita CORS ao exportar PNG)
       if (offer.imagemUrl) {
         try {
           const proxiedUrl = `/api/admin/image-proxy?url=${encodeURIComponent(
@@ -333,7 +422,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
         offer.descontoPercentual
       );
 
-      // Badge da Loja no canto superior esquerdo do cartão branco
       const storeLabel = (offer.loja || "OFERTA").toUpperCase();
       ctx.font = "900 24px system-ui, -apple-system, sans-serif";
       const storeTextW = ctx.measureText(storeLabel).width;
@@ -357,7 +445,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
       ctx.textBaseline = "middle";
       ctx.fillText(storeLabel, cardX + 24 + storePillW / 2, cardY + 48);
 
-      // Badge -XX% OFF no canto superior direito do cartão branco
       if (desconto > 0) {
         const offText = `-${desconto}% OFF`;
         ctx.font = "900 28px system-ui, -apple-system, sans-serif";
@@ -371,7 +458,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
         ctx.fillText(offText, cardX + cardW - offW / 2 - 24, cardY + 50);
       }
 
-      // 4. Título do Produto Centralizado (até 2 linhas)
       ctx.textAlign = "center";
       ctx.textBaseline = "alphabetic";
       ctx.fillStyle = theme.titleColor;
@@ -389,7 +475,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
         cursorY += 50;
       }
 
-      // 5. Preço Antigo Riscado ("de R$ 119,98" com traço vermelho no preço)
       if (precoAntigo > precoAtual && precoAtual > 0) {
         const deText = "de ";
         const oldValText = formatBRLPrice(precoAntigo);
@@ -405,7 +490,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
         ctx.fillText(deText, startX, oldY);
         ctx.fillText(oldValText, startX + deW, oldY);
 
-        // Linha vermelha riscando o valor antigo
         ctx.strokeStyle = theme.strikeColor;
         ctx.lineWidth = 4.5;
         ctx.beginPath();
@@ -418,7 +502,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
         cursorY += 20;
       }
 
-      // 6. Preço Atual Gigante ("por R$ 20,99")
       const porText = "por ";
       const currentValText =
         precoAtual > 0 ? formatBRLPrice(precoAtual) : "R$ --,--";
@@ -441,7 +524,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
       ctx.fillStyle = theme.priceColor;
       ctx.fillText(currentValText, priceStartX + porW, priceY);
 
-      // Mini badge de cupom se houver
       if (offer.cupomOpcional) {
         const cupomLabel = `🎟️ CUPOM: ${offer.cupomOpcional.toUpperCase()}`;
         ctx.font = "900 26px monospace";
@@ -455,7 +537,6 @@ export default function WhatsAppCreativeStudio({ offer }) {
         ctx.fillText(cupomLabel, W / 2, priceY + 42);
       }
 
-      // 7. Faixa Escura Inferior com Prova Social em Amarelo (Idêntica ao Print!)
       const footerH = 92;
       const footerY = H - footerH;
       ctx.fillStyle = theme.footerBg;
@@ -497,11 +578,12 @@ export default function WhatsAppCreativeStudio({ offer }) {
     selectedTheme,
   ]);
 
-  const handleCopyText = async () => {
+  const handleCopyText = async (mode) => {
+    const textToCopy = mode === "ig" ? customIgCopy : customWaCopy;
     try {
-      await navigator.clipboard.writeText(customCopy);
-      setCopiedText(true);
-      setTimeout(() => setCopiedText(false), 3000);
+      await navigator.clipboard.writeText(textToCopy);
+      setCopiedMode(mode);
+      setTimeout(() => setCopiedMode(null), 3000);
     } catch (err) {
       console.error("Erro ao copiar texto:", err);
     }
@@ -532,13 +614,12 @@ export default function WhatsAppCreativeStudio({ offer }) {
         await navigator.clipboard.write([
           new window.ClipboardItem({ "image/png": blob }),
         ]);
-        setCopiedImage(true);
-        setTimeout(() => setCopiedImage(false), 3000);
+        setCopiedMode("img");
+        setTimeout(() => setCopiedMode(null), 3000);
       } else {
         handleDownloadImage();
       }
-    } catch (err) {
-      console.warn("Navegador bloqueou cópia direta de imagem, baixando PNG:", err);
+    } catch {
       handleDownloadImage();
     }
   };
@@ -549,14 +630,13 @@ export default function WhatsAppCreativeStudio({ offer }) {
         <div>
           <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
             <Sparkles size={18} className="text-[#FFE600]" />
-            <span>Kit Pronto para WhatsApp (Imagem + Copy Viral)</span>
+            <span>Kit Pronto: Arte PNG + Texto WhatsApp &amp; Instagram</span>
           </h3>
           <p className="text-xs text-slate-400">
-            Atualiza automaticamente enquanto você edita os campos. Copie a imagem e o texto direto pro seu grupo!
+            Copie a imagem e as legendas prontas para postar no WhatsApp, Reels, Feed ou Stories!
           </p>
         </div>
 
-        {/* Seletor de Estilo Visual da Imagem */}
         <div className="flex flex-wrap items-center gap-1.5">
           {CARD_THEMES.map((theme) => (
             <button
@@ -576,7 +656,7 @@ export default function WhatsAppCreativeStudio({ offer }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
-        {/* COLUNA 1: Preview da Imagem Gerada em HD (Canvas) */}
+        {/* COLUNA 1: Preview da Imagem HD */}
         <div className="flex flex-col gap-3">
           <div className="relative bg-slate-900 border border-slate-800 rounded-2xl p-2 flex items-center justify-center overflow-hidden">
             <canvas
@@ -604,12 +684,12 @@ export default function WhatsAppCreativeStudio({ offer }) {
               type="button"
               onClick={handleCopyImage}
               className={`font-black text-xs sm:text-sm py-3 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
-                copiedImage
+                copiedMode === "img"
                   ? "bg-emerald-500 text-slate-950"
                   : "bg-[#FFE600] hover:bg-yellow-300 text-slate-950 shadow-md"
               }`}
             >
-              {copiedImage ? (
+              {copiedMode === "img" ? (
                 <>
                   <Check size={16} strokeWidth={3} />
                   <span>✅ Imagem Copiada!</span>
@@ -633,60 +713,146 @@ export default function WhatsAppCreativeStudio({ offer }) {
           </div>
         </div>
 
-        {/* COLUNA 2: Copy Viral Estilo WhatsApp (Editável + 1 Clique para Copiar) */}
+        {/* COLUNA 2: Abas de Texto (WhatsApp + Instagram) */}
         <div className="flex flex-col gap-3">
-          <div className="bg-[#0b141a] border border-emerald-900/50 rounded-2xl p-3.5 shadow-inner">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                <Share2 size={13} />
-                Texto Formatado para WhatsApp
-              </span>
-              {isCopyEditedManually && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsCopyEditedManually(false);
-                    setCustomCopy(generatedCopy);
-                  }}
-                  className="text-[11px] font-bold text-yellow-400 hover:underline cursor-pointer"
-                >
-                  ↺ Restaurar automático
-                </button>
-              )}
-            </div>
+          {/* Seletor WhatsApp / Instagram */}
+          <div className="grid grid-cols-2 gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+            <button
+              type="button"
+              onClick={() => setTextTab("whatsapp")}
+              className={`py-2 px-3 rounded-lg text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                textTab === "whatsapp"
+                  ? "bg-[#25D366] text-slate-950 shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <MessageCircle size={15} />
+              <span>📲 Texto WhatsApp</span>
+            </button>
 
-            <textarea
-              rows={13}
-              value={customCopy}
-              onChange={(e) => {
-                setIsCopyEditedManually(true);
-                setCustomCopy(e.target.value);
-              }}
-              className="w-full bg-[#111b21] border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs sm:text-sm text-slate-100 font-sans leading-relaxed resize-y"
-            />
+            <button
+              type="button"
+              onClick={() => setTextTab("instagram")}
+              className={`py-2 px-3 rounded-lg text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                textTab === "instagram"
+                  ? "bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white shadow"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Camera size={15} />
+              <span>📸 Legenda Instagram</span>
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleCopyText}
-            className={`w-full font-black text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
-              copiedText
-                ? "bg-emerald-400 text-slate-950"
-                : "bg-[#25D366] hover:bg-[#1fae54] text-slate-950 shadow-lg shadow-green-950/40"
-            }`}
-          >
-            {copiedText ? (
-              <>
-                <Check size={17} strokeWidth={3} />
-                <span>✅ Texto Copiado! Só colar no WhatsApp</span>
-              </>
-            ) : (
-              <>
-                <Copy size={17} />
-                <span>📲 Copiar Texto WhatsApp</span>
-              </>
-            )}
-          </button>
+          {textTab === "whatsapp" ? (
+            <>
+              <div className="bg-[#0b141a] border border-emerald-900/50 rounded-2xl p-3.5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400">
+                    Formatado para Grupo VIP / WhatsApp
+                  </span>
+                  {isWaEdited && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsWaEdited(false);
+                        setCustomWaCopy(generatedWaCopy);
+                      }}
+                      className="text-[11px] font-bold text-yellow-400 hover:underline cursor-pointer"
+                    >
+                      ↺ Restaurar
+                    </button>
+                  )}
+                </div>
+
+                <textarea
+                  rows={12}
+                  value={customWaCopy}
+                  onChange={(e) => {
+                    setIsWaEdited(true);
+                    setCustomWaCopy(e.target.value);
+                  }}
+                  className="w-full bg-[#111b21] border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-xs sm:text-sm text-slate-100 leading-relaxed resize-y"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleCopyText("wa")}
+                className={`w-full font-black text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
+                  copiedMode === "wa"
+                    ? "bg-emerald-400 text-slate-950"
+                    : "bg-[#25D366] hover:bg-[#1fae54] text-slate-950 shadow-lg"
+                }`}
+              >
+                {copiedMode === "wa" ? (
+                  <>
+                    <Check size={17} strokeWidth={3} />
+                    <span>✅ Texto WhatsApp Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={17} />
+                    <span>📲 Copiar Texto WhatsApp</span>
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="bg-slate-900 border border-pink-500/30 rounded-2xl p-3.5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-pink-400">
+                    Legenda Pronta para Feed / Reels / Stories
+                  </span>
+                  {isIgEdited && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsIgEdited(false);
+                        setCustomIgCopy(generatedIgCopy);
+                      }}
+                      className="text-[11px] font-bold text-yellow-400 hover:underline cursor-pointer"
+                    >
+                      ↺ Restaurar
+                    </button>
+                  )}
+                </div>
+
+                <textarea
+                  rows={12}
+                  value={customIgCopy}
+                  onChange={(e) => {
+                    setIsIgEdited(true);
+                    setCustomIgCopy(e.target.value);
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-pink-500 focus:outline-none rounded-xl p-3 text-xs sm:text-sm text-slate-100 leading-relaxed resize-y"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleCopyText("ig")}
+                className={`w-full font-black text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
+                  copiedMode === "ig"
+                    ? "bg-emerald-400 text-slate-950"
+                    : "bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 hover:brightness-110 text-white shadow-lg"
+                }`}
+              >
+                {copiedMode === "ig" ? (
+                  <>
+                    <Check size={17} strokeWidth={3} />
+                    <span>✅ Legenda Instagram Copiada!</span>
+                  </>
+                ) : (
+                  <>
+                    <Camera size={17} />
+                    <span>📸 Copiar Legenda Instagram</span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
