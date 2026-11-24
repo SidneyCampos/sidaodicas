@@ -1,0 +1,40 @@
+name: Atualizar Preços e Limpar Ofertas Indisponíveis
+
+on:
+  schedule:
+    # Roda automaticamente todo dia às 07:30 e 15:30 (horário de Brasília)
+    - cron: "30 10,18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit-offers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Auditar preços e remover links indisponíveis
+        env:
+          SHOPEE_APP_ID: ${{ secrets.SHOPEE_APP_ID }}
+          SHOPEE_APP_SECRET: ${{ secrets.SHOPEE_APP_SECRET }}
+        run: node scripts/sync-offers.mjs
+
+      - name: Salvar e publicar alterações automaticamente
+        run: |
+          git config user.name "Sidao Dicas Bot"
+          git config user.email "bot@sidaodicas.com.br"
+          git add src/data/ofertas.json
+          if git diff --staged --quiet; then
+            echo "Nenhuma alteração de preço ou disponibilidade hoje."
+          else
+            git commit -m "chore: atualizacao diaria automatica de precos e disponibilidade"
+            git push
+          fi

@@ -3,8 +3,8 @@
     "id": 101,
     "titulo": "Amazon Kindle Colorsoft 16 GB - Tela Colorida e Luz Ajustável",
     "subtitulo": "Leia em cores com alto contraste suave aos olhos e bateria para até 8 semanas.",
-    "precoAntigo": 1499.00,
-    "precoAtual": 999.00,
+    "precoAntigo": 1499,
+    "precoAtual": 999,
     "descontoPercentual": 33,
     "loja": "Amazon",
     "categoria": "Eletrônicos",
@@ -14,15 +14,16 @@
     "vendidos": "+5 mil compras",
     "imagemUrl": "https://m.media-amazon.com/images/I/71lORNHYWLL._AC_SX679_.jpg",
     "linkAfiliado": "https://link.amazon/B03bOPgKG",
-    "verificadoEm": "Verificado agora",
-    "criadoEm": "2026-11-23T16:50:00.000Z"
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-23T16:50:00.000Z",
+    "ultimaVerificacaoEm": "2026-11-24T17:52:28.381Z"
   },
   {
     "id": 102,
     "titulo": "Sony PlayStation Store Gift Card R$ 150 (Digital)",
     "subtitulo": "Loja oficial PlayStation • Parcelamento em até 5x sem juros",
-    "precoAntigo": 165.00,
-    "precoAtual": 150.00,
+    "precoAntigo": 165,
+    "precoAtual": 150,
     "descontoPercentual": 9,
     "loja": "Mercado Livre",
     "categoria": "Games",
@@ -32,15 +33,16 @@
     "vendidos": "+50 mil vendidos",
     "imagemUrl": "https://http2.mlstatic.com/D_NQ_NP_902418-MLA116666090065_082026-F.jpg",
     "linkAfiliado": "https://meli.la/2ZXCfb3",
-    "verificadoEm": "Verificado há 10 min",
-    "criadoEm": "2026-11-23T16:40:00.000Z"
+    "verificadoEm": "Verificado hoje",
+    "criadoEm": "2026-11-23T16:40:00.000Z",
+    "ultimaVerificacaoEm": "2026-11-24T17:52:29.880Z"
   },
   {
     "id": 103,
     "titulo": "Kit Estética Automotiva Vonixx V-Floc Tok Final Intense + Pneu Pretinho + Acessórios",
     "subtitulo": "Kit completo Vonixx para brilho e proteção profissional no carro em casa.",
-    "precoAntigo": 199.90,
-    "precoAtual": 129.90,
+    "precoAntigo": 199.9,
+    "precoAtual": 129.9,
     "descontoPercentual": 35,
     "loja": "Shopee",
     "categoria": "Casa",
@@ -51,6 +53,7 @@
     "imagemUrl": "https://down-br.img.susercontent.com/file/br-11134207-820lt-mqhpbloq1q0x0e",
     "linkAfiliado": "https://s.shopee.com.br/2BGfv50zwh",
     "verificadoEm": "Verificado há 20 min",
-    "criadoEm": "2026-11-23T16:30:00.000Z"
+    "criadoEm": "2026-11-23T16:30:00.000Z",
+    "ultimaVerificacaoEm": "2026-11-24T17:52:31.745Z"
   }
 ]

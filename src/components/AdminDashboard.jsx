@@ -124,6 +124,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
 
   // Estado do Auto Deploy (Git Push / Cloud Sync) & Diagnóstico de Salvamento
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isAuditingOffers, setIsAuditingOffers] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [storageStatus, setStorageStatus] = useState(null);
 
@@ -514,6 +515,29 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       showMessage("error", err.message || "Erro na sincronização automática.");
     } finally {
       setIsSyncingCoupons(false);
+    }
+  };
+
+  const handleAuditOffersNow = async () => {
+    setIsAuditingOffers(true);
+    setFeedback(null);
+    try {
+      const response = await fetch("/api/admin/ofertas/sync", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Falha ao verificar preços e links.");
+      }
+      if (data.ofertas) setOfertas(data.ofertas);
+      showMessage("success", data.message, data.details || "");
+    } catch (err) {
+      showMessage(
+        "error",
+        err.message || "Erro ao verificar preços e links."
+      );
+    } finally {
+      setIsAuditingOffers(false);
     }
   };
 
@@ -1678,11 +1702,31 @@ return (
                 📋 Ofertas Ativas na Vitrine ({ofertas.length})
               </h2>
               <p className="text-xs text-slate-400">
-                Abra a arte PNG, copie o texto para WhatsApp ou Instagram, acesse o link de afiliado ou gerencie suas promoções.
+                Preços e links indisponíveis são verificados automaticamente todo dia (07h30 e 15h30). Você também pode rodar agora:
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleAuditOffersNow}
+                disabled={isAuditingOffers}
+                className="bg-[#d89643] hover:bg-[#e5ad5e] disabled:opacity-60 text-[#0b0f14] text-xs font-black px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                title="Verifica o preço atual de todas as ofertas e exclui links indisponíveis"
+              >
+                {isAuditingOffers ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Verificando preços...</span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp size={14} />
+                    <span>🔄 Atualizar Preços Agora</span>
+                  </>
+                )}
+              </button>
+
               <select
                 value={adminStoreFilter}
                 onChange={(e) => setAdminStoreFilter(e.target.value)}
