@@ -43,7 +43,19 @@ export default function NotificationModal({ isOpen, onClose, onStatusChange }) {
     } else {
       setPermission("unsupported");
     }
-  }, [isOpen]);
+
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && onClose) onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const toggleCategory = (cat) => {
     setSelectedCategories((prev) =>
@@ -115,8 +127,12 @@ export default function NotificationModal({ isOpen, onClose, onStatusChange }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-notification-title"
+      onClick={onClose}
     >
-      <div className="bg-[#121820] border border-[#e7d7bf]/15 rounded-2xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
+      <div
+        className="bg-[#121820] border border-[#e7d7bf]/15 rounded-2xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="absolute -top-20 -right-20 w-44 h-44 bg-[#d89643]/15 rounded-full blur-3xl pointer-events-none" />
 
         <button

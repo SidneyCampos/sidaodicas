@@ -34,7 +34,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#080b0f] border-t border-[#e7d7bf]/[0.07] text-[#8b95a3] mt-12">
+    <footer className="bg-[#080b0f] border-t border-[#e7d7bf]/[0.07] text-[#94a0ad] mt-12">
       <div className="max-w-7xl mx-auto px-4 py-9">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-[#e7d7bf]/[0.06]">
           <div className="flex items-center gap-3.5 max-w-md">
@@ -42,6 +42,8 @@ export default function Footer() {
               <img
                 src="/avatar-sidao.png"
                 alt="Sidão Dicas Ofertas"
+                width={44}
+                height={44}
                 className="w-full h-full rounded-full object-cover bg-[#121820]"
               />
             </div>
@@ -52,9 +54,9 @@ export default function Footer() {
                   Sidão Dicas{" "}
                   <span className="text-[#e5ad5e] font-semibold">Ofertas</span>
                 </span>
-                <BadgeCheck size={14} className="text-[#d89643]" />
+                <BadgeCheck size={14} aria-hidden="true" className="text-[#d89643]" />
               </div>
-              <p className="text-xs text-[#8b95a3] leading-relaxed">
+              <p className="text-xs text-[#94a0ad] leading-relaxed">
                 Dicas e ofertas dos melhores produtos selecionados pra você na Amazon, Mercado Livre e Shopee.
               </p>
             </div>

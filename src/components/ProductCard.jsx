@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ArrowUpRight, Check, Copy, Heart, Star } from "lucide-react";
+import { ArrowUpRight, Check, Copy, Heart, Share2, Star } from "lucide-react";
 
 const STORE_ACCENT = {
   Amazon: {
@@ -76,7 +76,12 @@ export function calculateDiscountPercentage(
   return 0;
 }
 
-export default function ProductCard({ product, isSaved = false, onToggleSave }) {
+export default function ProductCard({
+  product,
+  isSaved = false,
+  onToggleSave,
+  onNotify,
+}) {
   const [couponCopied, setCouponCopied] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -107,7 +112,7 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
   );
 
   const storeStyle = STORE_ACCENT[loja] || {
-    dot: "bg-[#8b95a3]",
+    dot: "bg-[#94a0ad]",
     shortLabel: loja,
   };
 
@@ -132,21 +137,53 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
     }
 
     setCouponCopied(true);
+    if (onNotify) onNotify(`Cupom ${cupomOpcional} copiado!`);
     setTimeout(() => setCouponCopied(false), 2500);
   };
 
+  const handleShareOffer = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const shareText = `Olha essa oferta no Sidão Dicas: ${product.titulo} por ${formatPrice(
+      precoAtual
+    )} na ${storeStyle.shortLabel}!`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product.titulo,
+          text: shareText,
+          url: linkAfiliado,
+        });
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(`${shareText}\n${linkAfiliado}`);
+        if (onNotify) onNotify("Link da oferta copiado para compartilhar!");
+      }
+    } catch {
+      // Usuário cancelou o compartilhamento nativo
+    }
+  };
+
   return (
-    <article className="bg-[#121820] hover:bg-[#151c26] rounded-2xl border border-[#e7d7bf]/[0.07] hover:border-[#d89643]/35 flex flex-col group transition-all duration-300 overflow-hidden shadow-lg shadow-black/25">
-      {/* 1. Moldura Fotográfica em Off-White Suave (Confortável no Dark Mode) */}
+    <article className="bg-[#121820] hover:bg-[#151c26] rounded-2xl border border-[#e7d7bf]/[0.08] hover:border-[#d89643]/40 flex flex-col group transition-all duration-300 overflow-hidden shadow-lg shadow-black/25">
+      {/* 1. Moldura Fotográfica em Off-White Suave */}
       <div className="relative p-2.5 pb-0">
         <a
           href={linkAfiliado}
           target="_blank"
           rel="noopener noreferrer"
+          aria-label={`Ver oferta: ${product.titulo} na ${storeStyle.shortLabel}`}
           className="relative w-full h-40 sm:h-48 bg-[#faf9f6] rounded-xl overflow-hidden flex items-center justify-center p-4 block"
         >
           {descontoPercentual > 0 && (
-            <span className="absolute top-2.5 right-2.5 z-10 bg-[#121820]/90 text-[#e5ad5e] border border-[#d89643]/35 text-[11px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm">
+            <span
+              className="absolute top-2.5 right-2.5 z-10 bg-[#121820]/90 text-[#e5ad5e] border border-[#d89643]/35 text-[11px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm"
+              aria-label={`${descontoPercentual}% de desconto`}
+            >
               -{descontoPercentual}%
             </span>
           )}
@@ -158,49 +195,80 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
               onError={() => setImgError(true)}
               className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
+              decoding="async"
             />
           ) : (
-            <span className="text-xs font-semibold text-slate-400">
+            <span className="text-xs font-semibold text-slate-500">
               {storeStyle.shortLabel}
             </span>
           )}
         </a>
 
-        {onToggleSave && (
+        {/* Ações Rápidas Discretas: Salvar + Compartilhar (Retenção & Alcance Orgânico) */}
+        <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
+          {onToggleSave && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                onToggleSave(product.id, product.titulo);
+              }}
+              aria-pressed={isSaved}
+              aria-label={
+                isSaved
+                  ? `Remover ${product.titulo} dos salvos`
+                  : `Salvar ${product.titulo}`
+              }
+              title={isSaved ? "Salvo nos favoritos" : "Salvar para ver depois"}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                isSaved
+                  ? "bg-[#d89643] text-[#0b0f14] shadow-md"
+                  : "bg-[#121820]/70 text-[#f2ede4]/90 hover:bg-[#121820] hover:text-[#f2ede4] opacity-90 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+              }`}
+            >
+              <Heart
+                size={14}
+                aria-hidden="true"
+                className={isSaved ? "fill-[#0b0f14]" : ""}
+              />
+            </button>
+          )}
+
           <button
             type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              onToggleSave(product.id);
-            }}
-            aria-label={isSaved ? "Remover dos salvos" : "Salvar oferta"}
-            title={isSaved ? "Salvo" : "Salvar para ver depois"}
-            className={`absolute top-4 left-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              isSaved
-                ? "bg-[#d89643] text-[#0b0f14] shadow-md"
-                : "bg-[#121820]/65 text-[#f2ede4]/85 hover:bg-[#121820] hover:text-[#f2ede4] opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
-            }`}
+            onClick={handleShareOffer}
+            aria-label={`Compartilhar oferta: ${product.titulo}`}
+            title="Compartilhar oferta"
+            className="w-8 h-8 rounded-full bg-[#121820]/70 text-[#f2ede4]/90 hover:bg-[#121820] hover:text-[#e5ad5e] flex items-center justify-center transition-all cursor-pointer opacity-90 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
           >
-            <Heart size={14} className={isSaved ? "fill-[#0b0f14]" : ""} />
+            <Share2 size={13} aria-hidden="true" />
           </button>
-        )}
+        </div>
       </div>
 
-      {/* 2. Conteúdo Editorial Limpo */}
+      {/* 2. Conteúdo Editorial Limpo (Contraste WCAG AA) */}
       <div className="p-3.5 sm:p-4 flex flex-col flex-grow justify-between gap-3">
         <div>
-          <div className="flex items-center justify-between gap-2 text-[11px] text-[#8b95a3] mb-1.5">
+          <div className="flex items-center justify-between gap-2 text-[11px] text-[#94a0ad] mb-1.5">
             <span className="inline-flex items-center gap-1.5 font-medium truncate">
               <span
+                aria-hidden="true"
                 className={`w-1.5 h-1.5 rounded-full shrink-0 ${storeStyle.dot}`}
               />
               <span className="truncate">{storeStyle.shortLabel}</span>
             </span>
 
-            <span className="inline-flex items-center gap-1.5 text-[#6e7885] shrink-0">
+            <span className="inline-flex items-center gap-1.5 text-[#8f9aa8] shrink-0">
               {nota && (
-                <span className="inline-flex items-center gap-0.5 text-[#b4bdc8] font-medium">
-                  <Star size={10} className="fill-[#d89643] text-[#d89643]" />
+                <span
+                  className="inline-flex items-center gap-0.5 text-[#c0c8d2] font-medium"
+                  aria-label={`Nota ${nota} de 5`}
+                >
+                  <Star
+                    size={10}
+                    aria-hidden="true"
+                    className="fill-[#d89643] text-[#d89643]"
+                  />
                   {nota}
                 </span>
               )}
@@ -214,21 +282,23 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
             rel="noopener noreferrer"
             className="block"
           >
-            <h3 className="text-[#e8e2d7] font-medium text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors">
+            <h3 className="text-[#ede7dc] font-medium text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors">
               {product.titulo}
             </h3>
           </a>
         </div>
 
-        {/* 3. Preço + Cupom Discreto + CTA em Âmbar Quente no Hover */}
+        {/* 3. Preço + Cupom Discreto + CTA Coeso */}
         <div className="space-y-2.5 pt-1">
           <div>
             {precoAntigo > precoAtual && (
-              <span className="block text-[#6e7885] text-[11px] sm:text-xs line-through">
+              <span className="block text-[#8f9aa8] text-[11px] sm:text-xs line-through">
+                <span className="sr-only">Preço anterior: </span>
                 {formatPrice(precoAntigo)}
               </span>
             )}
             <span className="text-lg sm:text-2xl font-bold text-[#f7f3ec] tracking-tight leading-none">
+              <span className="sr-only">Preço atual: </span>
               {formatPrice(precoAtual)}
             </span>
           </div>
@@ -237,10 +307,11 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
             <button
               type="button"
               onClick={handleCopyCoupon}
+              aria-label={`Copiar cupom ${cupomOpcional}`}
               className={`w-full px-2.5 py-1.5 rounded-lg border text-[11px] font-medium flex items-center justify-between gap-1.5 transition-colors cursor-pointer ${
                 couponCopied
                   ? "bg-[#182e24] border-[#2f9e75]/45 text-[#7ae0ae]"
-                  : "bg-[#0d1218]/70 hover:bg-[#1a222d] border-dashed border-[#d89643]/35 text-[#e5ad5e]"
+                  : "bg-[#0d1218]/70 hover:bg-[#1a222d] border-dashed border-[#d89643]/40 text-[#e5ad5e]"
               }`}
             >
               <span className="truncate font-mono">
@@ -249,9 +320,9 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
                   : `Cupom: ${cupomOpcional}`}
               </span>
               {couponCopied ? (
-                <Check size={12} className="shrink-0 text-[#7ae0ae]" />
+                <Check size={12} aria-hidden="true" className="shrink-0 text-[#7ae0ae]" />
               ) : (
-                <Copy size={11} className="shrink-0 text-[#d89643]" />
+                <Copy size={11} aria-hidden="true" className="shrink-0 text-[#d89643]" />
               )}
             </button>
           )}
@@ -260,10 +331,11 @@ export default function ProductCard({ product, isSaved = false, onToggleSave }) 
             href={linkAfiliado}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-2.5 px-3 rounded-xl bg-[#1b222c] hover:bg-[#d89643] text-[#f2ede4] hover:text-[#0b0f14] border border-[#e7d7bf]/[0.08] hover:border-[#d89643] font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all active:scale-[0.98]"
+            aria-label={`Ir para ${storeStyle.shortLabel} ver ${product.titulo} (abre em nova aba)`}
+            className="w-full py-2.5 px-3 rounded-xl bg-[#1b222c] hover:bg-[#d89643] text-[#f2ede4] hover:text-[#0b0f14] border border-[#e7d7bf]/[0.1] hover:border-[#d89643] font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all active:scale-[0.98]"
           >
             <span>Ir para {storeStyle.shortLabel}</span>
-            <ArrowUpRight size={14} className="shrink-0" />
+            <ArrowUpRight size={14} aria-hidden="true" className="shrink-0" />
           </a>
         </div>
       </div>
