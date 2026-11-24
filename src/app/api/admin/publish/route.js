@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { exec } from "child_process";
 import util from "util";
 import { isAuthenticated } from "../../../../lib/adminAuth";
-import { readJsonData, writeJsonData } from "../../../../lib/adminStorage";
+import {
+  getStorageDiagnostics,
+  readJsonData,
+  writeJsonData,
+} from "../../../../lib/adminStorage";
 
 const execPromise = util.promisify(exec);
 
@@ -11,12 +16,25 @@ export async function POST() {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  // Se estiver na nuvem (Vercel) com GITHUB_TOKEN configurado, sincroniza via API do GitHub
-  if (process.env.GITHUB_TOKEN) {
+  const diag = getStorageDiagnostics();
+
+  if (diag.mode === "ephemeral_error") {
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "⚠️ GITHUB_TOKEN não está configurado na Vercel! Adicione a variável GITHUB_TOKEN em Settings → Environment Variables na Vercel e faça Redeploy para salvar ofertas na nuvem.",
+      },
+      { status: 400 }
+    );
+  }
+
+  // Se estiver na nuvem (Vercel) com GITHUB_TOKEN configurado, revalida a vitrine e confirma sincronia
+  if (diag.mode === "github") {
     try {
       const [ofertas, cupons] = await Promise.all([
-        readJsonData("ofertas.json"),
-        readJsonData("cupons.json"),
+        readJsonData("ofertas.json", { bypassCache: true }),
+        readJsonData("cupons.json", { bypassCache: true }),
       ]);
       await writeJsonData(
         "ofertas.json",
@@ -28,25 +46,25 @@ export async function POST() {
         cupons,
         "Publicacao de cupons via Painel Admin Web"
       );
+      revalidatePath("/");
 
       return NextResponse.json({
         success: true,
         message:
-          "✅ Publicado direto na nuvem! Suas ofertas foram sincronizadas no GitHub e a Vercel já está atualizando o site para todos os dispositivos.",
+          "✅ Sincronizado direto na nuvem! Suas ofertas já estão salvas no GitHub e atualizadas no site oficial.",
       });
     } catch (err) {
       return NextResponse.json(
         {
           success: false,
-          error: "Falha ao sincronizar com o GitHub API.",
-          details: err.message,
+          error: err.message || "Falha ao sincronizar com o GitHub API.",
         },
         { status: 500 }
       );
     }
   }
 
-  // Caso esteja rodando em um computador com Git instalado, executa o Git Push
+  // Caso esteja rodando localmente em um PC com Git instalado
   try {
     const command =
       'git add . && git commit -m "Atualizacao de ofertas via Painel Admin" && git push';
@@ -93,10 +111,13 @@ export async function POST() {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      message:
-        "✅ Alterações salvas na sessão atual! (Para sincronizar permanente na nuvem sem precisar de Git instalado nos 3 PCs, adicione a variável GITHUB_TOKEN no painel da Vercel).",
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Não foi possível publicar automaticamente via Git.",
+        details: combinedOutput.trim(),
+      },
+      { status: 500 }
+    );
   }
 }

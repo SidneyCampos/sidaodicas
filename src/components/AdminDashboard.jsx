@@ -122,9 +122,10 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
   const [copiedInstagramId, setCopiedInstagramId] = useState(null);
   const [studioModalOffer, setStudioModalOffer] = useState(null);
 
-  // Estado do Auto Deploy (Git Push / Cloud Sync)
+  // Estado do Auto Deploy (Git Push / Cloud Sync) & Diagnóstico de Salvamento
   const [isPublishing, setIsPublishing] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [storageStatus, setStorageStatus] = useState(null);
 
   const showMessage = (type, text, details = "") => {
     setFeedback({ type, text, details });
@@ -148,9 +149,13 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       const dataCupons = await resCupons.json();
       const dataConfig = resConfig.ok ? await resConfig.json() : {};
 
+      if (dataOfertas.storageStatus) setStorageStatus(dataOfertas.storageStatus);
       if (dataOfertas.ofertas) setOfertas(dataOfertas.ofertas);
       if (dataCupons.cupons) setCupons(dataCupons.cupons);
       if (dataConfig.config) setAffiliateConfig(dataConfig.config);
+      if (!resOfertas.ok && dataOfertas.error) {
+        showMessage("error", dataOfertas.error);
+      }
     } catch (error) {
       console.error("Erro ao carregar dados no painel admin:", error);
       showMessage("error", "Falha ao carregar as ofertas e cupons.");
@@ -714,8 +719,18 @@ return (
                 <h1 className="text-base sm:text-lg font-bold text-[#f2ede4] leading-none">
                   Sidão Dicas <span className="text-[#e5ad5e]">Admin</span>
                 </h1>
-                <span className="text-[10px] font-bold uppercase bg-[#182e24] text-[#7ae0ae] border border-[#2f9e75]/35 px-2 py-0.5 rounded-full">
-                  🌐 Acesso Web Seguro
+                <span
+                  className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${
+                    storageStatus?.mode === "ephemeral_error"
+                      ? "bg-red-950/90 text-red-300 border-red-500/50"
+                      : "bg-[#182e24] text-[#7ae0ae] border-[#2f9e75]/35"
+                  }`}
+                >
+                  {storageStatus?.mode === "ephemeral_error"
+                    ? "🔴 Falta GITHUB_TOKEN na Vercel"
+                    : storageStatus?.mode === "github"
+                    ? "🟢 Nuvem GitHub Conectada"
+                    : "🟢 Acesso Web Seguro"}
                 </span>
               </div>
               <p className="text-[11px] text-[#8b95a3] mt-0.5">
@@ -789,6 +804,42 @@ return (
     </header>
 
     <main className="max-w-6xl mx-auto px-4 pt-6">
+      {/* Aviso Crítico caso o GITHUB_TOKEN ainda não esteja configurado na Vercel */}
+      {storageStatus?.mode === "ephemeral_error" && (
+        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-red-950/80 border-2 border-red-500/60 text-red-100 shadow-xl">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={22} className="text-red-400 shrink-0 mt-0.5" />
+            <div className="text-xs sm:text-sm space-y-2 leading-relaxed">
+              <p className="font-black text-red-300 text-sm sm:text-base">
+                ⚠️ Ação necessária na Vercel: configure a variável GITHUB_TOKEN para salvar suas ofertas!
+              </p>
+              <p>
+                Na Vercel os arquivos do servidor são <strong>somente leitura</strong>. Sem o{" "}
+                <code className="bg-black/40 px-1.5 py-0.5 rounded text-yellow-300 font-mono">
+                  GITHUB_TOKEN
+                </code>
+                , os produtos adicionados aqui não conseguem gravar no repositório e não aparecem no site oficial.
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-red-200/95">
+                <li>
+                  No GitHub, acesse <strong>Settings → Developer settings → Personal access tokens → Fine-grained tokens</strong> e crie um token com permissão <strong>Contents: Read and write</strong> no repositório <strong>{storageStatus.repo}</strong>.
+                </li>
+                <li>
+                  Na <strong>Vercel</strong>, vá em <strong>Settings → Environment Variables</strong>, adicione{" "}
+                  <code className="bg-black/40 px-1.5 py-0.5 rounded text-yellow-300 font-mono">
+                    GITHUB_TOKEN
+                  </code>{" "}
+                  com o valor do token.
+                </li>
+                <li>
+                  Clique em <strong>Deployments → Redeploy</strong> na Vercel. Depois disso, todo produto adicionado aqui grava direto na nuvem e aparece no site na hora!
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Banner de Feedback Geral */}
       {feedback && (
         <div

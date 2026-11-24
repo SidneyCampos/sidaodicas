@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { isAuthenticated } from "../../../../lib/adminAuth";
-import { readJsonData, writeJsonData } from "../../../../lib/adminStorage";
+import {
+  getStorageDiagnostics,
+  mutateJsonData,
+  readJsonData,
+} from "../../../../lib/adminStorage";
 
 const FILENAME = "ofertas.json";
 
@@ -19,8 +23,23 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const ofertas = await readJsonData(FILENAME, { bypassCache: true });
-  return NextResponse.json({ ofertas });
+  const storageStatus = getStorageDiagnostics();
+  try {
+    const ofertas = await readJsonData(FILENAME, { bypassCache: true });
+    return NextResponse.json({
+      ofertas: Array.isArray(ofertas) ? ofertas : [],
+      storageStatus,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error.message || "Falha ao carregar ofertas.",
+        ofertas: [],
+        storageStatus,
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request) {
@@ -30,7 +49,6 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const ofertas = await readJsonData(FILENAME);
 
     const precoAntigo = Number(body.precoAntigo) || 0;
     const precoAtual = Number(body.precoAtual) || 0;
@@ -56,23 +74,31 @@ export async function POST(request) {
       criadoEm: nowIso,
     };
 
-    const atualizadas = [novaOferta, ...ofertas];
-    await writeJsonData(
+    // Mutação atômica: sempre lê a versão mais fresca do GitHub/disco antes de adicionar!
+    const atualizadas = await mutateJsonData(
       FILENAME,
-      atualizadas,
+      (current) => {
+        const list = Array.isArray(current) ? current : [];
+        return [novaOferta, ...list];
+      },
       `Nova oferta: ${novaOferta.titulo.slice(0, 40)}`
     );
+
     revalidatePath("/");
 
     return NextResponse.json({
       success: true,
       oferta: novaOferta,
       ofertas: atualizadas,
+      storageStatus: getStorageDiagnostics(),
     });
   } catch (error) {
     console.error("Erro ao adicionar oferta:", error);
     return NextResponse.json(
-      { error: error.message || "Falha ao salvar a nova oferta." },
+      {
+        error: error.message || "Falha ao salvar a nova oferta.",
+        storageStatus: getStorageDiagnostics(),
+      },
       { status: 500 }
     );
   }
@@ -85,37 +111,40 @@ export async function PUT(request) {
 
   try {
     const body = await request.json();
-    const ofertas = await readJsonData(FILENAME);
 
     // Ação: Mover oferta para o topo
     if (body.action === "move_to_top" && body.id !== undefined) {
-      const targetIndex = ofertas.findIndex(
-        (item) => String(item.id) === String(body.id)
+      let found = false;
+      const atualizadas = await mutateJsonData(
+        FILENAME,
+        (current) => {
+          const list = Array.isArray(current) ? current : [];
+          const targetIndex = list.findIndex(
+            (item) => String(item.id) === String(body.id)
+          );
+          if (targetIndex === -1) return list;
+          found = true;
+          const target = {
+            ...list[targetIndex],
+            criadoEm: new Date().toISOString(),
+            verificadoEm: "Verificado agora",
+          };
+          const remaining = list.filter(
+            (item) => String(item.id) !== String(body.id)
+          );
+          return [target, ...remaining];
+        },
+        "Oferta movida para o topo via Painel Admin"
       );
-      if (targetIndex === -1) {
+
+      if (!found) {
         return NextResponse.json(
           { error: "Oferta não encontrada." },
           { status: 404 }
         );
       }
 
-      const target = {
-        ...ofertas[targetIndex],
-        criadoEm: new Date().toISOString(),
-        verificadoEm: "Verificado agora",
-      };
-
-      const remaining = ofertas.filter(
-        (item) => String(item.id) !== String(body.id)
-      );
-      const atualizadas = [target, ...remaining];
-      await writeJsonData(
-        FILENAME,
-        atualizadas,
-        `Oferta movida para o topo: ${target.titulo.slice(0, 40)}`
-      );
       revalidatePath("/");
-
       return NextResponse.json({
         success: true,
         ofertas: atualizadas,
@@ -124,50 +153,56 @@ export async function PUT(request) {
 
     // Ação: Editar dados de uma oferta existente
     const targetId = body.id;
-    const atualizadas = ofertas.map((item) => {
-      if (String(item.id) !== String(targetId)) return item;
-
-      const precoAntigo = Number(body.precoAntigo ?? item.precoAntigo) || 0;
-      const precoAtual = Number(body.precoAtual ?? item.precoAtual) || 0;
-
-      return {
-        ...item,
-        titulo: body.titulo !== undefined ? body.titulo.trim() : item.titulo,
-        subtitulo:
-          body.subtitulo !== undefined
-            ? body.subtitulo.trim()
-            : item.subtitulo || "",
-        precoAntigo,
-        precoAtual,
-        descontoPercentual: calcDiscount(precoAntigo, precoAtual),
-        loja: body.loja || item.loja,
-        categoria: body.categoria || item.categoria,
-        cupomOpcional:
-          body.cupomOpcional !== undefined
-            ? body.cupomOpcional.trim().toUpperCase()
-            : item.cupomOpcional,
-        destaqueTag: body.destaqueTag || item.destaqueTag,
-        nota: body.nota !== undefined ? body.nota.trim() : item.nota || "",
-        vendidos:
-          body.vendidos !== undefined
-            ? body.vendidos.trim()
-            : item.vendidos || "",
-        imagemUrl:
-          body.imagemUrl !== undefined ? body.imagemUrl.trim() : item.imagemUrl,
-        linkAfiliado:
-          body.linkAfiliado !== undefined
-            ? body.linkAfiliado.trim()
-            : item.linkAfiliado,
-        criadoEm: new Date().toISOString(),
-        verificadoEm: "Verificado agora",
-      };
-    });
-
-    await writeJsonData(
+    const atualizadas = await mutateJsonData(
       FILENAME,
-      atualizadas,
+      (current) => {
+        const list = Array.isArray(current) ? current : [];
+        return list.map((item) => {
+          if (String(item.id) !== String(targetId)) return item;
+
+          const precoAntigo =
+            Number(body.precoAntigo ?? item.precoAntigo) || 0;
+          const precoAtual = Number(body.precoAtual ?? item.precoAtual) || 0;
+
+          return {
+            ...item,
+            titulo:
+              body.titulo !== undefined ? body.titulo.trim() : item.titulo,
+            subtitulo:
+              body.subtitulo !== undefined
+                ? body.subtitulo.trim()
+                : item.subtitulo || "",
+            precoAntigo,
+            precoAtual,
+            descontoPercentual: calcDiscount(precoAntigo, precoAtual),
+            loja: body.loja || item.loja,
+            categoria: body.categoria || item.categoria,
+            cupomOpcional:
+              body.cupomOpcional !== undefined
+                ? body.cupomOpcional.trim().toUpperCase()
+                : item.cupomOpcional,
+            destaqueTag: body.destaqueTag || item.destaqueTag,
+            nota: body.nota !== undefined ? body.nota.trim() : item.nota || "",
+            vendidos:
+              body.vendidos !== undefined
+                ? body.vendidos.trim()
+                : item.vendidos || "",
+            imagemUrl:
+              body.imagemUrl !== undefined
+                ? body.imagemUrl.trim()
+                : item.imagemUrl,
+            linkAfiliado:
+              body.linkAfiliado !== undefined
+                ? body.linkAfiliado.trim()
+                : item.linkAfiliado,
+            criadoEm: new Date().toISOString(),
+            verificadoEm: "Verificado agora",
+          };
+        });
+      },
       "Oferta editada via Painel Admin"
     );
+
     revalidatePath("/");
 
     return NextResponse.json({
@@ -204,13 +239,15 @@ export async function DELETE(request) {
       );
     }
 
-    const ofertas = await readJsonData(FILENAME);
-    const atualizadas = ofertas.filter((item) => String(item.id) !== String(id));
-    await writeJsonData(
+    const atualizadas = await mutateJsonData(
       FILENAME,
-      atualizadas,
+      (current) => {
+        const list = Array.isArray(current) ? current : [];
+        return list.filter((item) => String(item.id) !== String(id));
+      },
       "Oferta removida via Painel Admin"
     );
+
     revalidatePath("/");
 
     return NextResponse.json({

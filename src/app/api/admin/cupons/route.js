@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { isAuthenticated } from "../../../../lib/adminAuth";
-import { readJsonData, writeJsonData } from "../../../../lib/adminStorage";
+import { mutateJsonData, readJsonData } from "../../../../lib/adminStorage";
 
 const FILENAME = "cupons.json";
 
@@ -10,8 +10,15 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const cupons = await readJsonData(FILENAME, { bypassCache: true });
-  return NextResponse.json({ cupons });
+  try {
+    const cupons = await readJsonData(FILENAME, { bypassCache: true });
+    return NextResponse.json({ cupons: Array.isArray(cupons) ? cupons : [] });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message || "Falha ao carregar cupons.", cupons: [] },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request) {
@@ -21,7 +28,6 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const cupons = await readJsonData(FILENAME);
 
     const novoCupom = {
       id: Date.now(),
@@ -32,12 +38,15 @@ export async function POST(request) {
       validade: (body.validade || "Ativo agora • Estoque limitado").trim(),
     };
 
-    const atualizados = [novoCupom, ...cupons];
-    await writeJsonData(
+    const atualizados = await mutateJsonData(
       FILENAME,
-      atualizados,
+      (current) => {
+        const list = Array.isArray(current) ? current : [];
+        return [novoCupom, ...list];
+      },
       `Novo cupom: ${novoCupom.codigo}`
     );
+
     revalidatePath("/");
 
     return NextResponse.json({
@@ -61,35 +70,38 @@ export async function PUT(request) {
 
   try {
     const body = await request.json();
-    const cupons = await readJsonData(FILENAME);
 
-    const atualizados = cupons.map((item) => {
-      if (String(item.id) !== String(body.id)) return item;
-      return {
-        ...item,
-        loja: body.loja || item.loja,
-        codigo:
-          body.codigo !== undefined
-            ? body.codigo.trim().toUpperCase()
-            : item.codigo,
-        descricao:
-          body.descricao !== undefined
-            ? body.descricao.trim()
-            : item.descricao,
-        linkAfiliadoLoja:
-          body.linkAfiliadoLoja !== undefined
-            ? body.linkAfiliadoLoja.trim()
-            : item.linkAfiliadoLoja,
-        validade:
-          body.validade !== undefined ? body.validade.trim() : item.validade,
-      };
-    });
-
-    await writeJsonData(
+    const atualizados = await mutateJsonData(
       FILENAME,
-      atualizados,
+      (current) => {
+        const list = Array.isArray(current) ? current : [];
+        return list.map((item) => {
+          if (String(item.id) !== String(body.id)) return item;
+          return {
+            ...item,
+            loja: body.loja || item.loja,
+            codigo:
+              body.codigo !== undefined
+                ? body.codigo.trim().toUpperCase()
+                : item.codigo,
+            descricao:
+              body.descricao !== undefined
+                ? body.descricao.trim()
+                : item.descricao,
+            linkAfiliadoLoja:
+              body.linkAfiliadoLoja !== undefined
+                ? body.linkAfiliadoLoja.trim()
+                : item.linkAfiliadoLoja,
+            validade:
+              body.validade !== undefined
+                ? body.validade.trim()
+                : item.validade,
+          };
+        });
+      },
       "Cupom atualizado via Painel Admin"
     );
+
     revalidatePath("/");
 
     return NextResponse.json({
@@ -126,13 +138,15 @@ export async function DELETE(request) {
       );
     }
 
-    const cupons = await readJsonData(FILENAME);
-    const atualizados = cupons.filter((item) => String(item.id) !== String(id));
-    await writeJsonData(
+    const atualizados = await mutateJsonData(
       FILENAME,
-      atualizados,
+      (current) => {
+        const list = Array.isArray(current) ? current : [];
+        return list.filter((item) => String(item.id) !== String(id));
+      },
       "Cupom removido via Painel Admin"
     );
+
     revalidatePath("/");
 
     return NextResponse.json({
