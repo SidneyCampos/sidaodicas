@@ -101,8 +101,8 @@ export async function syncAndAuditAllOffers() {
           titulo: offer.titulo,
           loja: offer.loja,
           motivo:
-            offer.loja === "Shopee" && !live.shopeeApiConfigured
-              ? "Shopee sem SHOPEE_APP_ID/SECRET configurado"
+            offer.loja === "Shopee"
+              ? "Shopee não expõe preço no HTML público (mantido preço cadastrado)"
               : "Preço não retornado nesta checagem (mantido preço atual)",
         });
       }

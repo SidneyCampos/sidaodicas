@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 const UA_DESKTOP =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 const UA_WHATSAPP = "WhatsApp/2.23.20.0";
@@ -48,7 +46,7 @@ export function detectStoreFromUrl(targetUrl = "") {
 export function guessCategoryFromTitle(title = "") {
   const t = String(title).toLowerCase();
   if (
-    /(playstation|ps5|ps4|xbox|nintendo|switch|gift card|gamer|controle|dualsense|headset|teclado mecânico|mouse gamer|jogo|rtx|gtx|steam)/i.test(
+    /(playstation|ps5|ps4|xbox|nintendo|switch|gift card|gamer|controle|dualsense|headset|teclado mecânico|mouse gamer|jogo|rtx|gtx|steam|gta)/i.test(
       t
     )
   ) {
@@ -72,7 +70,8 @@ export function guessCategoryFromTitle(title = "") {
 }
 
 export function parseBRLNumber(raw = "") {
-  if (typeof raw === "number") return Number.isFinite(raw) && raw > 0 ? raw : null;
+  if (typeof raw === "number")
+    return Number.isFinite(raw) && raw > 0 ? raw : null;
   const cleaned = String(raw)
     .replace(/R\$/gi, "")
     .replace(/\s+/g, "")
@@ -137,7 +136,7 @@ async function safeFetchHtml(url, userAgent, timeoutMs = 11000) {
 }
 
 // ============================================================================
-// EXTRATOR AMAZON (Múltiplos padrões: legado + novos layouts + disponibilidade)
+// EXTRATOR AMAZON (100% HTML público, sem precisar de chave de API)
 // ============================================================================
 function parseAmazon(desktopRes, waRes) {
   const desktopHtml = desktopRes.html || "";
@@ -162,18 +161,19 @@ function parseAmazon(desktopRes, waRes) {
     return out;
   }
 
-  // Checagem explícita de indisponibilidade/sem estoque na página da Amazon
   if (
     /id=["']outOfStock["']/i.test(desktopHtml) ||
     /Temporariamente fora de estoque/i.test(desktopHtml) ||
     /Não disponível\.\s*<\/span>/i.test(desktopHtml) ||
-    /Não sabemos quando ou se este item estará disponível novamente/i.test(desktopHtml)
+    /Não sabemos quando ou se este item estará disponível novamente/i.test(
+      desktopHtml
+    )
   ) {
     out.isUnavailable = true;
-    out.unavailableReason = "Produto marcado como indisponível/sem estoque na Amazon";
+    out.unavailableReason =
+      "Produto marcado como indisponível/sem estoque na Amazon";
   }
 
-  // Título (Padrão 1: WhatsApp OG | Padrão 2: #productTitle | Padrão 3: meta title | Padrão 4: <title>)
   out.titulo =
     extractMetaTag(waHtml, ["og:title", "twitter:title"]) ||
     decodeHtmlEntities(
@@ -192,7 +192,6 @@ function parseAmazon(desktopRes, waRes) {
       .trim();
   }
 
-  // Imagem HD (Padrão 1: data-a-dynamic-image | Padrão 2: data-old-hires / hiRes / large | Padrão 3: og:image)
   const dynamicImgMatch =
     desktopHtml.match(
       /id=["']landingImage["'][^>]*data-a-dynamic-image=["']([^"']+)["']/i
@@ -223,7 +222,6 @@ function parseAmazon(desktopRes, waRes) {
     if (hiRes) out.imagemUrl = decodeHtmlEntities(hiRes);
   }
 
-  // Preço Atual (Padrão 1: priceToPay | Padrão 2: priceAmount JSON | Padrão 3: corePriceDisplay a-offscreen)
   const priceToPayBlock = desktopHtml.match(
     /priceToPay[\s\S]{0,450}?(?:a-offscreen|aok-offscreen)["'][^>]*>([^<]+)</i
   );
@@ -245,7 +243,6 @@ function parseAmazon(desktopRes, waRes) {
     }
   }
 
-  // Preço Antigo (Padrão 1: basisPrice | Padrão 2: a-text-price strike)
   const basisPriceBlock = desktopHtml.match(
     /basisPrice[\s\S]{0,450}?a-offscreen["'][^>]*>([^<]+)</i
   );
@@ -263,15 +260,14 @@ function parseAmazon(desktopRes, waRes) {
     }
   }
 
-  // Nota
   const ratingMatch =
-    desktopHtml.match(/id=["']acrPopover["'][^>]+title=["']([\d.,]+)\s*de\s*5/i) ||
-    desktopHtml.match(/([\d.,]+)\s*de\s*5\s*estrelas/i);
+    desktopHtml.match(
+      /id=["']acrPopover["'][^>]+title=["']([\d.,]+)\s*de\s*5/i
+    ) || desktopHtml.match(/([\d.,]+)\s*de\s*5\s*estrelas/i);
   if (ratingMatch && ratingMatch[1]) {
     out.nota = ratingMatch[1].replace(".", ",");
   }
 
-  // Vendidos / Social Proof
   const boughtMatch = desktopHtml.match(
     /id=["']social-proofing-faceout-title-tk_bought["'][^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/i
   );
@@ -292,7 +288,6 @@ function parseAmazon(desktopRes, waRes) {
     }
   }
 
-  // Subtítulo / Benefício
   const bulletsBlock = desktopHtml.match(
     /id=["']feature-bullets["'][\s\S]{0,2000}/i
   )?.[0];
@@ -301,7 +296,9 @@ function parseAmazon(desktopRes, waRes) {
       /<span class=["']a-list-item["'][^>]*>([\s\S]*?)<\/span>/i
     )?.[1];
     if (firstBullet) {
-      const cleanBullet = decodeHtmlEntities(firstBullet.replace(/<[^>]+>/g, " "));
+      const cleanBullet = decodeHtmlEntities(
+        firstBullet.replace(/<[^>]+>/g, " ")
+      );
       if (cleanBullet.length > 12) {
         out.subtitulo =
           cleanBullet.length > 130
@@ -322,7 +319,7 @@ function parseAmazon(desktopRes, waRes) {
 }
 
 // ============================================================================
-// EXTRATOR MERCADO LIVRE (Múltiplos padrões: /social/ poly-card + PDP + disponibilidade)
+// EXTRATOR MERCADO LIVRE (100% HTML público, sem precisar de chave de API)
 // ============================================================================
 function extractMeliAmount(htmlSnippet = "") {
   const frac = htmlSnippet.match(
@@ -359,7 +356,6 @@ function parseMercadoLivre(desktopRes, waRes) {
     return out;
   }
 
-  // Checagem explícita de anúncio pausado / finalizado no Mercado Livre
   if (
     /Publicação pausada/i.test(desktopHtml) ||
     /Anúncio pausado/i.test(desktopHtml) ||
@@ -473,128 +469,9 @@ function parseMercadoLivre(desktopRes, waRes) {
 }
 
 // ============================================================================
-// EXTRATOR SHOPEE (Padrão NOVO: API Oficial Afiliados GraphQL + Padrão ANTIGO: OG/HTML)
+// EXTRATOR SHOPEE (100% HTML/OpenGraph público, sem depender de chave de API)
 // ============================================================================
-export function parseShopeeIdsFromUrl(urlStr = "") {
-  const s = String(urlStr);
-  // Padrão 1: /opaanlp/<shopId>/<itemId> (links encurtados s.shopee.com.br modernos)
-  const m1 = s.match(/\/opaanlp\/(\d+)\/(\d+)/i);
-  if (m1) return { shopId: m1[1], itemId: m1[2] };
-
-  // Padrão 2: /product/<shopId>/<itemId>
-  const m2 = s.match(/\/product\/(\d+)\/(\d+)/i);
-  if (m2) return { shopId: m2[1], itemId: m2[2] };
-
-  // Padrão 3: ...-i.<shopId>.<itemId>
-  const m3 = s.match(/-i\.(\d+)\.(\d+)/i);
-  if (m3) return { shopId: m3[1], itemId: m3[2] };
-
-  return { shopId: null, itemId: null };
-}
-
-function formatShopeeSales(salesNum) {
-  const n = Number(salesNum);
-  if (!Number.isFinite(n) || n <= 0) return "";
-  if (n >= 1000) {
-    const k = Math.floor(n / 1000);
-    return `+${k} mil vendidos`;
-  }
-  return `+${n} vendidos`;
-}
-
-async function fetchShopeeOfficialAffiliateApi(shopId, itemId) {
-  const appId = (process.env.SHOPEE_APP_ID || "").trim();
-  const secret = (process.env.SHOPEE_APP_SECRET || "").trim();
-
-  if (!appId || !secret || !itemId) {
-    return { configured: Boolean(appId && secret), data: null };
-  }
-
-  try {
-    const query = `{productOfferV2(itemId:${Number(itemId)}${
-      shopId ? `,shopId:${Number(shopId)}` : ""
-    },page:1,limit:1){nodes{itemId shopId productName imageUrl priceMin priceMax priceDiscountRate sales ratingStar}}}`;
-
-    const payloadStr = JSON.stringify({ query });
-    const timestamp = Math.floor(Date.now() / 1000);
-    const signature = crypto
-      .createHash("sha256")
-      .update(`${appId}${timestamp}${payloadStr}${secret}`)
-      .digest("hex");
-
-    const res = await fetch("https://open-api.affiliate.shopee.com.br/graphql", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `SHA256 Credential=${appId},Timestamp=${timestamp},Signature=${signature}`,
-      },
-      body: payloadStr,
-      signal: AbortSignal.timeout(9000),
-    });
-
-    if (!res.ok) {
-      return {
-        configured: true,
-        data: null,
-        apiError: `HTTP ${res.status}`,
-      };
-    }
-
-    const json = await res.json();
-    if (json.errors && json.errors.length > 0) {
-      return {
-        configured: true,
-        data: null,
-        apiError: json.errors[0]?.message || "Erro na API Shopee",
-      };
-    }
-
-    const nodes = json?.data?.productOfferV2?.nodes;
-    if (Array.isArray(nodes) && nodes.length === 0) {
-      // API respondeu 200 OK mas o produto não retornou mais em ofertas ativas
-      return { configured: true, data: null, notFoundInApi: true };
-    }
-
-    const node = nodes?.[0];
-    if (!node) return { configured: true, data: null };
-
-    const precoAtual = parseBRLNumber(node.priceMin || node.priceMax);
-    const discountRate = Number(node.priceDiscountRate) || 0;
-    let precoAntigo = parseBRLNumber(node.priceMax);
-
-    if (precoAtual && discountRate > 0 && discountRate < 99) {
-      const calcOld = Math.round((precoAtual / (1 - discountRate / 100)) * 100) / 100;
-      if (!precoAntigo || calcOld > precoAntigo) {
-        precoAntigo = calcOld;
-      }
-    }
-    if (precoAntigo && precoAtual && precoAntigo <= precoAtual) {
-      precoAntigo = null;
-    }
-
-    const nota = node.ratingStar
-      ? Number(node.ratingStar).toFixed(1).replace(".", ",")
-      : "";
-    const vendidos = formatShopeeSales(node.sales);
-
-    return {
-      configured: true,
-      data: {
-        titulo: node.productName || "",
-        imagemUrl: node.imageUrl || "",
-        precoAtual,
-        precoAntigo,
-        nota,
-        vendidos,
-      },
-    };
-  } catch (err) {
-    console.warn("Aviso API Oficial Shopee:", err.message);
-    return { configured: true, data: null, apiError: err.message };
-  }
-}
-
-async function parseShopee(desktopRes, waRes, originalUrl) {
+function parseShopee(desktopRes, waRes) {
   const desktopHtml = desktopRes.html || "";
   const waHtml = waRes.html || "";
 
@@ -609,9 +486,6 @@ async function parseShopee(desktopRes, waRes, originalUrl) {
     destaqueTag: "OFERTA VERIFICADA",
     isUnavailable: false,
     unavailableReason: "",
-    shopeeApiConfigured: Boolean(
-      process.env.SHOPEE_APP_ID && process.env.SHOPEE_APP_SECRET
-    ),
   };
 
   if (
@@ -623,7 +497,6 @@ async function parseShopee(desktopRes, waRes, originalUrl) {
     return out;
   }
 
-  // 1. PADRÃO ANTIGO (MANTIDO): Extração via WhatsApp OpenGraph + Meta Description
   const waDesc =
     extractMetaTag(waHtml, ["og:description", "description"]) ||
     extractMetaTag(desktopHtml, ["og:description", "description"]);
@@ -664,7 +537,6 @@ async function parseShopee(desktopRes, waRes, originalUrl) {
     extractMetaTag(waHtml, ["og:image", "og:square_image", "twitter:image"]) ||
     extractMetaTag(desktopHtml, ["og:image", "twitter:image"]);
 
-  // Verifica se o link retornou página genérica de produto removido na Shopee
   if (
     /Produto não encontrado|Este produto não existe|item foi excluído/i.test(
       waHtml + desktopHtml
@@ -674,41 +546,18 @@ async function parseShopee(desktopRes, waRes, originalUrl) {
     out.unavailableReason = "Produto removido ou inexistente na Shopee";
   }
 
-  // Tenta preço em meta tags caso a Shopee volte a expor no HTML público
+  // Tenta extrair preço de meta tags caso a Shopee exponha no HTML público
   const rawMetaPrice = extractMetaTag(waHtml, [
     "product:price:amount",
     "og:price:amount",
   ]);
   if (rawMetaPrice) out.precoAtual = parseBRLNumber(rawMetaPrice);
 
-  // 2. PADRÃO NOVO (ADICIONADO EM PARALELO): API Oficial Shopee Affiliate GraphQL
-  const { shopId, itemId } =
-    parseShopeeIdsFromUrl(desktopRes.finalUrl) ||
-    parseShopeeIdsFromUrl(waRes.finalUrl) ||
-    parseShopeeIdsFromUrl(originalUrl);
-
-  if (itemId) {
-    const apiRes = await fetchShopeeOfficialAffiliateApi(shopId, itemId);
-    out.shopeeApiConfigured = apiRes.configured;
-
-    if (apiRes.data) {
-      out.titulo = apiRes.data.titulo || out.titulo;
-      out.imagemUrl = apiRes.data.imagemUrl || out.imagemUrl;
-      out.precoAtual = apiRes.data.precoAtual ?? out.precoAtual;
-      out.precoAntigo = apiRes.data.precoAntigo ?? out.precoAntigo;
-      out.nota = apiRes.data.nota || out.nota;
-      out.vendidos = apiRes.data.vendidos || out.vendidos;
-    } else if (apiRes.notFoundInApi && !out.titulo) {
-      out.isUnavailable = true;
-      out.unavailableReason = "Oferta não está mais ativa na API da Shopee";
-    }
-  }
-
   return out;
 }
 
 // ============================================================================
-// FUNÇÃO PRINCIPAL EXPORTADA (Usada no /admin e no Robô Diário de Ofertas!)
+// FUNÇÃO PRINCIPAL EXPORTADA (Usada no /admin e no Robô Diário de Ofertas)
 // ============================================================================
 export async function extractProductFromUrl(rawUrl) {
   const trimmedUrl = String(rawUrl || "").trim();
@@ -734,7 +583,6 @@ export async function extractProductFromUrl(rawUrl) {
     destaqueTag: "OFERTA VERIFICADA",
     isUnavailable: false,
     unavailableReason: "",
-    shopeeApiConfigured: false,
   };
 
   if (detectedStore === "Amazon") {
@@ -742,7 +590,7 @@ export async function extractProductFromUrl(rawUrl) {
   } else if (detectedStore === "Mercado Livre") {
     extracted = parseMercadoLivre(desktopRes, waRes);
   } else if (detectedStore === "Shopee") {
-    extracted = await parseShopee(desktopRes, waRes, trimmedUrl);
+    extracted = parseShopee(desktopRes, waRes);
   } else {
     extracted.titulo =
       extractMetaTag(waRes.html, ["og:title", "twitter:title"]) ||
@@ -791,9 +639,8 @@ export async function extractProductFromUrl(rawUrl) {
   let warningMessage = "";
   if (missingFields.length > 0) {
     if (detectedStore === "Shopee" && !extracted.precoAtual) {
-      warningMessage = extracted.shopeeApiConfigured
-        ? "A API da Shopee não retornou preço/nota para este item específico. Preencha os campos destacados manualmente."
-        : "A Shopee oculta preço, nota e vendidos do HTML público (carregamos Título, Foto e Resumo via OpenGraph). Para carregar 100% dos dados da Shopee automaticamente (inclusive no robô diário de preços!), adicione suas chaves gratuitas SHOPEE_APP_ID e SHOPEE_APP_SECRET (do painel affiliate.shopee.com.br → API Aberta) nas Environment Variables da Vercel e nos Secrets do GitHub.";
+      warningMessage =
+        "A Shopee não coloca preço, nota e vendidos no HTML público (sem API oficial da Shopee, carregamos automaticamente Loja, Título, Foto e Resumo). Preencha apenas os campos destacados acima.";
     } else {
       warningMessage = `Alguns dados não foram encontrados automaticamente na página (${missingFields.join(
         ", "
@@ -815,7 +662,6 @@ export async function extractProductFromUrl(rawUrl) {
     destaqueTag: extracted.destaqueTag,
     isUnavailable: Boolean(extracted.isUnavailable),
     unavailableReason: extracted.unavailableReason || "",
-    shopeeApiConfigured: Boolean(extracted.shopeeApiConfigured),
     loadedFields,
     missingFields,
     warningMessage,
