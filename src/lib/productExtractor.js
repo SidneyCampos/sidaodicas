@@ -148,6 +148,7 @@ function parseAmazon(desktopRes, waRes) {
     imagemUrl: "",
     precoAtual: null,
     precoAntigo: null,
+    precoObs: "",
     nota: "",
     vendidos: "",
     destaqueTag: "OFERTA VERIFICADA",
@@ -319,7 +320,8 @@ function parseAmazon(desktopRes, waRes) {
 }
 
 // ============================================================================
-// EXTRATOR MERCADO LIVRE (100% HTML público, sem precisar de chave de API)
+// EXTRATOR MERCADO LIVRE (100% HTML/JSON público, sem precisar de chave de API)
+// Mantém padrão antigo (HTML poly-card/PDP) + novo padrão (JSON card-featured)
 // ============================================================================
 function extractMeliAmount(htmlSnippet = "") {
   const frac = htmlSnippet.match(
@@ -333,6 +335,88 @@ function extractMeliAmount(htmlSnippet = "") {
   return parseBRLNumber(combined);
 }
 
+function formatBRLCompact(num) {
+  const value = Number(num);
+  if (!Number.isFinite(value) || value <= 0) return "";
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+function extractMeliFeaturedPolycard(html = "") {
+  const marker = '"id":"card-featured"';
+  const markerIdx = html.indexOf(marker);
+  if (markerIdx === -1) return null;
+
+  const polycardsIdx = html.indexOf('"polycards":[', markerIdx);
+  if (polycardsIdx === -1 || polycardsIdx - markerIdx > 6000) return null;
+
+  const start = polycardsIdx + '"polycards":'.length;
+  let depth = 0;
+  let end = -1;
+  let inStr = false;
+  let esc = false;
+
+  for (let i = start; i < html.length && i - start < 40000; i++) {
+    const ch = html[i];
+    if (esc) {
+      esc = false;
+      continue;
+    }
+    if (ch === "\\") {
+      esc = true;
+      continue;
+    }
+    if (ch === '"') {
+      inStr = !inStr;
+      continue;
+    }
+    if (inStr) continue;
+    if (ch === "[") depth++;
+    else if (ch === "]") {
+      depth--;
+      if (depth === 0) {
+        end = i + 1;
+        break;
+      }
+    }
+  }
+
+  if (end === -1) return null;
+
+  try {
+    const parsed = JSON.parse(html.slice(start, end));
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : null;
+  } catch {
+    return null;
+  }
+}
+
+function parseMeliInstallmentsJson(installmentsObj) {
+  if (!installmentsObj || !installmentsObj.text) return "";
+  let text = String(installmentsObj.text);
+  const values = Array.isArray(installmentsObj.values)
+    ? installmentsObj.values
+    : [];
+
+  for (const val of values) {
+    if (!val?.key) continue;
+    let replacement = "";
+    if (val.type === "price" && val.price?.value) {
+      replacement = formatBRLCompact(val.price.value);
+    } else if (val.type === "label" && val.label?.text) {
+      replacement = val.label.text;
+    }
+    text = text.replace(new RegExp(`\\{${val.key}\\}`, "g"), replacement);
+  }
+
+  return text
+    .replace(/\{[^}]+\}/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function parseMercadoLivre(desktopRes, waRes) {
   const desktopHtml = desktopRes.html || "";
   const waHtml = waRes.html || "";
@@ -343,11 +427,15 @@ function parseMercadoLivre(desktopRes, waRes) {
     imagemUrl: "",
     precoAtual: null,
     precoAntigo: null,
+    precoObs: "",
     nota: "",
     vendidos: "",
     destaqueTag: "OFERTA VERIFICADA",
     isUnavailable: false,
     unavailableReason: "",
+    isCatalogProduct:
+      /\/p\/MLB\d+/i.test(desktopHtml) ||
+      /\/p\/MLB\d+/i.test(desktopRes.finalUrl || ""),
   };
 
   if (desktopRes.status === 404 || desktopRes.status === 410) {
@@ -367,25 +455,104 @@ function parseMercadoLivre(desktopRes, waRes) {
     out.unavailableReason = "Anúncio pausado ou sem estoque no Mercado Livre";
   }
 
+  // PADRÃO NOVO: JSON estruturado do card-featured (inclui preço exato, Pix, parcelamento limpo e loja)
+  const polycard = extractMeliFeaturedPolycard(desktopHtml);
+  const components = Array.isArray(polycard?.components)
+    ? polycard.components
+    : [];
+  let sellerFromJson = "";
+  let installmentsFromJson = "";
+
+  if (components.length > 0) {
+    const titleComp = components.find((c) => c.type === "title")?.title;
+    if (titleComp?.text) out.titulo = decodeHtmlEntities(titleComp.text);
+
+    const priceComp = components.find((c) => c.type === "price")?.price;
+    if (priceComp) {
+      if (priceComp.current_price?.value) {
+        out.precoAtual = parseBRLNumber(priceComp.current_price.value);
+      }
+      if (priceComp.previous_price?.value) {
+        out.precoAntigo = parseBRLNumber(priceComp.previous_price.value);
+      }
+      const discountLabel = priceComp.discount_label?.text || "";
+      if (/no\s*pix/i.test(discountLabel)) {
+        out.precoObs = "no Pix";
+      }
+      installmentsFromJson = parseMeliInstallmentsJson(priceComp.installments);
+    }
+
+    const sellerComp = components.find((c) => c.type === "seller")?.seller;
+    if (sellerComp?.text) {
+      const cleanSeller = decodeHtmlEntities(
+        sellerComp.text.replace(/\{[^}]+\}/g, "").replace(/^Por\s+/i, "")
+      );
+      const isOfficial = Array.isArray(sellerComp.values)
+        ? sellerComp.values.some(
+            (v) =>
+              v.key === "icon_cockade" ||
+              /loja oficial/i.test(v.icon?.alt_text || "")
+          )
+        : false;
+      if (cleanSeller) {
+        sellerFromJson = isOfficial
+          ? `Loja oficial (${cleanSeller})`
+          : `Vendido por ${cleanSeller}`;
+      }
+    }
+
+    const reviewComp = components.find(
+      (c) => c.type === "review_compacted"
+    )?.review_compacted;
+    if (Array.isArray(reviewComp?.values)) {
+      const ratingVal = reviewComp.values.find(
+        (v) => v.key === "label"
+      )?.label?.text;
+      if (ratingVal && /^[\d.,]+$/.test(ratingVal.trim())) {
+        out.nota = ratingVal.trim().replace(".", ",");
+      }
+      const soldVal = reviewComp.values.find(
+        (v) => v.key === "label2"
+      )?.label?.text;
+      if (soldVal) {
+        const cleanSold = decodeHtmlEntities(soldVal)
+          .replace(/^\|?\s*/, "")
+          .replace(/(\d)(mil)/gi, "$1 $2")
+          .trim();
+        if (cleanSold) out.vendidos = cleanSold;
+      }
+    }
+
+    const highlightComp = components.find(
+      (c) => c.type === "highlight"
+    )?.highlight;
+    if (highlightComp?.text && /mais vendido/i.test(highlightComp.text)) {
+      out.destaqueTag = "MAIS VENDIDO";
+    }
+  }
+
+  // PADRÃO ANTIGO (mantido integralmente como fallback para HTML poly-card / PDP / meta tags)
   const xlargeIdx = desktopHtml.indexOf("poly-card--xlarge");
   const featuredBlock =
     xlargeIdx !== -1
       ? desktopHtml.slice(xlargeIdx, xlargeIdx + 5500)
       : desktopHtml;
 
-  out.titulo =
-    extractMetaTag(waHtml, ["og:title"]) ||
-    decodeHtmlEntities(
-      featuredBlock.match(
-        /class=["'][^"']*poly-component__title[^"']*["'][^>]*>([\s\S]*?)<\/a>/i
-      )?.[1] || ""
-    ) ||
-    decodeHtmlEntities(
-      desktopHtml.match(
-        /class=["'][^"']*ui-pdp-title[^"']*["'][^>]*>([\s\S]*?)<\/h1>/i
-      )?.[1] || ""
-    ) ||
-    extractMetaTag(desktopHtml, ["twitter:title", "og:title", "title"]);
+  if (!out.titulo) {
+    out.titulo =
+      extractMetaTag(waHtml, ["og:title"]) ||
+      decodeHtmlEntities(
+        featuredBlock.match(
+          /class=["'][^"']*poly-component__title[^"']*["'][^>]*>([\s\S]*?)<\/a>/i
+        )?.[1] || ""
+      ) ||
+      decodeHtmlEntities(
+        desktopHtml.match(
+          /class=["'][^"']*ui-pdp-title[^"']*["'][^>]*>([\s\S]*?)<\/h1>/i
+        )?.[1] || ""
+      ) ||
+      extractMetaTag(desktopHtml, ["twitter:title", "og:title", "title"]);
+  }
 
   if (out.titulo) {
     out.titulo = out.titulo
@@ -403,15 +570,24 @@ function parseMercadoLivre(desktopRes, waRes) {
     ) ||
     extractMetaTag(desktopHtml, ["og:image", "twitter:image", "image"]);
 
-  const prevPriceBlock = featuredBlock.match(
-    /andes-money-amount--previous[\s\S]{0,600}?<\/s>/i
-  )?.[0];
-  if (prevPriceBlock) out.precoAntigo = extractMeliAmount(prevPriceBlock);
+  if (!out.precoAntigo) {
+    const prevPriceBlock = featuredBlock.match(
+      /andes-money-amount--previous[\s\S]{0,600}?<\/s>/i
+    )?.[0];
+    if (prevPriceBlock) out.precoAntigo = extractMeliAmount(prevPriceBlock);
+  }
 
-  const currentPriceBlock =
-    featuredBlock.match(/poly-price__current[\s\S]{0,700}?<\/div>/i)?.[0] ||
-    featuredBlock.match(/ui-pdp-price__second-line[\s\S]{0,700}?<\/div>/i)?.[0];
-  if (currentPriceBlock) out.precoAtual = extractMeliAmount(currentPriceBlock);
+  if (!out.precoAtual) {
+    const currentPriceBlock =
+      featuredBlock.match(/poly-price__current[\s\S]{0,700}?<\/div>/i)?.[0] ||
+      featuredBlock.match(/ui-pdp-price__second-line[\s\S]{0,700}?<\/div>/i)?.[0];
+    if (currentPriceBlock) {
+      out.precoAtual = extractMeliAmount(currentPriceBlock);
+      if (!out.precoObs && /no\s*pix/i.test(currentPriceBlock)) {
+        out.precoObs = "no Pix";
+      }
+    }
+  }
 
   if (!out.precoAtual) {
     const ogTitleOrDesc =
@@ -420,27 +596,35 @@ function parseMercadoLivre(desktopRes, waRes) {
     if (priceInMeta) out.precoAtual = parseBRLNumber(priceInMeta);
   }
 
-  const ratingMatch =
-    featuredBlock.match(/Classificação\s*([\d.,]+)\s*de\s*5/i) ||
-    featuredBlock.match(
-      /poly-component__review-compacted[\s\S]{0,300}?>([\d.,]+)<\/span>/i
-    ) ||
-    desktopHtml.match(/ui-pdp-review__rating[^>]*>([\d.,]+)</i);
-  if (ratingMatch && ratingMatch[1]) {
-    out.nota = ratingMatch[1].replace(".", ",");
+  if (!out.precoObs && /OFF\s+no\s+Pix/i.test(featuredBlock)) {
+    out.precoObs = "no Pix";
   }
 
-  const soldMatch =
-    featuredBlock.match(
-      /(\+?[\d.,]+\s*mil\s*vendidos|\+?[\d.,]+\s*vendidos)/i
-    ) ||
-    featuredBlock.match(/Mais de\s*([\d.,]+\s*mil?)\s*produtos vendidos/i);
-  if (soldMatch && soldMatch[1]) {
-    let sold = decodeHtmlEntities(soldMatch[1])
-      .replace(/(\d)(mil)/gi, "$1 $2")
-      .trim();
-    if (!/vendidos/i.test(sold)) sold = `+${sold} vendidos`;
-    out.vendidos = sold;
+  if (!out.nota) {
+    const ratingMatch =
+      featuredBlock.match(/Classificação\s*([\d.,]+)\s*de\s*5/i) ||
+      featuredBlock.match(
+        /poly-component__review-compacted[\s\S]{0,300}?>([\d.,]+)<\/span>/i
+      ) ||
+      desktopHtml.match(/ui-pdp-review__rating[^>]*>([\d.,]+)</i);
+    if (ratingMatch && ratingMatch[1]) {
+      out.nota = ratingMatch[1].replace(".", ",");
+    }
+  }
+
+  if (!out.vendidos) {
+    const soldMatch =
+      featuredBlock.match(
+        /(\+?[\d.,]+\s*mil\s*vendidos|\+?[\d.,]+\s*vendidos)/i
+      ) ||
+      featuredBlock.match(/Mais de\s*([\d.,]+\s*mil?)\s*produtos vendidos/i);
+    if (soldMatch && soldMatch[1]) {
+      let sold = decodeHtmlEntities(soldMatch[1])
+        .replace(/(\d)(mil)/gi, "$1 $2")
+        .trim();
+      if (!/vendidos/i.test(sold)) sold = `+${sold} vendidos`;
+      out.vendidos = sold;
+    }
   }
 
   const highlightMatch = featuredBlock.match(
@@ -450,19 +634,31 @@ function parseMercadoLivre(desktopRes, waRes) {
     out.destaqueTag = "MAIS VENDIDO";
   }
 
-  const seller = decodeHtmlEntities(
+  const sellerHtml = decodeHtmlEntities(
     featuredBlock
       .match(/poly-component__seller[^>]*>([\s\S]*?)<\/span>/i)?.[1]
       ?.replace(/<[^>]+>/g, " ") || ""
-  );
-  const installments = decodeHtmlEntities(
+  ).replace(/^Por\s+/i, "");
+
+  const installmentsHtml = decodeHtmlEntities(
     featuredBlock
       .match(/poly-price__installments[^>]*>([\s\S]*?)<\/span>\s*<\/div>/i)?.[1]
       ?.replace(/<[^>]+>/g, " ") || ""
-  );
+  ).replace(/(\d)\s*,\s*(\d)/g, "$1,$2");
+
+  const finalSeller =
+    sellerFromJson || (sellerHtml ? `Loja oficial (${sellerHtml})` : "");
+  const finalInstallments = installmentsFromJson || installmentsHtml;
+
   const subParts = [];
-  if (seller) subParts.push(`Loja oficial (${seller})`);
-  if (installments) subParts.push(`Parcelamento em ${installments}`);
+  if (finalSeller) subParts.push(finalSeller);
+  if (finalInstallments) {
+    subParts.push(
+      /^ou\s+/i.test(finalInstallments)
+        ? finalInstallments
+        : `Parcelamento em ${finalInstallments}`
+    );
+  }
   if (subParts.length > 0) out.subtitulo = subParts.join(" • ");
 
   return out;
@@ -481,6 +677,7 @@ function parseShopee(desktopRes, waRes) {
     imagemUrl: "",
     precoAtual: null,
     precoAntigo: null,
+    precoObs: "",
     nota: "",
     vendidos: "",
     destaqueTag: "OFERTA VERIFICADA",
@@ -657,11 +854,17 @@ export async function extractProductFromUrl(rawUrl) {
     imagemUrl: extracted.imagemUrl,
     precoAtual: extracted.precoAtual,
     precoAntigo: extracted.precoAntigo,
+    precoObs: extracted.precoObs || "",
     nota: extracted.nota,
     vendidos: extracted.vendidos,
     destaqueTag: extracted.destaqueTag,
     isUnavailable: Boolean(extracted.isUnavailable),
     unavailableReason: extracted.unavailableReason || "",
+    isCatalogProduct: Boolean(extracted.isCatalogProduct),
+    priceHint:
+      detectedStore === "Mercado Livre"
+        ? "No Mercado Livre, produtos de catálogo mudam de vendedor e preço ao longo do dia (e podem variar no Pix ou por CEP). Nosso robô recheca a cada 2h — ou marque 'Travar preço manual' se quiser fixar um valor específico."
+        : "",
     loadedFields,
     missingFields,
     warningMessage,

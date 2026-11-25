@@ -87,23 +87,25 @@ export default function ProductCard({
 
   const precoAntigo = Number(product.precoAntigo ?? product.precoOriginal ?? 0);
   const precoAtual = Number(product.precoAtual ?? product.precoDesconto ?? 0);
+  const precoObs = (product.precoObs || "").trim();
   const imagemUrl = product.imagemUrl ?? product.urlImagem ?? "";
   const loja = product.loja || "Amazon";
   const cupomOpcional = product.cupomOpcional || "";
   const linkAfiliado = product.linkAfiliado || "#";
   const nota = product.nota || "";
+  const verifiedTimestamp = product.ultimaVerificacaoEm || product.criadoEm;
 
   const [relativeTime, setRelativeTime] = useState(() =>
-    product.criadoEm
-      ? formatRelativeVerifiedTime(product.criadoEm, product.verificadoEm)
+    verifiedTimestamp
+      ? formatRelativeVerifiedTime(verifiedTimestamp, product.verificadoEm)
       : "Hoje"
   );
 
   useEffect(() => {
     setRelativeTime(
-      formatRelativeVerifiedTime(product.criadoEm, product.verificadoEm)
+      formatRelativeVerifiedTime(verifiedTimestamp, product.verificadoEm)
     );
-  }, [product.criadoEm, product.verificadoEm]);
+  }, [verifiedTimestamp, product.verificadoEm]);
 
   const descontoPercentual = calculateDiscountPercentage(
     precoAntigo,
@@ -297,10 +299,17 @@ export default function ProductCard({
                 {formatPrice(precoAntigo)}
               </span>
             )}
-            <span className="text-lg sm:text-2xl font-bold text-[#f7f3ec] tracking-tight leading-none">
-              <span className="sr-only">Preço atual: </span>
-              {formatPrice(precoAtual)}
-            </span>
+            <div className="flex flex-wrap items-baseline gap-1.5">
+              <span className="text-lg sm:text-2xl font-bold text-[#f7f3ec] tracking-tight leading-none">
+                <span className="sr-only">Preço atual: </span>
+                {formatPrice(precoAtual)}
+              </span>
+              {precoObs && (
+                <span className="text-[11px] font-medium text-[#e5ad5e]">
+                  {precoObs}
+                </span>
+              )}
+            </div>
           </div>
 
           {cupomOpcional && (

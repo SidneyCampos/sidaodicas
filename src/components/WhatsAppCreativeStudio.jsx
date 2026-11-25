@@ -99,6 +99,8 @@ export function buildViralWhatsAppCopy(offer = {}) {
   const nota = (offer.nota || "").trim();
   const vendidos = (offer.vendidos || "").trim();
   const cupom = (offer.cupomOpcional || "").trim().toUpperCase();
+  const precoObs = (offer.precoObs || "").trim();
+  const precoObsSuffix = precoObs ? ` (${precoObs})` : "";
   const link = (offer.linkAfiliado || "").trim();
 
   let headline = `🔥 *${(
@@ -130,13 +132,13 @@ export function buildViralWhatsAppCopy(offer = {}) {
   if (precoAntigo > precoAtual && precoAtual > 0) {
     lines.push(`😱 Era ~${formatBRLPrice(precoAntigo)}~`);
     lines.push(
-      `🥳 *AGORA: ${formatBRLPrice(precoAtual)}*${
+      `🥳 *AGORA: ${formatBRLPrice(precoAtual)}*${precoObsSuffix}${
         desconto > 0 ? ` (-${desconto}% OFF)` : ""
       }`
     );
     lines.push(`💸 Economia de ${formatBRLPrice(economia)}`);
   } else if (precoAtual > 0) {
-    lines.push(`🥳 *AGORA: ${formatBRLPrice(precoAtual)}*`);
+    lines.push(`🥳 *AGORA: ${formatBRLPrice(precoAtual)}*${precoObsSuffix}`);
   }
 
   if (cupom) {
@@ -171,6 +173,8 @@ export function buildInstagramCaption(offer = {}) {
   const nota = (offer.nota || "").trim();
   const vendidos = (offer.vendidos || "").trim();
   const cupom = (offer.cupomOpcional || "").trim().toUpperCase();
+  const precoObs = (offer.precoObs || "").trim();
+  const precoObsSuffix = precoObs ? ` (${precoObs})` : "";
 
   const storeHashtag =
     loja === "Amazon"
@@ -204,10 +208,10 @@ export function buildInstagramCaption(offer = {}) {
 
   if (precoAntigo > precoAtual && precoAtual > 0) {
     lines.push(`❌ De ${formatBRLPrice(precoAntigo)}`);
-    lines.push(`✅ Por apenas ${formatBRLPrice(precoAtual)}!`);
+    lines.push(`✅ Por apenas ${formatBRLPrice(precoAtual)}${precoObsSuffix}!`);
     lines.push(`💸 Você economiza ${formatBRLPrice(economia)} hoje!`);
   } else if (precoAtual > 0) {
-    lines.push(`✅ Por apenas ${formatBRLPrice(precoAtual)}!`);
+    lines.push(`✅ Por apenas ${formatBRLPrice(precoAtual)}${precoObsSuffix}!`);
   }
 
   if (cupom) {
@@ -536,6 +540,13 @@ export default function WhatsAppCreativeStudio({ offer }) {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(cupomLabel, W / 2, priceY + 42);
+      } else if (offer.precoObs) {
+        const obsLabel = String(offer.precoObs).trim().toUpperCase();
+        ctx.font = "800 26px system-ui, -apple-system, sans-serif";
+        ctx.fillStyle = theme.priceLabelColor;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(obsLabel, W / 2, priceY + 40);
       }
 
       const footerH = 92;
@@ -576,6 +587,7 @@ export default function WhatsAppCreativeStudio({ offer }) {
     offer.nota,
     offer.vendidos,
     offer.cupomOpcional,
+    offer.precoObs,
     selectedTheme,
   ]);
 

@@ -30,6 +30,7 @@ export async function syncAndAuditAllOffers() {
   const priceChanges = [];
   const removedOffers = [];
   const skippedOffers = [];
+  let metadataChanged = false;
 
   for (let i = 0; i < ofertas.length; i++) {
     const offer = ofertas[i];
@@ -54,13 +55,23 @@ export async function syncAndAuditAllOffers() {
         continue;
       }
 
-      let nextOffer = {
-        ...offer,
-        ultimaVerificacaoEm: new Date().toISOString(),
-      };
+      let nextOffer = { ...offer };
+      let offerChanged = false;
 
-      // 2. Se encontrou preço novo na loja, atualiza com inteligência!
-      if (live.precoAtual && live.precoAtual > 0) {
+      // 2. Se o preço está TRAVADO manualmente pelo admin, o robô valida só a disponibilidade
+      // e prova social, sem sobrescrever o preço definido por você.
+      if (offer.precoTravado) {
+        const livePriceText =
+          live.precoAtual && live.precoAtual > 0
+            ? `vitrine pública mostra R$ ${Number(live.precoAtual).toFixed(2)}`
+            : "preço não exposto na vitrine pública";
+        skippedOffers.push({
+          id: offer.id,
+          titulo: offer.titulo,
+          loja: offer.loja,
+          motivo: `Preço travado manualmente (${livePriceText} • link ativo)`,
+        });
+      } else if (live.precoAtual && live.precoAtual > 0) {
         const prevAtual = Number(offer.precoAtual) || 0;
         const prevAntigo = Number(offer.precoAntigo) || 0;
         const newAtual = Number(live.precoAtual);
@@ -77,6 +88,8 @@ export async function syncAndAuditAllOffers() {
         }
 
         const newDiscount = calcDiscount(newAntigo, newAtual);
+        const nextObs = live.precoObs || "";
+        const prevObs = offer.precoObs || "";
 
         if (Math.abs(newAtual - prevAtual) >= 0.01) {
           priceChanges.push({
@@ -86,6 +99,15 @@ export async function syncAndAuditAllOffers() {
             de: prevAtual,
             para: newAtual,
           });
+          offerChanged = true;
+        }
+
+        if (
+          Math.abs(newAntigo - prevAntigo) >= 0.01 ||
+          newDiscount !== (Number(offer.descontoPercentual) || 0) ||
+          nextObs !== prevObs
+        ) {
+          offerChanged = true;
         }
 
         nextOffer = {
@@ -93,8 +115,19 @@ export async function syncAndAuditAllOffers() {
           precoAtual: newAtual,
           precoAntigo: newAntigo,
           descontoPercentual: newDiscount,
+          precoObs: nextObs,
           verificadoEm: "Verificado hoje",
         };
+
+        // Atualiza subtítulo automático (parcelamento/vendedor) se o antigo era gerado automaticamente
+        const oldSub = String(offer.subtitulo || "").trim();
+        const isAutoSubtitle =
+          !oldSub ||
+          /^(Parcelamento em|Loja oficial \(|Vendido por |ou R\$)/i.test(oldSub);
+        if (isAutoSubtitle && live.subtitulo && live.subtitulo !== oldSub) {
+          nextOffer.subtitulo = live.subtitulo;
+          offerChanged = true;
+        }
       } else {
         skippedOffers.push({
           id: offer.id,
@@ -107,9 +140,20 @@ export async function syncAndAuditAllOffers() {
         });
       }
 
-      // Atualiza prova social se encontrada
-      if (live.nota) nextOffer.nota = live.nota;
-      if (live.vendidos) nextOffer.vendidos = live.vendidos;
+      // Atualiza prova social se encontrada e diferente
+      if (live.nota && live.nota !== offer.nota) {
+        nextOffer.nota = live.nota;
+        offerChanged = true;
+      }
+      if (live.vendidos && live.vendidos !== offer.vendidos) {
+        nextOffer.vendidos = live.vendidos;
+        offerChanged = true;
+      }
+
+      if (offerChanged) {
+        nextOffer.ultimaVerificacaoEm = new Date().toISOString();
+        metadataChanged = true;
+      }
 
       updatedList.push(nextOffer);
     } catch (err) {
@@ -129,12 +173,15 @@ export async function syncAndAuditAllOffers() {
     }
   }
 
-  const hasChanges = priceChanges.length > 0 || removedOffers.length > 0;
-  if (hasChanges || ofertas.length > 0) {
+  // Só grava e gera commit/deploy se houve alteração real de preço, disponibilidade ou dados!
+  // Isso economiza cota de deploys da Vercel e permite rodar o robô várias vezes ao dia.
+  const hasChanges =
+    priceChanges.length > 0 || removedOffers.length > 0 || metadataChanged;
+  if (hasChanges) {
     await writeJsonData(
       "ofertas.json",
       updatedList,
-      `Auditoria diaria de ofertas: ${priceChanges.length} precos atualizados, ${removedOffers.length} indisponiveis removidas`
+      `Auditoria automatica de ofertas: ${priceChanges.length} precos atualizados, ${removedOffers.length} indisponiveis removidas`
     );
   }
 

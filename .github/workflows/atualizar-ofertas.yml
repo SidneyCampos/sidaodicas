@@ -2,8 +2,9 @@ name: Atualizar Preços e Limpar Ofertas Indisponíveis
 
 on:
   schedule:
-    # Roda automaticamente todo dia às 07:30 e 15:30 (horário de Brasília)
-    - cron: "30 10,18 * * *"
+    # Roda a cada 2 horas entre 07:00 e 23:00 (horário de Brasília / UTC-3)
+    # Só faz commit e deploy na Vercel quando algum preço ou link realmente mudar!
+    - cron: "0 10,12,14,16,18,20,22,0,2 * * *"
   workflow_dispatch:
 
 permissions:

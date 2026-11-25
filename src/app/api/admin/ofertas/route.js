@@ -62,6 +62,8 @@ export async function POST(request) {
       precoAntigo,
       precoAtual,
       descontoPercentual,
+      precoObs: (body.precoObs || "").trim(),
+      precoTravado: Boolean(body.precoTravado),
       loja: body.loja || "Amazon",
       categoria: body.categoria || "Mais Vendidos",
       cupomOpcional: (body.cupomOpcional || "").trim().toUpperCase(),
@@ -151,6 +153,42 @@ export async function PUT(request) {
       });
     }
 
+    // Ação: Travar ou destravar preço manual (impede/libera alteração pelo robô diário)
+    if (body.action === "toggle_price_lock" && body.id !== undefined) {
+      let found = false;
+      let nextLocked = false;
+      const atualizadas = await mutateJsonData(
+        FILENAME,
+        (current) => {
+          const list = Array.isArray(current) ? current : [];
+          return list.map((item) => {
+            if (String(item.id) !== String(body.id)) return item;
+            found = true;
+            nextLocked = !Boolean(item.precoTravado);
+            return {
+              ...item,
+              precoTravado: nextLocked,
+            };
+          });
+        },
+        "Trava de preco manual alterada via Painel Admin"
+      );
+
+      if (!found) {
+        return NextResponse.json(
+          { error: "Oferta não encontrada." },
+          { status: 404 }
+        );
+      }
+
+      revalidatePath("/");
+      return NextResponse.json({
+        success: true,
+        precoTravado: nextLocked,
+        ofertas: atualizadas,
+      });
+    }
+
     // Ação: Editar dados de uma oferta existente
     const targetId = body.id;
     const atualizadas = await mutateJsonData(
@@ -175,6 +213,14 @@ export async function PUT(request) {
             precoAntigo,
             precoAtual,
             descontoPercentual: calcDiscount(precoAntigo, precoAtual),
+            precoObs:
+              body.precoObs !== undefined
+                ? body.precoObs.trim()
+                : item.precoObs || "",
+            precoTravado:
+              body.precoTravado !== undefined
+                ? Boolean(body.precoTravado)
+                : Boolean(item.precoTravado),
             loja: body.loja || item.loja,
             categoria: body.categoria || item.categoria,
             cupomOpcional:

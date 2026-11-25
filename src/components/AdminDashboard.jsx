@@ -29,6 +29,7 @@ import {
   Ticket,
   Trash2,
   TrendingUp,
+  Unlock,
   User,
   Wand2,
   X,
@@ -62,6 +63,8 @@ const INITIAL_OFFER_FORM = {
   categoria: "Mais Vendidos",
   precoAntigo: "",
   precoAtual: "",
+  precoObs: "",
+  precoTravado: false,
   destaqueTag: "OFERTA VERIFICADA",
   cupomOpcional: "",
   nota: "",
@@ -289,6 +292,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
           data.precoAntigo !== null && data.precoAntigo !== undefined
             ? String(data.precoAntigo)
             : "",
+        precoObs: data.precoObs || "",
         nota: data.nota || "",
         vendidos: data.vendidos || "",
         destaqueTag: data.destaqueTag || "OFERTA VERIFICADA",
@@ -300,6 +304,7 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
         loadedFields: data.loadedFields || [],
         missingFields: data.missingFields || [],
         warningMessage: data.warningMessage || "",
+        priceHint: data.priceHint || "",
         success: Boolean(data.success),
       });
     } catch {
@@ -419,6 +424,28 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
     }
   };
 
+  const handleTogglePriceLock = async (id) => {
+    try {
+      const response = await fetch("/api/admin/ofertas", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggle_price_lock", id }),
+      });
+      const data = await response.json();
+      if (data.ofertas) {
+        setOfertas(data.ofertas);
+        showMessage(
+          "success",
+          data.precoTravado
+            ? "🔒 Preço travado! O robô continua verificando se o link está ativo, mas não altera este valor."
+            : "🔓 Preço destravado! O robô voltará a atualizar este valor automaticamente a cada 2h."
+        );
+      }
+    } catch {
+      showMessage("error", "Falha ao alterar a trava de preço.");
+    }
+  };
+
   const handleEditOffer = (product) => {
     setOfferForm({
       id: product.id,
@@ -429,6 +456,8 @@ export default function AdminDashboard({ initialAuthenticated = false }) {
       categoria: product.categoria || "Mais Vendidos",
       precoAntigo: product.precoAntigo ?? "",
       precoAtual: product.precoAtual ?? "",
+      precoObs: product.precoObs || "",
+      precoTravado: Boolean(product.precoTravado),
       destaqueTag: product.destaqueTag || "OFERTA VERIFICADA",
       cupomOpcional: product.cupomOpcional || "",
       nota: product.nota || "",
@@ -1040,6 +1069,13 @@ return (
                       </div>
                     </div>
                   )}
+
+                  {extractionReport.priceHint && (
+                    <div className="p-3 rounded-xl bg-sky-950/60 border border-sky-500/35 text-sky-100 text-xs leading-relaxed">
+                      💡 <strong>Dica de preço ({extractionReport.loja}):</strong>{" "}
+                      {extractionReport.priceHint}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1250,6 +1286,71 @@ return (
                     className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm font-mono uppercase text-yellow-400 px-3.5 py-2.5 rounded-xl"
                   />
                 </div>
+              </div>
+
+              {/* Condição do Preço (ex: no Pix) + Trava de Preço Manual */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center bg-slate-950/60 border border-slate-800 rounded-2xl p-4">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <label className="block text-xs font-bold uppercase text-slate-300">
+                      Condição do Preço (Opcional)
+                    </label>
+                    <div className="flex items-center gap-1">
+                      {["no Pix", "à vista", "no App"].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() =>
+                            setOfferForm({
+                              ...offerForm,
+                              precoObs:
+                                offerForm.precoObs === preset ? "" : preset,
+                            })
+                          }
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
+                            offerForm.precoObs === preset
+                              ? "bg-[#FFE600] text-slate-950 border-[#FFE600]"
+                              : "bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500"
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    value={offerForm.precoObs}
+                    onChange={(e) =>
+                      setOfferForm({ ...offerForm, precoObs: e.target.value })
+                    }
+                    placeholder="Ex: no Pix (aparece discretamente ao lado do preço)"
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-[#FFE600] focus:outline-none text-sm text-white px-3.5 py-2 rounded-xl"
+                  />
+                </div>
+
+                <label className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700/80 hover:border-[#FFE600]/50 cursor-pointer transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(offerForm.precoTravado)}
+                    onChange={(e) =>
+                      setOfferForm({
+                        ...offerForm,
+                        precoTravado: e.target.checked,
+                      })
+                    }
+                    className="accent-[#FFE600] w-4 h-4 mt-0.5 shrink-0"
+                  />
+                  <span className="text-xs leading-relaxed">
+                    <strong className="text-white flex items-center gap-1.5">
+                      <Lock size={13} className="text-[#FFE600]" />
+                      Travar preço manual (robô não sobrescreve)
+                    </strong>
+                    <span className="text-slate-400 block mt-0.5">
+                      Útil quando você conferiu um preço especial no Pix/cupom. O robô continua verificando se o link está ativo, mas mantém o valor acima.
+                    </span>
+                  </span>
+                </label>
               </div>
 
               {/* Prova Social para Arte e Copy (Vendidos + Nota + URL da Imagem) */}
@@ -1702,7 +1803,7 @@ return (
                 📋 Ofertas Ativas na Vitrine ({ofertas.length})
               </h2>
               <p className="text-xs text-slate-400">
-                Preços e links indisponíveis são verificados automaticamente todo dia (07h30 e 15h30). Você também pode rodar agora:
+                Preços e links indisponíveis são verificados automaticamente a cada 2h (das 07h às 23h). Você também pode rodar agora:
               </p>
             </div>
 
@@ -1820,6 +1921,20 @@ return (
                           <span className="text-sm font-black text-[#FFE600]">
                             {formatBRLPrice(item.precoAtual)}
                           </span>
+                          {item.precoObs && (
+                            <span className="text-[10px] font-bold text-amber-300 bg-amber-950/70 border border-amber-500/30 px-2 py-0.5 rounded">
+                              {item.precoObs}
+                            </span>
+                          )}
+                          {item.precoTravado && (
+                            <span
+                              className="text-[10px] font-bold text-sky-300 bg-sky-950/80 border border-sky-500/35 px-2 py-0.5 rounded inline-flex items-center gap-1"
+                              title="Preço travado manualmente: o robô só checa se o link continua disponível"
+                            >
+                              <Lock size={10} />
+                              Travado
+                            </span>
+                          )}
                           {discount > 0 && (
                             <span className="text-[11px] font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.2 rounded">
                               -{discount}% OFF
@@ -1910,6 +2025,33 @@ return (
                       >
                         <ArrowUp size={13} className="text-[#FFE600]" />
                         <span>Topo</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePriceLock(item.id)}
+                        className={`text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer border transition-colors ${
+                          item.precoTravado
+                            ? "bg-sky-950/80 hover:bg-sky-900 border-sky-500/40 text-sky-200"
+                            : "bg-slate-800 hover:bg-slate-700 border-transparent text-slate-200"
+                        }`}
+                        title={
+                          item.precoTravado
+                            ? "Preço travado — clique para liberar atualização automática"
+                            : "Clique para travar este preço contra alterações do robô"
+                        }
+                      >
+                        {item.precoTravado ? (
+                          <>
+                            <Lock size={13} className="text-sky-300" />
+                            <span>Destravar</span>
+                          </>
+                        ) : (
+                          <>
+                            <Unlock size={13} className="text-slate-400" />
+                            <span>Travar R$</span>
+                          </>
+                        )}
                       </button>
 
                       <button
