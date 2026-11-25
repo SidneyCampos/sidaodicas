@@ -24,39 +24,6 @@
     "validade": "Ativo agora • Uso imediato"
   },
   {
-    "id": "auto-amazon-150PRIMEBF",
-    "loja": "Amazon",
-    "codigo": "150PRIMEBF",
-    "descricao": "Cupom Amazon Prime de R$150 OFF na Primeira Compra",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.706Z"
-  },
-  {
-    "id": "auto-amazon-COMPRAPP",
-    "loja": "Amazon",
-    "codigo": "COMPRAPP",
-    "descricao": "Cupom de Primeira Compra de R$100 OFF Pelo App Amazon",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.706Z"
-  },
-  {
-    "id": "auto-amazon-25PRIMEBF",
-    "loja": "Amazon",
-    "codigo": "25PRIMEBF",
-    "descricao": "Cupom Amazon Prime de R$25 OFF na Primeira Compra",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.706Z"
-  },
-  {
     "id": "auto-amazon-PRIMEIRA20BF",
     "loja": "Amazon",
     "codigo": "PRIMEIRA20BF",
@@ -65,73 +32,106 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.706Z"
+    "atualizadoEm": "2026-11-25T20:24:30.375Z"
   },
   {
-    "id": "auto-amazon-RELAMPAGO20",
+    "id": "auto-amazon-BLACKNUPAY20",
     "loja": "Amazon",
-    "codigo": "RELAMPAGO20",
-    "descricao": "Cupom de desconto Amazon: 20% OFF em todo o site",
+    "codigo": "BLACKNUPAY20",
+    "descricao": "Cupom de Primeira Compra NuPay Amazon de 20% OFF",
     "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.825Z"
+    "atualizadoEm": "2026-11-25T20:24:30.376Z"
   },
   {
-    "id": "auto-mercadolivre-ECONOMIZEI",
+    "id": "auto-amazon-300OFF",
+    "loja": "Amazon",
+    "codigo": "300OFF",
+    "descricao": "iPhones com Cupom de R$300 OFF na Amazon",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-25T20:24:30.376Z"
+  },
+  {
+    "id": "auto-amazon-KINDLEBF30",
+    "loja": "Amazon",
+    "codigo": "KINDLEBF30",
+    "descricao": "Cupom de R$30 OFF em Kindle na Amazon Prime",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-25T20:24:30.376Z"
+  },
+  {
+    "id": "auto-amazon-BLACK75OFF",
+    "loja": "Amazon",
+    "codigo": "BLACK75OFF",
+    "descricao": "Garanta R$ 75 OFF em compras > R$ 499 com cupom #Amazon",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-25T20:24:30.888Z"
+  },
+  {
+    "id": "auto-mercadolivre-MELIAGORA",
     "loja": "Mercado Livre",
-    "codigo": "ECONOMIZEI",
-    "descricao": "Cupom Mercado Livre de 30% OFF em Até 300 itens",
+    "codigo": "MELIAGORA",
+    "descricao": "Cupom Mercado Livre de 10% OFF em Compras Acima de R$199 - Limite de R$100",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.717Z"
+    "atualizadoEm": "2026-11-25T20:24:30.411Z"
   },
   {
-    "id": "auto-mercadolivre-MAISQUEOFERTA",
+    "id": "auto-mercadolivre-LIVREOFF",
     "loja": "Mercado Livre",
-    "codigo": "MAISQUEOFERTA",
-    "descricao": "Produtos Selecionados com 25% OFF no Cupom de Desconto Mercado Livre",
+    "codigo": "LIVREOFF",
+    "descricao": "Cupom Mercado Livre de 10% OFF em Todo o Site",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.717Z"
+    "atualizadoEm": "2026-11-25T20:24:30.411Z"
   },
   {
-    "id": "auto-mercadolivre-PROMOCERTAML",
+    "id": "auto-mercadolivre-LIVREHOJE",
     "loja": "Mercado Livre",
-    "codigo": "PROMOCERTAML",
-    "descricao": "Cupom Mercado Livre de 30% OFF em Roupas, Acessórios e Calçados",
+    "codigo": "LIVREHOJE",
+    "descricao": "R$250 OFF Acima de R$2.499 no Cupom de Desconto Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.717Z"
+    "atualizadoEm": "2026-11-25T20:24:30.411Z"
   },
   {
-    "id": "auto-mercadolivre-LEVEAGORA30",
+    "id": "auto-mercadolivre-75MAIS1125MELI",
     "loja": "Mercado Livre",
-    "codigo": "LEVEAGORA30",
-    "descricao": "Calçados, Joias e Roupas com 30% OFF no Cupom de Desconto Mercado Livre",
+    "codigo": "75MAIS1125MELI",
+    "descricao": "Cupom Mercado Livre de R$75 OFF em Compras Acima de R$499 [Meli+]",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.717Z"
+    "atualizadoEm": "2026-11-25T20:24:30.411Z"
   },
   {
-    "id": "auto-mercadolivre-MELIYTBF26",
+    "id": "auto-mercadolivre-MENOSPRATECH",
     "loja": "Mercado Livre",
-    "codigo": "MELIYTBF26",
-    "descricao": "8% OFF em Eletrônicos com cupom Mercado Livre",
+    "codigo": "MENOSPRATECH",
+    "descricao": "30% OFF em Eletrônicos com cupom Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Válido até 26/11",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.869Z"
+    "atualizadoEm": "2026-11-25T20:24:30.998Z"
   },
   {
     "id": "auto-shopee-V0UCH3R002AF",
@@ -142,7 +142,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.802Z"
+    "atualizadoEm": "2026-11-25T20:24:30.944Z"
   },
   {
     "id": "auto-shopee-C0M3C0U200",
@@ -153,7 +153,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.802Z"
+    "atualizadoEm": "2026-11-25T20:24:30.945Z"
   },
   {
     "id": "auto-shopee-DESCONTO30AF",
@@ -164,7 +164,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.802Z"
+    "atualizadoEm": "2026-11-25T20:24:30.945Z"
   },
   {
     "id": "auto-shopee-SHOPEE100AF",
@@ -175,6 +175,6 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-25T11:44:02.802Z"
+    "atualizadoEm": "2026-11-25T20:24:30.945Z"
   }
 ]
