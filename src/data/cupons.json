@@ -32,18 +32,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:28.029Z"
-  },
-  {
-    "id": "auto-amazon-SAMSUNG250",
-    "loja": "Amazon",
-    "codigo": "SAMSUNG250",
-    "descricao": "Cupom de R$250 OFF em Celular Samsung no APP Amazon",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:28.029Z"
+    "atualizadoEm": "2026-11-25T11:44:02.706Z"
   },
   {
     "id": "auto-amazon-COMPRAPP",
@@ -54,7 +43,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:28.029Z"
+    "atualizadoEm": "2026-11-25T11:44:02.706Z"
   },
   {
     "id": "auto-amazon-25PRIMEBF",
@@ -65,7 +54,18 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:28.029Z"
+    "atualizadoEm": "2026-11-25T11:44:02.706Z"
+  },
+  {
+    "id": "auto-amazon-PRIMEIRA20BF",
+    "loja": "Amazon",
+    "codigo": "PRIMEIRA20BF",
+    "descricao": "Cupom Amazon Hoje de R$20 OFF na Primeira Compra Pelo App",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-25T11:44:02.706Z"
   },
   {
     "id": "auto-amazon-RELAMPAGO20",
@@ -76,62 +76,62 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:28.481Z"
+    "atualizadoEm": "2026-11-25T11:44:02.825Z"
   },
   {
-    "id": "auto-mercadolivre-VOCEDEZ",
+    "id": "auto-mercadolivre-ECONOMIZEI",
     "loja": "Mercado Livre",
-    "codigo": "VOCEDEZ",
-    "descricao": "Cupom Mercado Livre de 10% OFF em Compras Acima de R$79 - Limite de R$30",
+    "codigo": "ECONOMIZEI",
+    "descricao": "Cupom Mercado Livre de 30% OFF em Até 300 itens",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:27.920Z"
+    "atualizadoEm": "2026-11-25T11:44:02.717Z"
   },
   {
-    "id": "auto-mercadolivre-QUEROOFFHOJE",
+    "id": "auto-mercadolivre-MAISQUEOFERTA",
     "loja": "Mercado Livre",
-    "codigo": "QUEROOFFHOJE",
-    "descricao": "R$250 OFF Acima de R$2.499 no Cupom de Desconto Mercado Livre",
+    "codigo": "MAISQUEOFERTA",
+    "descricao": "Produtos Selecionados com 25% OFF no Cupom de Desconto Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:27.920Z"
+    "atualizadoEm": "2026-11-25T11:44:02.717Z"
   },
   {
-    "id": "auto-mercadolivre-1124MAISME",
+    "id": "auto-mercadolivre-PROMOCERTAML",
     "loja": "Mercado Livre",
-    "codigo": "1124MAISME",
-    "descricao": "Cupom Mercado Livre de R$70 OFF em Compras Acima de R$499 [Meli+]",
+    "codigo": "PROMOCERTAML",
+    "descricao": "Cupom Mercado Livre de 30% OFF em Roupas, Acessórios e Calçados",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:27.920Z"
+    "atualizadoEm": "2026-11-25T11:44:02.717Z"
   },
   {
-    "id": "auto-mercadolivre-OFICIAIS2411",
+    "id": "auto-mercadolivre-LEVEAGORA30",
     "loja": "Mercado Livre",
-    "codigo": "OFICIAIS2411",
-    "descricao": "Produtos Vendidos por Lojas Oficiais com 10% OFF no Mercado Livre",
+    "codigo": "LEVEAGORA30",
+    "descricao": "Calçados, Joias e Roupas com 30% OFF no Cupom de Desconto Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:27.920Z"
+    "atualizadoEm": "2026-11-25T11:44:02.717Z"
   },
   {
-    "id": "auto-mercadolivre-CURTAMELI",
+    "id": "auto-mercadolivre-MELIYTBF26",
     "loja": "Mercado Livre",
-    "codigo": "CURTAMELI",
-    "descricao": "Cupom Mercado Livre: 10% OFF em produtos selecionados",
+    "codigo": "MELIYTBF26",
+    "descricao": "8% OFF em Eletrônicos com cupom Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
-    "validade": "Válido até 25/11",
+    "validade": "Válido até 26/11",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:28.620Z"
+    "atualizadoEm": "2026-11-25T11:44:02.869Z"
   },
   {
     "id": "auto-shopee-V0UCH3R002AF",
@@ -142,7 +142,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:29.243Z"
+    "atualizadoEm": "2026-11-25T11:44:02.802Z"
   },
   {
     "id": "auto-shopee-C0M3C0U200",
@@ -153,7 +153,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:29.243Z"
+    "atualizadoEm": "2026-11-25T11:44:02.802Z"
   },
   {
     "id": "auto-shopee-DESCONTO30AF",
@@ -164,7 +164,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:29.243Z"
+    "atualizadoEm": "2026-11-25T11:44:02.802Z"
   },
   {
     "id": "auto-shopee-SHOPEE100AF",
@@ -175,6 +175,6 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-24T21:00:29.243Z"
+    "atualizadoEm": "2026-11-25T11:44:02.802Z"
   }
 ]
