@@ -32,7 +32,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.484Z"
+    "atualizadoEm": "2026-11-27T11:44:02.582Z"
   },
   {
     "id": "auto-amazon-BLACKNAAMZ",
@@ -43,7 +43,18 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.484Z"
+    "atualizadoEm": "2026-11-27T11:44:02.582Z"
+  },
+  {
+    "id": "auto-amazon-CASAEDECOR50",
+    "loja": "Amazon",
+    "codigo": "CASAEDECOR50",
+    "descricao": "Cupom de R$50 OFF em Casa e Decoração Acima de R$350 na Amazon",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-27T11:44:02.582Z"
   },
   {
     "id": "auto-amazon-1REAL",
@@ -54,106 +65,73 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.484Z"
-  },
-  {
-    "id": "auto-amazon-OPPO10",
-    "loja": "Amazon",
-    "codigo": "OPPO10",
-    "descricao": "Cupom de 10% OFF em Celulares Oppo na Amazon Prime",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.484Z"
+    "atualizadoEm": "2026-11-27T11:44:02.582Z"
   },
   {
     "id": "auto-amazon-BLACK150",
     "loja": "Amazon",
     "codigo": "BLACK150",
-    "descricao": "Use o cupom Amazon e ganhe R$ 150 OFF acima de R$ 1.099",
+    "descricao": "R$ 150 OFF em compras acima de R$ 1499 com cupom Amazon",
     "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:17.057Z"
+    "atualizadoEm": "2026-11-27T11:44:02.690Z"
   },
   {
-    "id": "auto-mercadolivre-PROMOAGORA",
+    "id": "auto-mercadolivre-SOHOJEBF",
     "loja": "Mercado Livre",
-    "codigo": "PROMOAGORA",
-    "descricao": "Cupom Mercado Livre de 10% OFF em Compras Acima de R$199 - Limite de R$100",
+    "codigo": "SOHOJEBF",
+    "descricao": "Cupom Mercado Livre de 12% OFF em Compras Acima de R$599 - Limite de R$100",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.488Z"
+    "atualizadoEm": "2026-11-27T11:44:02.593Z"
   },
   {
-    "id": "auto-mercadolivre-PROMOEXTRA",
+    "id": "auto-mercadolivre-RENOVACASA",
     "loja": "Mercado Livre",
-    "codigo": "PROMOEXTRA",
-    "descricao": "R$300 OFF em Compras Acima de R$2.299 no Cupom de Desconto Mercado Livre",
+    "codigo": "RENOVACASA",
+    "descricao": "Seleção de Eletrônicos e Tecnologia com 12% OFF no Cupom de Desconto Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.488Z"
+    "atualizadoEm": "2026-11-27T11:44:02.593Z"
   },
   {
-    "id": "auto-mercadolivre-PROMOTOP",
+    "id": "auto-mercadolivre-BLACKVIP",
     "loja": "Mercado Livre",
-    "codigo": "PROMOTOP",
-    "descricao": "Cupom Mercado Livre Hoje: R$250 OFF em Compras Acima de R$2.499",
+    "codigo": "BLACKVIP",
+    "descricao": "15% OFF em Compras Acima de R$599 no Cupom Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.488Z"
+    "atualizadoEm": "2026-11-27T11:44:02.593Z"
   },
   {
-    "id": "auto-mercadolivre-DESCONTOHOJE",
+    "id": "auto-mercadolivre-GANHEBLACK",
     "loja": "Mercado Livre",
-    "codigo": "DESCONTOHOJE",
-    "descricao": "Código Promocional Mercado Livre: 25% OFF em Todo o Site",
+    "codigo": "GANHEBLACK",
+    "descricao": "Cupom Mercado Livre de R$300 OFF em Compras Acima de R$1.999",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.488Z"
+    "atualizadoEm": "2026-11-27T11:44:02.593Z"
   },
   {
-    "id": "auto-mercadolivre-ECONOMIZE",
+    "id": "auto-mercadolivre-ELETRO300",
     "loja": "Mercado Livre",
-    "codigo": "ECONOMIZE",
-    "descricao": "30% OFF em Esportes, Saúde e mais com cupom Mercado Livre",
+    "codigo": "ELETRO300",
+    "descricao": "Cupom Mercado Livre: 30% OFF acima de R$ 2.999 (até R$ 300) em Eletrônicos",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
-    "validade": "Válido até 25/12",
+    "validade": "Válido até 01/12",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:17.029Z"
-  },
-  {
-    "id": "auto-shopee-C0MEC0UBFNASH010",
-    "loja": "Shopee",
-    "codigo": "C0MEC0UBFNASH010",
-    "descricao": "Cupom Shopee de R$20 OFF Acima de R$60",
-    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.479Z"
-  },
-  {
-    "id": "auto-shopee-V3SPERABOA",
-    "loja": "Shopee",
-    "codigo": "V3SPERABOA",
-    "descricao": "Cupom Shopee de R$10 OFF Acima de R$40",
-    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.479Z"
+    "atualizadoEm": "2026-11-27T11:44:02.681Z"
   },
   {
     "id": "auto-shopee-BL4CKDASH026Q",
@@ -164,7 +142,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:16.479Z"
+    "atualizadoEm": "2026-11-27T11:44:02.570Z"
   },
   {
     "id": "auto-shopee-V0UCH3R002AF",
@@ -175,7 +153,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:17.716Z"
+    "atualizadoEm": "2026-11-27T11:44:02.718Z"
   },
   {
     "id": "auto-shopee-C0M3C0U200",
@@ -186,6 +164,28 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-26T20:00:17.716Z"
+    "atualizadoEm": "2026-11-27T11:44:02.718Z"
+  },
+  {
+    "id": "auto-shopee-DESCONTO30AF",
+    "loja": "Shopee",
+    "codigo": "DESCONTO30AF",
+    "descricao": "Aplique cupom Shopee e ganhe R$ 30 OFF",
+    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-27T11:44:02.718Z"
+  },
+  {
+    "id": "auto-shopee-SHOPEE100AF",
+    "loja": "Shopee",
+    "codigo": "SHOPEE100AF",
+    "descricao": "Cupom Shopee concede desconto de R$100",
+    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-27T11:44:02.718Z"
   }
 ]
