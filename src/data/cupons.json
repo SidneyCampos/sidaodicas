@@ -24,6 +24,17 @@
     "validade": "Ativo agora • Uso imediato"
   },
   {
+    "id": "auto-amazon-BLACK120",
+    "loja": "Amazon",
+    "codigo": "BLACK120",
+    "descricao": "Cupom Amazon de R$120 OFF Acima de R$799 - Só Hoje",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-27T19:49:17.666Z"
+  },
+  {
     "id": "auto-amazon-IMPERDIVEL25",
     "loja": "Amazon",
     "codigo": "IMPERDIVEL25",
@@ -32,29 +43,18 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.582Z"
+    "atualizadoEm": "2026-11-27T19:49:17.666Z"
   },
   {
-    "id": "auto-amazon-BLACKNAAMZ",
+    "id": "auto-amazon-TECH300",
     "loja": "Amazon",
-    "codigo": "BLACKNAAMZ",
-    "descricao": "Cupom Black Friday Amazon de R$500 OFF em Notebooks Samsung Galaxy Book6",
+    "codigo": "TECH300",
+    "descricao": "Cupom Amazon: Seleção de Notebooks com R$300 OFF",
     "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.582Z"
-  },
-  {
-    "id": "auto-amazon-CASAEDECOR50",
-    "loja": "Amazon",
-    "codigo": "CASAEDECOR50",
-    "descricao": "Cupom de R$50 OFF em Casa e Decoração Acima de R$350 na Amazon",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.582Z"
+    "atualizadoEm": "2026-11-27T19:49:17.666Z"
   },
   {
     "id": "auto-amazon-1REAL",
@@ -65,73 +65,73 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.582Z"
+    "atualizadoEm": "2026-11-27T19:49:17.666Z"
   },
   {
-    "id": "auto-amazon-BLACK150",
+    "id": "auto-amazon-INFLUPRIME",
     "loja": "Amazon",
-    "codigo": "BLACK150",
-    "descricao": "R$ 150 OFF em compras acima de R$ 1499 com cupom Amazon",
+    "codigo": "INFLUPRIME",
+    "descricao": "Garanta R$150 OFF em todo o site com cupom #Amazon",
     "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.690Z"
+    "atualizadoEm": "2026-11-27T19:49:18.717Z"
   },
   {
-    "id": "auto-mercadolivre-SOHOJEBF",
+    "id": "auto-mercadolivre-BLACKMELI",
     "loja": "Mercado Livre",
-    "codigo": "SOHOJEBF",
-    "descricao": "Cupom Mercado Livre de 12% OFF em Compras Acima de R$599 - Limite de R$100",
+    "codigo": "BLACKMELI",
+    "descricao": "Cupom Mercado Livre de 20% OFF em Compras Acima de R$199 - Limite de R$100",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.593Z"
+    "atualizadoEm": "2026-11-27T19:49:17.774Z"
   },
   {
-    "id": "auto-mercadolivre-RENOVACASA",
+    "id": "auto-mercadolivre-MEUDESCONTOBLACK",
     "loja": "Mercado Livre",
-    "codigo": "RENOVACASA",
-    "descricao": "Seleção de Eletrônicos e Tecnologia com 12% OFF no Cupom de Desconto Mercado Livre",
+    "codigo": "MEUDESCONTOBLACK",
+    "descricao": "R$300 OFF Acima de R$1.999 no Cupom de Desconto Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.593Z"
-  },
-  {
-    "id": "auto-mercadolivre-BLACKVIP",
-    "loja": "Mercado Livre",
-    "codigo": "BLACKVIP",
-    "descricao": "15% OFF em Compras Acima de R$599 no Cupom Mercado Livre",
-    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.593Z"
-  },
-  {
-    "id": "auto-mercadolivre-GANHEBLACK",
-    "loja": "Mercado Livre",
-    "codigo": "GANHEBLACK",
-    "descricao": "Cupom Mercado Livre de R$300 OFF em Compras Acima de R$1.999",
-    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.593Z"
+    "atualizadoEm": "2026-11-27T19:49:17.774Z"
   },
   {
     "id": "auto-mercadolivre-ELETRO300",
     "loja": "Mercado Livre",
     "codigo": "ELETRO300",
-    "descricao": "Cupom Mercado Livre: 30% OFF acima de R$ 2.999 (até R$ 300) em Eletrônicos",
+    "descricao": "Ares-Condicionados, TVs, Geladeiras e Outros Eletros Selecionados com R$300 OFF no Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
-    "validade": "Válido até 01/12",
+    "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.681Z"
+    "atualizadoEm": "2026-11-27T19:49:17.774Z"
+  },
+  {
+    "id": "auto-mercadolivre-RENOVACASA",
+    "loja": "Mercado Livre",
+    "codigo": "RENOVACASA",
+    "descricao": "Seleção de Eletrônicos e Tecnologia com 18% OFF no Cupom de Desconto Mercado Livre",
+    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-27T19:49:17.774Z"
+  },
+  {
+    "id": "auto-mercadolivre-SUPEROFF",
+    "loja": "Mercado Livre",
+    "codigo": "SUPEROFF",
+    "descricao": "Mercado Livre: cupom de 25% OFF em produtos selecionados",
+    "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
+    "validade": "Válido até 28/11",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-27T19:49:18.624Z"
   },
   {
     "id": "auto-shopee-BL4CKDASH026Q",
@@ -142,7 +142,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.570Z"
+    "atualizadoEm": "2026-11-27T19:49:17.765Z"
   },
   {
     "id": "auto-shopee-V0UCH3R002AF",
@@ -153,7 +153,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.718Z"
+    "atualizadoEm": "2026-11-27T19:49:18.367Z"
   },
   {
     "id": "auto-shopee-C0M3C0U200",
@@ -164,7 +164,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.718Z"
+    "atualizadoEm": "2026-11-27T19:49:18.367Z"
   },
   {
     "id": "auto-shopee-DESCONTO30AF",
@@ -175,7 +175,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.718Z"
+    "atualizadoEm": "2026-11-27T19:49:18.367Z"
   },
   {
     "id": "auto-shopee-SHOPEE100AF",
@@ -186,6 +186,6 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T11:44:02.718Z"
+    "atualizadoEm": "2026-11-27T19:49:18.367Z"
   }
 ]
