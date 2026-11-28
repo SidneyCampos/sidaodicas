@@ -24,17 +24,6 @@
     "validade": "Ativo agora • Uso imediato"
   },
   {
-    "id": "auto-amazon-BLACK120",
-    "loja": "Amazon",
-    "codigo": "BLACK120",
-    "descricao": "Cupom Amazon de R$120 OFF Acima de R$799 - Só Hoje",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.666Z"
-  },
-  {
     "id": "auto-amazon-IMPERDIVEL25",
     "loja": "Amazon",
     "codigo": "IMPERDIVEL25",
@@ -43,7 +32,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.666Z"
+    "atualizadoEm": "2026-11-28T11:44:02.634Z"
   },
   {
     "id": "auto-amazon-TECH300",
@@ -54,7 +43,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.666Z"
+    "atualizadoEm": "2026-11-28T11:44:02.634Z"
   },
   {
     "id": "auto-amazon-1REAL",
@@ -65,84 +54,84 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.666Z"
+    "atualizadoEm": "2026-11-28T11:44:02.634Z"
   },
   {
-    "id": "auto-amazon-INFLUPRIME",
+    "id": "auto-amazon-OPPO10",
     "loja": "Amazon",
-    "codigo": "INFLUPRIME",
-    "descricao": "Garanta R$150 OFF em todo o site com cupom #Amazon",
+    "codigo": "OPPO10",
+    "descricao": "Cupom de 10% OFF em Celulares Oppo na Amazon Prime",
     "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:18.717Z"
+    "atualizadoEm": "2026-11-28T11:44:02.634Z"
   },
   {
-    "id": "auto-mercadolivre-BLACKMELI",
+    "id": "auto-amazon-SONHOBLACK15",
+    "loja": "Amazon",
+    "codigo": "SONHOBLACK15",
+    "descricao": "Use o cupom Amazon e ganhe R$ 15 OFF em todo o site",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Ativo hoje • Uso limitado",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-28T11:44:03.214Z"
+  },
+  {
+    "id": "auto-mercadolivre-K4RMELI",
     "loja": "Mercado Livre",
-    "codigo": "BLACKMELI",
-    "descricao": "Cupom Mercado Livre de 20% OFF em Compras Acima de R$199 - Limite de R$100",
+    "codigo": "K4RMELI",
+    "descricao": "Cupom Mercado Livre Hoje: R$60 OFF em Compras Acima de R$399",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.774Z"
+    "atualizadoEm": "2026-11-28T11:44:02.640Z"
   },
   {
-    "id": "auto-mercadolivre-MEUDESCONTOBLACK",
+    "id": "auto-mercadolivre-ECONOMIZEI",
     "loja": "Mercado Livre",
-    "codigo": "MEUDESCONTOBLACK",
-    "descricao": "R$300 OFF Acima de R$1.999 no Cupom de Desconto Mercado Livre",
+    "codigo": "ECONOMIZEI",
+    "descricao": "Cupom Mercado Livre de 30% OFF em Até 300 itens",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.774Z"
+    "atualizadoEm": "2026-11-28T11:44:02.640Z"
   },
   {
-    "id": "auto-mercadolivre-ELETRO300",
+    "id": "auto-mercadolivre-MAISQUEOFERTA",
     "loja": "Mercado Livre",
-    "codigo": "ELETRO300",
-    "descricao": "Ares-Condicionados, TVs, Geladeiras e Outros Eletros Selecionados com R$300 OFF no Mercado Livre",
+    "codigo": "MAISQUEOFERTA",
+    "descricao": "Produtos Selecionados com 25% OFF no Cupom de Desconto Mercado Livre",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.774Z"
+    "atualizadoEm": "2026-11-28T11:44:02.640Z"
   },
   {
-    "id": "auto-mercadolivre-RENOVACASA",
+    "id": "auto-mercadolivre-PROMOCERTAML",
     "loja": "Mercado Livre",
-    "codigo": "RENOVACASA",
-    "descricao": "Seleção de Eletrônicos e Tecnologia com 18% OFF no Cupom de Desconto Mercado Livre",
+    "codigo": "PROMOCERTAML",
+    "descricao": "Cupom Mercado Livre de 30% OFF em Roupas, Acessórios e Calçados",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.774Z"
+    "atualizadoEm": "2026-11-28T11:44:02.640Z"
   },
   {
-    "id": "auto-mercadolivre-SUPEROFF",
+    "id": "auto-mercadolivre-VALEAGORA",
     "loja": "Mercado Livre",
-    "codigo": "SUPEROFF",
-    "descricao": "Mercado Livre: cupom de 25% OFF em produtos selecionados",
+    "codigo": "VALEAGORA",
+    "descricao": "Mercado Livre: cupom de 30% OFF em produtos selecionados",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
-    "validade": "Válido até 28/11",
+    "validade": "Válido até 01/01",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:18.624Z"
-  },
-  {
-    "id": "auto-shopee-BL4CKDASH026Q",
-    "loja": "Shopee",
-    "codigo": "BL4CKDASH026Q",
-    "descricao": "Cupom Shopee Surpresa Black Friday às 20h",
-    "linkAfiliadoLoja": "https://shopee.com.br/m/cupons-diarios",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:17.765Z"
+    "atualizadoEm": "2026-11-28T11:44:03.248Z"
   },
   {
     "id": "auto-shopee-V0UCH3R002AF",
@@ -153,7 +142,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:18.367Z"
+    "atualizadoEm": "2026-11-28T11:44:03.175Z"
   },
   {
     "id": "auto-shopee-C0M3C0U200",
@@ -164,7 +153,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:18.367Z"
+    "atualizadoEm": "2026-11-28T11:44:03.175Z"
   },
   {
     "id": "auto-shopee-DESCONTO30AF",
@@ -175,7 +164,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:18.367Z"
+    "atualizadoEm": "2026-11-28T11:44:03.175Z"
   },
   {
     "id": "auto-shopee-SHOPEE100AF",
@@ -186,6 +175,6 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-27T19:49:18.367Z"
+    "atualizadoEm": "2026-11-28T11:44:03.175Z"
   }
 ]
