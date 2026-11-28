@@ -32,18 +32,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:02.634Z"
-  },
-  {
-    "id": "auto-amazon-TECH300",
-    "loja": "Amazon",
-    "codigo": "TECH300",
-    "descricao": "Cupom Amazon: Seleção de Notebooks com R$300 OFF",
-    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
-    "validade": "Ativo hoje • Uso limitado",
-    "autoSynced": true,
-    "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:02.634Z"
+    "atualizadoEm": "2026-11-28T18:43:24.340Z"
   },
   {
     "id": "auto-amazon-1REAL",
@@ -54,7 +43,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:02.634Z"
+    "atualizadoEm": "2026-11-28T18:43:24.340Z"
   },
   {
     "id": "auto-amazon-OPPO10",
@@ -65,29 +54,40 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:02.634Z"
+    "atualizadoEm": "2026-11-28T18:43:24.340Z"
   },
   {
-    "id": "auto-amazon-SONHOBLACK15",
+    "id": "auto-amazon-10OFFBF",
     "loja": "Amazon",
-    "codigo": "SONHOBLACK15",
-    "descricao": "Use o cupom Amazon e ganhe R$ 15 OFF em todo o site",
+    "codigo": "10OFFBF",
+    "descricao": "Cupom de Primeira Compra Amazon de R$10 OFF Pelo App",
     "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:03.214Z"
+    "atualizadoEm": "2026-11-28T18:43:24.340Z"
   },
   {
-    "id": "auto-mercadolivre-K4RMELI",
+    "id": "auto-amazon-MOVEISBLACK",
+    "loja": "Amazon",
+    "codigo": "MOVEISBLACK",
+    "descricao": "Compre móveis com 20% de desconto usando o cupom Amazon",
+    "linkAfiliadoLoja": "https://www.amazon.com.br/deals?tag=sidaodicas-20",
+    "validade": "Válido até 04/12",
+    "autoSynced": true,
+    "fonte": "auto",
+    "atualizadoEm": "2026-11-28T18:43:25.180Z"
+  },
+  {
+    "id": "auto-mercadolivre-ZOQMELI",
     "loja": "Mercado Livre",
-    "codigo": "K4RMELI",
-    "descricao": "Cupom Mercado Livre Hoje: R$60 OFF em Compras Acima de R$399",
+    "codigo": "ZOQMELI",
+    "descricao": "Cupom Mercado Livre de R$20 OFF em Compras Acima de R$129",
     "linkAfiliadoLoja": "https://www.mercadolivre.com.br/social/casi3341967",
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:02.640Z"
+    "atualizadoEm": "2026-11-28T18:43:24.415Z"
   },
   {
     "id": "auto-mercadolivre-ECONOMIZEI",
@@ -98,7 +98,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:02.640Z"
+    "atualizadoEm": "2026-11-28T18:43:24.415Z"
   },
   {
     "id": "auto-mercadolivre-MAISQUEOFERTA",
@@ -109,7 +109,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:02.640Z"
+    "atualizadoEm": "2026-11-28T18:43:24.416Z"
   },
   {
     "id": "auto-mercadolivre-PROMOCERTAML",
@@ -120,7 +120,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:02.640Z"
+    "atualizadoEm": "2026-11-28T18:43:24.416Z"
   },
   {
     "id": "auto-mercadolivre-VALEAGORA",
@@ -131,7 +131,7 @@
     "validade": "Válido até 01/01",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:03.248Z"
+    "atualizadoEm": "2026-11-28T18:43:25.151Z"
   },
   {
     "id": "auto-shopee-V0UCH3R002AF",
@@ -142,7 +142,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:03.175Z"
+    "atualizadoEm": "2026-11-28T18:43:25.332Z"
   },
   {
     "id": "auto-shopee-C0M3C0U200",
@@ -153,7 +153,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:03.175Z"
+    "atualizadoEm": "2026-11-28T18:43:25.332Z"
   },
   {
     "id": "auto-shopee-DESCONTO30AF",
@@ -164,7 +164,7 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:03.175Z"
+    "atualizadoEm": "2026-11-28T18:43:25.332Z"
   },
   {
     "id": "auto-shopee-SHOPEE100AF",
@@ -175,6 +175,6 @@
     "validade": "Ativo hoje • Uso limitado",
     "autoSynced": true,
     "fonte": "auto",
-    "atualizadoEm": "2026-11-28T11:44:03.175Z"
+    "atualizadoEm": "2026-11-28T18:43:25.332Z"
   }
 ]
